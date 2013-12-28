@@ -1,5 +1,5 @@
 {
-    "name": "boltphp/bolt",
+    "name": "boltphp/core",
     "description": "Bolt framework Core",
     "keywords": ["bolt"],
     "license": "MIT",
