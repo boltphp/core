@@ -1,6 +1,6 @@
 {
-    "name": "bolthq/bolt",
-    "description": "Bolt framework",
+    "name": "boltphp/bolt",
+    "description": "Bolt framework Core",
     "keywords": ["bolt"],
     "license": "MIT",
     "authors": [
