@@ -1,7 +1,9 @@
 <?php
 
 namespace bolt\render\engine;
+use \b;
 
-interface face {
+class base implements face {
+
 
 }

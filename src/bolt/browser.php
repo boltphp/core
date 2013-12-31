@@ -69,9 +69,10 @@ class browser {
 
     private $_rootPath = false;
 
-    private $_paths = [];
-
-    private $_engines = [];
+    private $_engines = [
+        'hbr' => 'bolt\render\engine\handlebars',
+        'php' => 'bolt\render\engine\php'
+    ];
 
     /**
      * construct a new browser app
@@ -121,12 +122,6 @@ class browser {
         return $this->_response;
     }
 
-    public function getPath($name) {
-        if (array_key_exists($name, $this->_paths)) {
-            return $this->_paths[$name];
-        }
-        return false;
-    }
 
     /**
      * paths
@@ -143,7 +138,10 @@ class browser {
             return $this->setRootPath($value);
         }
 
-        $this->_paths[$name] = is_array($value) ? array_map(function($val) { return b::path($val); }, $value) : b::path($value);
+        // set in browser settings
+        b::settings("browser.paths.{$name}", array_map(function($val) {
+            return b::path($this->getRootPath(), $val);
+        }, $value));
 
         return $this;
     }
@@ -151,25 +149,17 @@ class browser {
     /**
      * load sub modules
      */
-    public function load($paths) {
-        if (is_array($paths)) {
-            array_walk($paths, function($path){
-                $this->load($path);
+    public function load($class, $path) {
+        if (is_array($class)) {
+            array_walk($class, function($opt){
+                call_user_func_array([$this, 'load'], $opt);
             });
             return $this;
         }
 
-        $try = [
-            $paths,
-            b::path($this->getRootPath(), $paths)
-        ];
+        b::requireFromPath($path);
 
-        foreach ($try as $path) {
-            if (file_exists($path)) {
-                b::requireFromPath($path);
-                return $this;
-            }
-        }
+//        b::load($class, $path);
 
         return $this;
 
@@ -214,15 +204,12 @@ class browser {
     public function run() {
 
         // loop through and add any engines not already
-        // defined by the user
-        foreach (b::render('engine\collect') as $ext => $class) {
-            if (!array_key_exists($ext, $this->_engines)) {
-                $this->engine($ext, $class);
-            }
+        foreach ($this->_engines as $ext => $ref) {
+            b::render('setEngine', $ext, $ref);
         }
 
-        // globalize our engine prefs
-        b::render('setEngines', $this->_engines);
+        // collect to backfill
+        b::render('engine\collect');
 
         // add routes from controller classes
         b::browser('route\collection\fromControllers', $this->_routes);
@@ -244,6 +231,10 @@ class browser {
 
         // build the controller
         $resp = $controller->run($params);
+
+        if (!$resp) {
+            $resp = $this->_response;
+        }
 
         // prepare base on request
         $resp->prepare($this->_request);

@@ -7,7 +7,7 @@ class BucketTest extends Test {
     }
 
     public function test_createString() {
-        $this->assertInstanceOf('bolt\bucket\string', \bolt\bucket::create('test'));
+        $this->assertInstanceOf('bolt\bucket\s', \bolt\bucket::create('test'));
     }
 
 }

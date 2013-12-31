@@ -3,9 +3,12 @@
 namespace bolt\browser;
 use \b;
 
+use Symfony\Component\Finder\Finder;
+
+
 class controller {
 
-    private $_parameters;
+    private $_parameters = [];
 
     private $_browser;
 
@@ -17,28 +20,42 @@ class controller {
         $this->_parameters[$name] = $value;
     }
 
-    public function setBrowser(\bolt\browser $browser) {
-        $this->_browser = $browser;
-    }
+    public function view($file, $vars=[]) {
 
-    public function view($filename, $vars=[]) {
-
-
-        // if we have a browser
-        // lets
-        if ($this->_browser) {
-
-            $paths = $this->_browser->getPath('views');
-
-            var_dump($paths);
-
+        // loop through vars and
+        // print our params
+        foreach ($this->_parameters as $key => $value) {
+            if (!array_key_exists($key, $vars)) {
+                $vars[$key] = $value;
+            }
         }
 
-        return new view([
-                'file' => $filename,
-                'vars' => $vars,
-                'parent' => $this
-            ]);
+        // paths to find
+        $paths = b::settings('browser.paths.views')->value;
+
+        // find this template
+        $find = new Finder();
+
+        $base = pathinfo($file)['dirname'];
+        $name = pathinfo($file)['basename'];
+
+        // loop through each path
+        foreach ($paths as $path) {
+            $files = $find->files()->in(b::path($path, $base))->name($name);
+            if (iterator_count($files)) {
+                $it = iterator_to_array($files);
+                $first = array_shift($it);
+
+                return new view([
+                    'file' => $first->getRealPath(),
+                    'vars' => $vars,
+                    'parent' => $this
+                ]);
+            }
+        }
+
+        // nope
+        return false;
 
     }
 

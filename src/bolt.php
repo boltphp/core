@@ -28,7 +28,7 @@ require __DIR__."/../vendor/autoload.php";
 // how long this request takes
 define('bStart', microtime(true));
 
-class b {
+class bolt {
 
     const VERSION = '0.3';
 
@@ -88,6 +88,11 @@ class b {
         return array_key_exists($key, $object) ? $object[$key] : $default;
     }
 
+}
+
+class b extends bolt {};
+function b() {
+    return b::instance();
 }
 
 define("bLoaded", true);

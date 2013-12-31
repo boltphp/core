@@ -29,8 +29,7 @@ class view {
     public function render() {
 
         // render
-        $str = b::render('file', [
-                'file' => $this->_file,
+        $str = b::render('file', $this->_file, [
                 'self' => $this->_parent,
                 'vars' => $this->_vars
             ]);

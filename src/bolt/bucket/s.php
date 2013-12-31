@@ -14,6 +14,12 @@ class s implements face {
         $this->_str = new Stringy($value, $encode);
     }
 
+    public function __get($name) {
+        if ($name == 'value') {
+            return $this->normalize();
+        }
+    }
+
     public function __call($name, $args) {
         if (method_exists($this->_str, $name)){
             return call_user_func_array([$this->_str, $name], $args);

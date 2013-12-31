@@ -22,6 +22,11 @@ class route extends browser\controller implements browser\route\face {
 
     }
 
+    public function __get($name) {
+
+        return false;
+    }
+
     public function format($format, $content=false) {
         if (is_array($format)) {
             array_walk($format, function($content, $format){

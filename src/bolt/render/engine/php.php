@@ -3,7 +3,7 @@
 namespace bolt\render\engine;
 use \b;
 
-class php extends \bolt\render\engine {
+class php extends base {
 
     const EXT = 'php';
 

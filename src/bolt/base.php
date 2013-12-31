@@ -1,39 +1,77 @@
 <?php
 
 namespace bolt;
+use \b;
 
 use \RecursiveDirectoryIterator;
 use \RecursiveIteratorIterator;
 use \RecursiveRegexIterator;
 use \RegexIterator;
 
+// symfony
+use Symfony\Component\ClassLoader\ClassLoader;
+
 class base {
 
     private $_classes = false;
     private $_refClass = [];
 
-    private $_settings = [];
+    private $_settings = false;
 
     // loaded
     private $_required = [];
 
+    public function __construct() {
+        $this->loader = new ClassLoader();
+        $this->loader->setUseIncludePath(true);
+    }
+
+    public function load($prefix, $path) {
+        $this->loader->addPrefix($prefix, $path);
+        $this->loader->register();
+        return $this;
+    }
+
     public function settings($name, $value=null) {
-        if ($value === null AND array_key_exists($name, $this->_settings)) {
-            return $this->_settings[$name];
+        if (!$this->_settings) { $this->_settings = new bucket\a(); }
+        if ($value === null) {
+            return $this->_settings->get($name);
         }
-        return $this->_settings[$name] = new \bolt\bucket\a($value);
+        else {
+            $this->_settings->set($name, $value);
+        }
+        return $this;
+    }
+
+    public function isInterfaceOf($obj, $class) {
+        if (!is_object($obj)){ return false; }
+        return in_array(b::normalizeClassName($class), class_implements($obj));
     }
 
     public function getRegexFiles($path, $regex="^.+\.php$") {
         $files = [];
-        $regex = new RegexIterator(
-                new RecursiveIteratorIterator(new RecursiveDirectoryIterator($path)),
-                '#'.$regex.'#i',
-                RecursiveRegexIterator::GET_MATCH
-        );
-        foreach (iterator_to_array($regex) as $path) {
-            $files[] = realpath($path[0]);
-        }
+
+        $findFiles = function($path, &$files, $findFiles) use ($regex) {
+            $dirs = [];
+
+            foreach (new \DirectoryIterator($path) as $file) {
+                if ($file->isDot()) {continue;}
+
+                if ($file->isFile() AND preg_match('#'.$regex.'#i', $file->getPathname())) {
+                    $files[] = $file->getRealPath();
+                }
+                else if ($file->isDir()) {
+                    $dirs[] = $file->getPathname();
+                }
+            }
+            foreach ($dirs as $dir) {
+                $findFiles($dir, $files, $findFiles);
+            }
+
+        };
+
+        $findFiles(realpath($path), $files, $findFiles);
+
         return $files;
     }
 

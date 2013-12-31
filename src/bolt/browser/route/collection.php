@@ -17,23 +17,30 @@ class collection extends RouteCollection {
                 (!$class->hasProperty('routes') AND !$class->hasMethod('getRoutes'))
             ) {continue;} // skip our controller class and make sure we have at least $routes || getRoutes()
 
-            $routes[$class->name] = [];
+            $_ = [
+                'ref' => $class,
+                'collection' => $class->hasProperty('routeCollection') ? $class->getStaticPropertyValue('routeCollection') : ['prefix' => ''],
+                'routes' => []
+            ];
 
             if ($class->hasProperty('routes')) {
-                $routes[$class->name] = array_merge($routes[$class->name], $class->getStaticPropertyValue('routes'));
+                $_['routes'] = array_merge($_['routes'], $class->getStaticPropertyValue('routes'));
             }
 
             if ($class->hasMethod('getRoutes')) {
                 $name = $class->name;
-                $routes[$class->name] = array_merge($routes[$class->name], $name::getRoutes());
+                $_['routes'] = array_merge($_['routes'], $name::getRoutes());
             }
+
+            $routes[] = $_;
 
         }
 
+        foreach ($routes as $class) {
+            $c = new collection();
 
-
-        foreach ($routes as $class => $items) {
-            foreach ($items as $key => $route) {
+            // loop through routes
+            foreach ($class['routes'] as $key => $route) {
 
                 $name = b::param('name', false, $route);
 
@@ -48,13 +55,26 @@ class collection extends RouteCollection {
                 unset($route['name']);
 
                 // add our two default things
-                $route['controller'] = $class;
+                $route['controller'] = $class['ref']->name;
                 $route['action'] = b::param('action', false, $route);
 
                 // loop through each part and set it
-                $collection->add($name,  b::browser_route('create', $route) );
+                $c->add($name,  b::browser_route('create', $route) );
 
             }
+
+            // get our prefix vars
+            extract(
+                    array_merge(['prefix' => '', 'requirements' => [], 'options' => [], 'host' => false, 'schemes' => []], $class['collection']),
+                    EXTR_OVERWRITE
+                );
+
+
+            // set prefix
+            $c->addPrefix($prefix, $requirements, $options, $host, $schemes);
+
+            // add this collection
+            $collection->addCollection($c);
 
         }
 

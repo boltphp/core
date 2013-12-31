@@ -25,6 +25,15 @@ class ArrayTest extends Test {
     public function test_getSet_dot() {
         $this->b->set('new.node', 'poop');
         $this->assertEquals('poop', (string)$this->b->get('new.node'));
+        $this->b->set('new.node2.level', 'poop');
+        $this->assertEquals('poop', (string)$this->b->get('new.node2.level'));
+    }
+
+    public function test_nested_getSet() {
+        $nest = $this->b->get('nested');
+        $this->assertInstanceOf('bolt\bucket\a', $nest);
+        $nest->set('poop', 'nested');
+        $this->assertEquals('nested', (string)$nest->get('poop'));
     }
 
 }
