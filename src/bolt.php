@@ -28,6 +28,9 @@ require __DIR__."/../vendor/autoload.php";
 // how long this request takes
 define('bStart', microtime(true));
 
+// default to utc
+date_default_timezone_set('UTC');
+
 class bolt {
 
     const VERSION = '0.3';
@@ -49,43 +52,11 @@ class bolt {
      *
      * @return mixed submodule::func return or false for no sub module
      */
-    public static function __callStatic($name, $args){
+    public static function __callStatic($name, $args=[]){
 
-        // see if we have this function on base
-        if (method_exists(self::instance(), $name)) {
-            return call_user_func_array([self::instance(), $name], $args);
-        }
+        // passoff to our instance call method
+        return self::instance()->call($name, $args);
 
-        // name has a / in it
-        if (stripos($args[0], '\\') !== false) {
-            $parts = explode('\\', array_shift($args));
-            array_unshift($args, array_pop($parts));
-            array_unshift($parts, $name);
-            $name = implode("_", $parts);
-        }
-
-        // class
-        $class = '\bolt\\'.str_replace("_", '\\', $name);
-
-        // first of the args should be a function name
-        $func = array_shift($args);
-
-        // the function with the named args
-        if (method_exists($class, $func)) {
-            return call_user_func_array(array($class, $func), $args);
-        }
-
-        return false;
-
-    }
-
-    public static function path() {
-        $sep = "/";
-        return $sep.implode($sep, array_map(function($val) use ($sep){ return trim($val, $sep); }, func_get_args()));
-    }
-
-    public static function param($key, $default=false, $object=[]) {
-        return array_key_exists($key, $object) ? $object[$key] : $default;
     }
 
 }

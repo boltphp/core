@@ -4,9 +4,7 @@ namespace bolt;
 use \b;
 
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
-
-// plugin to b
-b::plug('browser', '\bolt\browser');
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 /**
  * browser class
@@ -85,7 +83,7 @@ class browser {
     public function __construct($req = false, $res = false) {
 
         // set the request and response or create new onse
-        $this->_request = $req ?: b::browser_request('createFromGlobals');
+        $this->_request = $req ?: b::browser('request\createFromGlobals');
         $this->_response = $res ?: new browser\response();
 
         // routes
@@ -120,6 +118,11 @@ class browser {
 
     public function getResponse() {
         return $this->_response;
+    }
+
+    public function plug($name, $class) {
+        b::plug($name, $class);
+        return $this;
     }
 
 
@@ -225,6 +228,9 @@ class browser {
         catch(ResourceNotFoundException $e) {
             var_dump('bad'); die;
         }
+
+        // bind our params to request::attributes
+        $this->_request->attributes->replace($params);
 
         // we can get started
         $controller = new $params['_controller']($this->_request, $this->_response);

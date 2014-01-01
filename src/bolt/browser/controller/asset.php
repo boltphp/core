@@ -27,10 +27,6 @@ class asset extends route {
         return 'text/plain';
     }
 
-    public function process($file) {
-        return $file->getContents();
-    }
-
     public function run($params) {
         $content = "";
 
@@ -70,6 +66,7 @@ class asset extends route {
         // figureo ut
         $this->response->headers->set('Content-Type', $this->_mapContentTypeFromExt($ext));
 
+        // set our content
         $this->response->setContent($content);
 
     }

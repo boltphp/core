@@ -31,6 +31,10 @@ class format implements format\face {
         return false;
     }
 
+    public function useLayout() {
+        return false;
+    }
+
     public function setContent($content) {
         $this->_content = $content;
         return $this;

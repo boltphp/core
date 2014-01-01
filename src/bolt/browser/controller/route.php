@@ -5,6 +5,9 @@ use \bolt\browser;
 use \b;
 
 
+use Symfony\Component\Routing\Exception\MethodNotAllowedException;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
+
 class route extends browser\controller implements browser\route\face {
 
 
@@ -27,6 +30,18 @@ class route extends browser\controller implements browser\route\face {
         return false;
     }
 
+    public function exception($class, $message=null, $code=null) {
+        switch($class) {
+            case 'MethodNotAllowedException':
+                $allowed = array_filter(['get', 'put', 'post', 'delete'], function($method) { return method_exists($this, $method); });
+                throw new MethodNotAllowedException($allowed, $message, $code);
+                break;
+            default:
+                throw new $class($message, $code);
+        };
+        return $this;
+    }
+
     public function format($format, $content=false) {
         if (is_array($format)) {
             array_walk($format, function($content, $format){
@@ -39,7 +54,6 @@ class route extends browser\controller implements browser\route\face {
         $this->_formats[$format]->setContent($content);
         return $this;
     }
-
 
     public function build($params=[]) {
 
@@ -72,18 +86,24 @@ class route extends browser\controller implements browser\route\face {
 
         // wonderfull, lets call the function and figure out what
         // they respond with
-        $resp = call_user_func_array([$this, $func], $args);
+        return call_user_func_array([$this, $func], $args);
 
     }
 
     public function run($params) {
 
+        // resp
         $resp = $this->build($params);
 
-
+        // if it's an array,
+        // we assume they have given formats
         if (is_string($resp)) {
             $this->response->setContent($resp);
-            $resp = false;
+            $resp = false; // fallback to default response
+        }
+        else if ($resp instanceof \bolt\browser\view) {
+            $this->response->setContent($resp->render());
+            $resp = false; // fallback to default response
         }
 
         // if resp is a request
@@ -92,7 +112,7 @@ class route extends browser\controller implements browser\route\face {
             $this->format($resp);
         }
 
-            // if _format exists in response. no we return
+        // if _format exists in response. no we return
         if (array_key_exists('_format', $params) AND array_key_exists($params['_format'], $this->_formats)) {
             $resp = $this->_formats[$params['_format']];
         }
@@ -106,6 +126,18 @@ class route extends browser\controller implements browser\route\face {
 
         if (!$resp) {
             $resp = $this->response;
+        }
+
+        // if we have a layout, we need to
+        // wrap our current content in that layout
+        if ($this->layout !== null AND $resp->useLayout() === true) {
+            $resp->setContent(
+                $this->view(
+                    $this->layout,
+                    ['yeild' => $resp->getContent()],
+                    b::settings('browser.paths.layouts')->value
+                )
+            );
         }
 
         return $resp;

@@ -69,7 +69,6 @@ class collection extends RouteCollection {
                     EXTR_OVERWRITE
                 );
 
-
             // set prefix
             $c->addPrefix($prefix, $requirements, $options, $host, $schemes);
 

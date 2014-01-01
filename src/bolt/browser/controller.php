@@ -8,6 +8,8 @@ use Symfony\Component\Finder\Finder;
 
 class controller {
 
+    protected $layout = null;
+
     private $_parameters = [];
 
     private $_browser;
@@ -20,7 +22,7 @@ class controller {
         $this->_parameters[$name] = $value;
     }
 
-    public function view($file, $vars=[]) {
+    public function view($file, $vars=[], $paths=[]) {
 
         // loop through vars and
         // print our params
@@ -31,7 +33,7 @@ class controller {
         }
 
         // paths to find
-        $paths = b::settings('browser.paths.views')->value;
+        $paths += b::settings('browser.paths.views')->value;
 
         // find this template
         $find = new Finder();

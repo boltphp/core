@@ -40,6 +40,13 @@ class route extends sRoute {
             (array_key_exists('_formats', $default) ? $default['formats'] : []),
             (is_array($format) ? $format : explode(',', $format))
         );
+
+        // optional
+        if (isset($formats[0]) AND $formats[0]{0} === '?') {
+            $formats[0] = substr($formats[0],1);
+            $this->addDefaults(['_format' => $formats[0]]);
+        }
+
         $this->addDefaults(['_formats' => $formats]);
         return $this;
     }

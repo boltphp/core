@@ -14,8 +14,14 @@ class handlebars extends base {
 
     public function __construct() {
         $this->_instance = new HBR([
-                'delimiters' => "<% %>"
+                'delimiters' => "<% %>",
             ]);
+
+        // add our helpers
+        $this->_instance->addHelper('bolt', function($template, $context, $args, $source){
+            return eval('return bolt::'.trim($args, '; ').';');
+        });
+
     }
 
     public function compile() {

@@ -18,4 +18,8 @@ class response extends SymfonyResponse {
         return $this->_bguid;
     }
 
+    public function useLayout() {
+        return true;
+    }
+
 }
