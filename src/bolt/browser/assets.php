@@ -48,4 +48,29 @@ class assets implements \bolt\plugin\singleton {
 
     }
 
+    public function process($str) {
+        $find = [
+            'file' => '#\$file ([^\n]+)#',
+            'glob' => '#\$glob ([^\n]+)#',
+            'dir' => '#\$dir ([^\n]+)#',
+            'filter' => '#\$filter ([^\n]+)#'
+        ];
+
+        $found = [];
+
+        // parse the string
+        foreach ($find as $type => $pat) {
+            if (preg_match_all($pat, $str, $matches, PREG_SET_ORDER)) {
+                $found[$type] = $matches;
+            }
+        }
+
+
+    }
+
+    public function getTree($file) {
+
+
+    }
+
 }
