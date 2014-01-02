@@ -33,7 +33,7 @@ date_default_timezone_set('UTC');
 
 class bolt {
 
-    const VERSION = '0.3';
+    const VERSION = '0.3.1';
 
     private static $_instance = false;
 

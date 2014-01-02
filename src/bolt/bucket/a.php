@@ -21,11 +21,12 @@ class a implements face, \IteratorAggregate, \Countable {
         }
     }
 
-    public function get($key) {
+    public function get($key, $default=null) {
         if (!is_numeric($key)) {
             $key = '['.trim(str_replace('.', '][', $key), '[]').']';
         }
-        return b::bucket('create', $this->_access->getValue($this->_value, $key));
+        $value = $this->_access->getValue($this->_value, $key);
+        return b::bucket('create', $value ?: $default);
     }
 
     public function set($key, $value) {
@@ -38,6 +39,10 @@ class a implements face, \IteratorAggregate, \Countable {
 
     public function normalize() {
         return $this->_value;
+    }
+
+    public function value($key, $default=null) {
+        return $this->get($key, $default)->normalize();
     }
 
     public function getIterator() {

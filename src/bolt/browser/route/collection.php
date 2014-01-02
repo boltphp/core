@@ -7,33 +7,41 @@ use Symfony\Component\Routing\RouteCollection;
 
 class collection extends RouteCollection {
 
+    public static function create($routes=[]) {
+        $c = new collection();
+        array_map(function($route) use ($c){ $c->add($route->getName(), $route); }, $routes);
+        return $c;
+    }
+
     public static function fromControllers(\bolt\browser\route\collection $collection) {
         $routes = [];
 
         // get all loaded classes
-        foreach (b::getClassImplements('\bolt\browser\route\face') as $class) {
-            if (
-                $class->name === 'bolt\browser\controller' OR
-                (!$class->hasProperty('routes') AND !$class->hasMethod('getRoutes'))
-            ) {continue;} // skip our controller class and make sure we have at least $routes || getRoutes()
+        if (($classes = b::getClassImplements('\bolt\browser\route\face')) != false) {
+            foreach ($classes as $class) {
+                if (
+                    $class->name === 'bolt\browser\controller' OR
+                    (!$class->hasProperty('routes') AND !$class->hasMethod('getRoutes'))
+                ) {continue;} // skip our controller class and make sure we have at least $routes || getRoutes()
 
-            $_ = [
-                'ref' => $class,
-                'collection' => $class->hasProperty('routeCollection') ? $class->getStaticPropertyValue('routeCollection') : ['prefix' => ''],
-                'routes' => []
-            ];
+                $_ = [
+                    'ref' => $class,
+                    'collection' => $class->hasProperty('routeCollection') ? $class->getStaticPropertyValue('routeCollection') : ['prefix' => ''],
+                    'routes' => []
+                ];
 
-            if ($class->hasProperty('routes')) {
-                $_['routes'] = array_merge($_['routes'], $class->getStaticPropertyValue('routes'));
+                if ($class->hasProperty('routes')) {
+                    $_['routes'] = array_merge($_['routes'], $class->getStaticPropertyValue('routes'));
+                }
+
+                if ($class->hasMethod('getRoutes')) {
+                    $name = $class->name;
+                    $_['routes'] = array_merge($_['routes'], $name::getRoutes());
+                }
+
+                $routes[] = $_;
+
             }
-
-            if ($class->hasMethod('getRoutes')) {
-                $name = $class->name;
-                $_['routes'] = array_merge($_['routes'], $name::getRoutes());
-            }
-
-            $routes[] = $_;
-
         }
 
         foreach ($routes as $class) {

@@ -1,13 +1,12 @@
 <?php
 
-namespace bolt\browser\controller;
-use \bolt\browser;
+namespace bolt\browser\middleware;
 use \b;
 
 use Symfony\Component\Finder\Finder;
 
 
-class asset extends route {
+class assets extends \bolt\browser\middleware {
 
     //
     private $_headerMap = [
@@ -27,7 +26,15 @@ class asset extends route {
         return 'text/plain';
     }
 
-    public function run($params) {
+    public function handle($req, $res) {
+        $route = b::browser('route\create', [
+                'path' => $this->config->value('route', '/a/{path}'),
+                'require' => ['path' => '.*']
+            ]);
+
+        // match a route
+        if (($params = $this->matchRoute($route, $req)) === false) {return false;}
+
         $content = "";
 
         // paths
@@ -55,8 +62,16 @@ class asset extends route {
                     $it = iterator_to_array($files);
                     $first = array_shift($it);
 
+                    $real = $first->getRealPath();
+
+                    // rel
+                    $rel = str_replace($path, '', $real);
+
                     // process a file and append it's content
-                    $content .= $this->process($first);
+                    $content .= \bolt\browser\assets::instance()->processFile($real, [
+                        'rel' => $rel,
+                        'url' => 'http://localhost/'.str_replace('{path}', '', $route->getPath())
+                    ]);
 
                 }
             }
@@ -64,10 +79,12 @@ class asset extends route {
         }
 
         // figureo ut
-        $this->response->headers->set('Content-Type', $this->_mapContentTypeFromExt($ext));
+        $res->headers->set('Content-Type', $this->_mapContentTypeFromExt($ext));
 
         // set our content
-        $this->response->setContent($content);
+        $res->setContent($content);
+
+        return $res;
 
     }
 

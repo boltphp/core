@@ -13,6 +13,8 @@ use Symfony\Component\ClassLoader\ClassLoader;
 
 class base {
 
+    private $_env = 'dev';
+
     private $_helpers = [];
     private $_plugins = [];
 
@@ -29,6 +31,14 @@ class base {
         // add our internal helper class
         $this->helper('\bolt\helpers');
 
+        // env
+        $this->env(b::params('env', 'dev', $config));
+
+    }
+
+    public function env($env=null) {
+        if($env) {$this->_env = $env;}
+        return $this->_env;
     }
 
     /**
@@ -59,7 +69,11 @@ class base {
 
             // see if this plugin is a singleton or factory
             if ($p['type'] == 'singleton') {
-                if (!$p['instance']) {
+                if (!$p['instance'] AND $p['ref']->hasMethod('instance')) {
+                    $class = $this->_plugins[$name]['class'];
+                    $p['instance'] = $class::instance();
+                }
+                else if (!$p['instance']) {
                     $p['instance'] = $this->_plugins[$name]['instance'] = $p['ref']->newInstance();
                 }
 
@@ -107,7 +121,6 @@ class base {
             array_unshift($parts, $name);
             $name = implode("_", $parts);
         }
-
 
         // is it a bolt class?
         $class = '\bolt\\'.str_replace("_", '\\', $name);
@@ -165,8 +178,11 @@ class base {
         return $this;
     }
 
-    public function settings($name, $value=null) {
+    public function settings($name=null, $value=null) {
         if (!$this->_settings) { $this->_settings = new bucket\a(); }
+        if ($name === null AND $value === null) {
+            return $this->_settings;
+        }
         if ($value === null) {
             return $this->_settings->get($name);
         }
