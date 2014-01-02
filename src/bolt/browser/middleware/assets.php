@@ -3,8 +3,6 @@
 namespace bolt\browser\middleware;
 use \b;
 
-use Symfony\Component\Routing\Matcher\UrlMatcher;
-use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Finder\Finder;
 
 
@@ -34,18 +32,8 @@ class assets extends \bolt\browser\middleware {
                 'require' => ['path' => '.*']
             ]);
 
-        $collection = b::browser('route\collection\create', [$route]);
-        $match = new UrlMatcher($collection, $req->getContext());
-
-        // we're going to try and match our request
-        // if not we fall back to error
-        try {
-            $params = $match->matchRequest($req);
-        }
-        catch(ResourceNotFoundException $e) {
-            return false;
-        }
-
+        // match a route
+        if (!$this->matchRoute($route, $req)) {return false;}
 
         $content = "";
 
