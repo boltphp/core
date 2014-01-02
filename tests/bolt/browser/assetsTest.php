@@ -80,7 +80,7 @@ class assetsTest extends Test {
     public function test_devModeFilter() {
 
         // we need out less filter
-        $this->a->filter('less', 'lessphp');
+        $this->a->filter('less', 'Lessphp');
 
         $this->a->filter('*', 'CssMin', false);
 
