@@ -48,7 +48,7 @@ class assets implements \bolt\plugin\singleton {
 
     }
 
-    public function process($str) {
+    public function processString($str) {
         $find = [
             'file' => '#\$file ([^\n]+)#',
             'glob' => '#\$glob ([^\n]+)#',
