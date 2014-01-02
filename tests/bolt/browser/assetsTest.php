@@ -2,6 +2,7 @@
 
 use Assetic\Filter\LessphpFilter;
 
+
 class assetsTest extends Test {
 
     public function setup() {
@@ -61,9 +62,9 @@ class assetsTest extends Test {
     }
 
     public function test_filter() {
-        $this->a->filter('less', 'lessphp');
+        $this->a->filter('less', 'Lessphp');
         $this->a->filter('poop', 'poop');
-        $this->assertEquals(['poop' => [], '*' => [], 'less' => [ ["\\Assetic\\Filter\\lessphpFilter", true]]], $this->a->getFilters());
+        $this->assertEquals(['poop' => [], '*' => [], 'less' => [ ['\Assetic\Filter\LessphpFilter', true]]], $this->a->getFilters());
     }
 
     public function test_processFile() {
@@ -80,6 +81,8 @@ class assetsTest extends Test {
     }
 
     public function test_devModeFilter() {
+
+        b::env('dev');
 
         // we need out less filter
         $this->a->filter('less', 'Lessphp');
