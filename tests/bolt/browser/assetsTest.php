@@ -1,5 +1,7 @@
 <?php
 
+use Assetic\Filter\LessphpFilter;
+
 class assetsTest extends Test {
 
     public function setup() {

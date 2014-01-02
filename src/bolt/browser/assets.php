@@ -14,7 +14,6 @@ use Assetic\Asset\StringAsset;
 // filters
 use Assetic\Filter\CssRewriteFilter;
 
-
 class assets implements \bolt\plugin\singleton {
     use \bolt\plugin\singletonTraits;
 
