@@ -30,7 +30,7 @@
 
         "leafo/lessphp": "*",
         "leafo/scssphp": "*",
-        "mrclay/minify": "*"
+        "natxet/cssmin": "*"
     },
     "autoload": {
         "psr-0": {

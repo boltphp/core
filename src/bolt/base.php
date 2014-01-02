@@ -13,6 +13,8 @@ use Symfony\Component\ClassLoader\ClassLoader;
 
 class base {
 
+    private $_env = 'dev';
+
     private $_helpers = [];
     private $_plugins = [];
 
@@ -29,6 +31,14 @@ class base {
         // add our internal helper class
         $this->helper('\bolt\helpers');
 
+        // env
+        $this->env(b::params('env', 'dev', $config));
+
+    }
+
+    public function env($env=null) {
+        if($env) {$this->_env = $env;}
+        return $this->_env;
     }
 
     /**

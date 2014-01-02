@@ -60,7 +60,7 @@ class assetsTest extends Test {
     public function test_filter() {
         $this->a->filter('less', 'lessphp');
         $this->a->filter('poop', 'poop');
-        $this->assertEquals(['poop' => [], 'less' => ["\\Assetic\\Filter\\lessphpFilter"]], $this->a->getFilters());
+        $this->assertEquals(['poop' => [], '*' => [], 'less' => [ ["\\Assetic\\Filter\\lessphpFilter", true]]], $this->a->getFilters());
     }
 
     public function test_processFile() {
@@ -73,8 +73,30 @@ class assetsTest extends Test {
         $exp = "body header {\n  background: red;\n}\n".
                "footer {\n  background: green;\n}";
 
+        $this->assertEquals($exp, $this->a->processFile($file));
+    }
+
+    public function test_devModeFilter() {
+
+        // we need out less filter
+        $this->a->filter('less', 'lessphp');
+
+        $this->a->filter('*', 'CssMin', false);
+
+        $file = b::path($this->dir, 'less/file.less');
+
+        $exp = "body header {\n  background: red;\n}\n".
+               "footer {\n  background: green;\n}";
 
         $this->assertEquals($exp, $this->a->processFile($file));
+
+        b::env('prod');
+
+        $exp = "body header{background:red}".
+               "footer{background:green}";
+
+        $this->assertEquals($exp, $this->a->processFile($file));
+
     }
 
 }

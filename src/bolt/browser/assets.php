@@ -20,7 +20,7 @@ class assets implements \bolt\plugin\singleton {
 
     private $_manager = false;
     private $_paths = [];
-    private $_filters = [];
+    private $_filters = ['*' => []];
 
 
     public function __construct() {
@@ -30,7 +30,7 @@ class assets implements \bolt\plugin\singleton {
 
     }
 
-    public function filter($ext, $filter=null) {
+    public function filter($ext, $filter=null, $useInDev=true) {
         if (is_array($ext)) {
             array_map(function(){ call_user_func_array([$this, 'filter'], func_get_args()); }, $ext);
             return $this;
@@ -42,7 +42,7 @@ class assets implements \bolt\plugin\singleton {
         }
 
         if (class_exists($class, true)) {
-            $this->_filters[$ext][] = $class;
+            $this->_filters[$ext][] = [$class, $useInDev];
         }
     }
 
@@ -141,9 +141,16 @@ class assets implements \bolt\plugin\singleton {
         }
 
         // use filters
-        if ($useGlobalFilters !== false AND array_key_exists($ext, $this->_filters)) {
-            foreach ($this->_filters[$ext] as $filter) {
-                $a->ensureFilter(new $filter());
+        if ($useGlobalFilters !== false) {
+            if (array_key_exists($ext, $this->_filters)) {
+                foreach ($this->_filters[$ext] as $filter) {
+                    if ($filter[1] === false AND b::env() === 'dev') {continue;}
+                    $a->ensureFilter(new $filter[0]());
+                }
+            }
+            foreach ($this->_filters['*'] as $filter) {
+                if ($filter[1] === false AND b::env() === 'dev') {continue;}
+                $a->ensureFilter(new $filter[0]());
             }
         }
 
