@@ -1,6 +1,6 @@
 <?php
 
-require_once "../src/bolt.php";
+require_once __DIR__."/../src/bolt.php";
 
 date_default_timezone_set('UTC');
 
