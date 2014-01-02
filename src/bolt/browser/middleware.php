@@ -14,6 +14,7 @@ abstract class middleware {
 
     final public function __construct($config=[]) {
         $this->config = b::bucket('create', $config);
+        $this->init();
     }
 
 
@@ -34,6 +35,10 @@ abstract class middleware {
         catch(ResourceNotFoundException $e) {
             return false;
         }
+
+    }
+
+    public function init() {
 
     }
 

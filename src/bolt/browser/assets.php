@@ -11,12 +11,17 @@ use Assetic\Asset\GlobAsset;
 use Assetic\Asset\HttpAsset;
 use Assetic\Asset\StringAsset;
 
+// filters
+use Assetic\Filter\CssRewriteFilter;
+
 
 class assets implements \bolt\plugin\singleton {
+    use \bolt\plugin\singletonTraits;
 
     private $_manager = false;
     private $_paths = [];
     private $_filters = [];
+
 
     public function __construct() {
 
@@ -82,7 +87,11 @@ class assets implements \bolt\plugin\singleton {
         return $f;
     }
 
-    public function processFile($path, $useGlobalFilters=true) {
+    public function processFile($path, $config=[]) {
+        $rel = b::param('rel', false, $config);
+        $url = b::param('url', false, $config);
+        $useGlobalFilters = b::param('useGlobalFilters', true, $config);
+
         // get the file
         $file = $this->getFile($path);
 
@@ -114,7 +123,22 @@ class assets implements \bolt\plugin\singleton {
             $content .= $this->processFile($f);
         }
 
-        $a = new StringAsset($content);
+        $source = false;
+        $sourcePath = false;
+        $targetPath = false;
+
+        if ($url) {
+            $parts = parse_url($url);
+            $source = "{$parts['scheme']}://{$parts['host']}";
+            $targetPath = trim($parts['path'], '/');
+            $sourcePath = $targetPath .'/'.trim($rel,'/');
+        }
+
+        $a = new StringAsset($content, [], $source, $sourcePath);
+
+        if ($targetPath) {
+            $a->setTargetPath($targetPath);
+        }
 
         // use filters
         if ($useGlobalFilters !== false AND array_key_exists($ext, $this->_filters)) {
@@ -122,6 +146,8 @@ class assets implements \bolt\plugin\singleton {
                 $a->ensureFilter(new $filter());
             }
         }
+
+        $a->ensureFilter(new CssRewriteFilter());
 
 
         return trim($a->dump());

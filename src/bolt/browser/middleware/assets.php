@@ -33,7 +33,7 @@ class assets extends \bolt\browser\middleware {
             ]);
 
         // match a route
-        if (!$this->matchRoute($route, $req)) {return false;}
+        if (($params = $this->matchRoute($route, $req)) === false) {return false;}
 
         $content = "";
 
@@ -62,8 +62,16 @@ class assets extends \bolt\browser\middleware {
                     $it = iterator_to_array($files);
                     $first = array_shift($it);
 
+                    $real = $first->getRealPath();
+
+                    // rel
+                    $rel = str_replace($path, '', $real);
+
                     // process a file and append it's content
-                    $content .= $this->processFile($first);
+                    $content .= \bolt\browser\assets::instance()->processFile($real, [
+                        'rel' => $rel,
+                        'url' => 'http://localhost/'.str_replace('{path}', '', $route->getPath())
+                    ]);
 
                 }
             }

@@ -59,7 +59,11 @@ class base {
 
             // see if this plugin is a singleton or factory
             if ($p['type'] == 'singleton') {
-                if (!$p['instance']) {
+                if (!$p['instance'] AND $p['ref']->hasMethod('instance')) {
+                    $class = $this->_plugins[$name]['class'];
+                    $p['instance'] = $class::instance();
+                }
+                else if (!$p['instance']) {
                     $p['instance'] = $this->_plugins[$name]['instance'] = $p['ref']->newInstance();
                 }
 
