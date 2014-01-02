@@ -1,13 +1,14 @@
 <?php
 
-namespace bolt\browser\controller;
-use \bolt\browser;
+namespace bolt\browser\middleware;
 use \b;
 
+use Symfony\Component\Routing\Matcher\UrlMatcher;
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Finder\Finder;
 
 
-class asset extends route {
+class assets extends \bolt\browser\middleware {
 
     //
     private $_headerMap = [
@@ -27,7 +28,25 @@ class asset extends route {
         return 'text/plain';
     }
 
-    public function run($params) {
+    public function handle($req, $res) {
+        $route = b::browser('route\create', [
+                'path' => $this->config->value('route', '/a/{path}'),
+                'require' => ['path' => '.*']
+            ]);
+
+        $collection = b::browser('route\collection\create', [$route]);
+        $match = new UrlMatcher($collection, $req->getContext());
+
+        // we're going to try and match our request
+        // if not we fall back to error
+        try {
+            $params = $match->matchRequest($req);
+        }
+        catch(ResourceNotFoundException $e) {
+            return false;
+        }
+
+
         $content = "";
 
         // paths
@@ -56,7 +75,7 @@ class asset extends route {
                     $first = array_shift($it);
 
                     // process a file and append it's content
-                    $content .= $this->process($first);
+                    $content .= $this->processFile($first);
 
                 }
             }
@@ -64,10 +83,12 @@ class asset extends route {
         }
 
         // figureo ut
-        $this->response->headers->set('Content-Type', $this->_mapContentTypeFromExt($ext));
+        $res->headers->set('Content-Type', $this->_mapContentTypeFromExt($ext));
 
         // set our content
-        $this->response->setContent($content);
+        $res->setContent($content);
+
+        return $res;
 
     }
 

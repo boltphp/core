@@ -65,6 +65,8 @@ class browser {
      */
     private $_routes = false;
 
+    private $_middleware = [];
+
     private $_rootPath = false;
 
     private $_engines = [
@@ -120,10 +122,37 @@ class browser {
         return $this->_response;
     }
 
-    public function plug($name, $class) {
-        b::plug($name, $class);
+    public function bind($name, $class=null, $config=[]) {
+        if (is_array($name) AND $class === null) {
+            array_map(function($item){
+                call_user_func_array([$this, 'bind'], $item);
+            }, $name);
+            return $this;
+        }
+
+        $inst = false;
+
+        // annon function
+        if (is_callable($name)) {
+            $class = 'bolt\browser\middleware\closure';
+            $inst = new $class($config);
+            $inst->setClosure($name);
+            $name = 'closure'.microtime();
+        }
+
+        $ref = b::getReflectionClass($class);
+
+        $this->_middleware[] = [
+            'name' => $name,
+            'ref' => $ref,
+            'instance' => $inst,
+            'class' => $class,
+            'config' => $config
+        ];
+
         return $this;
     }
+
 
 
     /**
@@ -217,30 +246,59 @@ class browser {
         // add routes from controller classes
         b::browser('route\collection\fromControllers', $this->_routes);
 
-        // match our route from the request
-        $match = new browser\route\match($this->_routes, $this->_request->getContext());
+        // before
+        $this->_runMiddleware('before', [$this->_request]);
 
-        // we're going to try and match our request
-        // if not we fall back to error
-        try {
-            $params = $match->matchRequest($this->_request);
+        // no response
+        $resp = false;
+
+        // loop through our middleware
+        // and see if anyone returns a response
+        // if they do, we switch a controller
+        foreach ($this->_middleware as $mid) {
+            $_resp = $mid['instance']->handle($this->_request, $this->_response);
+
+            if ($_resp AND $_resp instanceof \bolt\browser\response) {
+                $resp = $_resp; break;
+            }
+
         }
-        catch(ResourceNotFoundException $e) {
-            var_dump('bad'); die;
+
+        // if no response
+        if (!$resp) {
+
+            // match our route from the request
+            $match = new browser\route\match($this->_routes, $this->_request->getContext());
+
+            // we're going to try and match our request
+            // if not we fall back to error
+            try {
+                $params = $match->matchRequest($this->_request);
+            }
+            catch(ResourceNotFoundException $e) {
+                var_dump('bad'); die;
+            }
+
+            // bind our params to request::attributes
+            $this->_request->attributes->replace($params);
+
+            // run middle before we run the controller
+            $this->_runMiddleware('before', [$this->_request]);
+
+            // we can get started
+            $controller = new $params['_controller']($this->_request, $this->_response);
+
+            // build the controller
+            $resp = $controller->run($this->_request->attributes->all());
+
         }
-
-        // bind our params to request::attributes
-        $this->_request->attributes->replace($params);
-
-        // we can get started
-        $controller = new $params['_controller']($this->_request, $this->_response);
-
-        // build the controller
-        $resp = $controller->run($params);
 
         if (!$resp) {
             $resp = $this->_response;
         }
+
+        // run middle before we run the controller
+        $this->_runMiddleware('handle', [$this->_request, $this->_response]);
 
         // prepare base on request
         $resp->prepare($this->_request);
@@ -255,6 +313,15 @@ class browser {
         // and done
         $resp->send();
 
+    }
+
+     private function _runMiddleware($method, $args=[]) {
+        foreach ($this->_middleware as $name => $mid) {
+            if (!$mid['instance']) {
+                $this->_middleware[$name]['instance'] = $mid['instance'] = $mid['ref']->newInstance();
+            }
+            call_user_func_array([$mid['instance'], $method], $args);
+        }
     }
 
 }

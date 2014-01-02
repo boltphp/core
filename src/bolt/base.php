@@ -108,7 +108,6 @@ class base {
             $name = implode("_", $parts);
         }
 
-
         // is it a bolt class?
         $class = '\bolt\\'.str_replace("_", '\\', $name);
 
@@ -165,8 +164,11 @@ class base {
         return $this;
     }
 
-    public function settings($name, $value=null) {
+    public function settings($name=null, $value=null) {
         if (!$this->_settings) { $this->_settings = new bucket\a(); }
+        if ($name === null AND $value === null) {
+            return $this->_settings;
+        }
         if ($value === null) {
             return $this->_settings->get($name);
         }

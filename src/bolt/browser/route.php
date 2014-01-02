@@ -20,12 +20,21 @@ class route extends sRoute {
         return $r;
     }
 
+    public function getName() {
+        return false;
+    }
+
     public function setController($controller) {
         if (is_a($controller, 'Closure')) {
             $this->addDefaults(['_closure' => $controller]);
             $controller = '\bolt\browser\controller\closure';
         }
         $this->addDefaults(['_controller' => $controller]);
+        return $this;
+    }
+
+    public function setRequire($require) {
+        $this->addRequirements($require);
         return $this;
     }
 
