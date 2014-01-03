@@ -69,18 +69,26 @@ class assetsTest extends Test {
 
     public function test_processFile() {
 
+        if (!class_exists('lessc')) {
+            $this->markTestSkipped('LessPHP is not installed');
+        }
+
         // we need out less filter
         $this->a->filter('less', 'lessphp');
 
         $file = b::path($this->dir, 'less/file.less');
 
-        $exp = "body header {\n  background: red;\n}\n".
-               "footer {\n  background: green;\n}";
+        $exp = "footer {\n  background: green;\n}\n".
+                "body header {\n  background: red;\n}";
 
         $this->assertEquals($exp, $this->a->processFile($file));
     }
 
     public function test_devModeFilter() {
+
+        if (!class_exists('lessc')) {
+            $this->markTestSkipped('LessPHP is not installed');
+        }
 
         b::env('dev');
 
@@ -91,15 +99,15 @@ class assetsTest extends Test {
 
         $file = b::path($this->dir, 'less/file.less');
 
-        $exp = "body header {\n  background: red;\n}\n".
-               "footer {\n  background: green;\n}";
+        $exp = "footer {\n  background: green;\n}\n".
+                "body header {\n  background: red;\n}";
 
         $this->assertEquals($exp, $this->a->processFile($file));
 
         b::env('prod');
 
-        $exp = "body header{background:red}".
-               "footer{background:green}";
+        $exp = "footer{background:green}".
+                "body header{background:red}";
 
         $this->assertEquals($exp, $this->a->processFile($file));
 
