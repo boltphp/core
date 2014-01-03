@@ -26,6 +26,10 @@ class assets extends \bolt\browser\middleware {
         return 'text/plain';
     }
 
+    public function init() {
+        b::plug('assets', 'bolt\browser\assets');
+    }
+
     public function handle($req, $res) {
         $route = b::browser('route\create', [
                 'path' => $this->config->value('route', '/a/{path}'),
@@ -35,6 +39,7 @@ class assets extends \bolt\browser\middleware {
         // match a route
         if (($params = $this->matchRoute($route, $req)) === false) {return false;}
 
+        // content
         $content = "";
 
         // paths
@@ -70,7 +75,8 @@ class assets extends \bolt\browser\middleware {
                     // process a file and append it's content
                     $content .= \bolt\browser\assets::instance()->processFile($real, [
                         'rel' => $rel,
-                        'url' => 'http://localhost/'.str_replace('{path}', '', $route->getPath())
+                        'url' => 'http://localhost/'.str_replace('{path}', '', $route->getPath()),
+                        'filterOnly' => $req->query->get('filterOnly')
                     ]);
 
                 }

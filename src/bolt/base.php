@@ -162,6 +162,7 @@ class base {
         // add to plugins
         $this->_plugins[$name] = [
             'name' => $name,
+            'class' => $ref->name,
             'type' => $ref->isSubclassOf('bolt\plugin\singleton') ? 'singleton' : 'factory',
             'ref' => $ref,
             'instance' => false

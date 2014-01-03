@@ -17,6 +17,8 @@ use Assetic\Filter\CssRewriteFilter;
 class assets implements \bolt\plugin\singleton {
     use \bolt\plugin\singletonTraits;
 
+    public static $route = '/a/{path}';
+
     private $_manager = false;
     private $_paths = [];
     private $_filters = ['*' => []];
@@ -55,7 +57,23 @@ class assets implements \bolt\plugin\singleton {
         $output = [];
 
         foreach ($leafs as $leaf) {
-            $output[] = $leaf;
+            // find this file
+            $file = $this->find($leaf);
+
+            if ($file) {
+                foreach ($this->getCompressedFileTree($file) as $f) {
+                    if (substr($f, 0, 4) === 'http') {
+                        $output[] = $f;
+                    }
+                    else {
+
+                    }
+                }
+                $output[] = str_replace("{path}", ltrim(str_replace($file[0], '', $file[1]),'/')."?filterOnly=true", self::$route);
+            }
+            else {
+                $output[] = $leaf;
+            }
         }
 
         return implode("\n", array_map(function($href) {
@@ -70,19 +88,27 @@ class assets implements \bolt\plugin\singleton {
     }
 
     public function find($find, $root=false) {
+        if (substr($find,0,4) === 'http') {return [null, $find];}
+
         $this->addPaths(b::settings()->value("browser.paths.assets", []));
         foreach (array_merge([$root], $this->_paths) as $path) {
             $_ = b::path($path, $find);
             if (file_exists($_)) {
-                return $_;
+                return [$path, $_];
             }
         }
         return false;
     }
 
     public function getFile($path) {
-        $f =  new FileAsset($path);
-        $f->load();
+        if (strtolower(substr($path, 0, 4)) === 'http') {
+            $f = new HttpAsset($path);
+            $f->load();
+        }
+        else {
+            $f =  new FileAsset($path);
+            $f->load();
+        }
         return $f;
     }
 
@@ -102,8 +128,14 @@ class assets implements \bolt\plugin\singleton {
 
         if (empty($content)) { return $content; }
 
+        $inc = [];
+
         // parse the string
         $found = $this->parseString($content, $root);
+
+        if (b::param('filterOnly', false, $config) === 'true') {
+            $found = ['filter' => $found['filter']];
+        }
 
         $tree = $this->getCombinedTree($found, $ext);
 
@@ -119,7 +151,7 @@ class assets implements \bolt\plugin\singleton {
         // loop through each file and append
         foreach (array_unique($reduce($tree, $reduce)) as $f) {
             if ($f === $path) {continue;}
-            $content .= $this->processFile($f);
+            $inc[] = $this->processFile($f);
         }
 
         $source = false;
@@ -133,7 +165,9 @@ class assets implements \bolt\plugin\singleton {
             $sourcePath = $targetPath .'/'.trim($rel,'/');
         }
 
-        $a = new StringAsset($content, [], $source, $sourcePath);
+        $inc[] = $content;
+
+        $a = new StringAsset(implode("\n", $inc), [], $source, $sourcePath);
 
         if ($targetPath) {
             $a->setTargetPath($targetPath);
@@ -175,9 +209,9 @@ class assets implements \bolt\plugin\singleton {
             $found[$type] = [];
             if (preg_match_all($pat, $str, $matches, PREG_SET_ORDER)) {
                 foreach ($matches as $match) {
-                    $found[$type] += array_map(function($item){
+                    $found[$type] = array_merge($found[$type], array_map(function($item){
                         return $item;
-                    }, explode(' ', trim($match[1], '')));
+                    }, explode(' ', trim($match[1], ''))));
                 }
             }
         }
@@ -186,7 +220,7 @@ class assets implements \bolt\plugin\singleton {
         foreach (['file', 'dir'] as $type) {
             foreach ($found[$type] as $i => $path) {
                 if (($file = $this->find($path, $root)) != false) {
-                    $found[$type][$i] = $file;
+                    $found[$type][$i] = $file[1];
                 }
                 else {
                     unset($found[$type][$i]);
@@ -229,6 +263,37 @@ class assets implements \bolt\plugin\singleton {
         $found = $this->parseString($str);
 
         return $this->getCombinedTree($found, $ext);
+
+    }
+
+    public function getCompressedFileTree($file) {
+        $root = $file[0];
+        $ext = pathinfo($file[1])['extension'];
+        $ref = $this->getFile($file[1]);
+        $inc = [];
+
+        // parse the string
+        $found = $this->parseString($ref->getContent(), $root);
+
+        $tree = $this->getCombinedTree($found, $ext);
+
+        $reduce = function($items, $reduce) {
+            $resp = [];
+            foreach ($items as $key => $files) {
+                $resp[] = $key;
+                $resp += $reduce($files, $reduce);
+            }
+            return $resp;
+        };
+
+        // loop through each file and append
+        foreach (array_unique($reduce($tree, $reduce)) as $f) {
+            if ($f === $file[1]) {continue;}
+            $inc[] = $f;
+        }
+
+
+        return $inc;
 
     }
 
