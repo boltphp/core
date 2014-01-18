@@ -16,7 +16,6 @@ class base {
     private $_env = 'dev';
 
     private $_helpers = [];
-    private $_plugins = [];
 
     private $_settings = false;
 
@@ -61,41 +60,6 @@ class base {
         // see if we have this function on base
         if (method_exists($this, $name)) {
             return call_user_func_array([$this, $name], $args);
-        }
-
-        // see if we have a plugin name $name
-        if (array_key_exists($name, $this->_plugins)) {
-            $p = $this->_plugins[$name];
-
-            // see if this plugin is a singleton or factory
-            if ($p['type'] == 'singleton') {
-                if (!$p['instance'] AND $p['ref']->hasMethod('instance')) {
-                    $class = $this->_plugins[$name]['class'];
-                    $p['instance'] = $class::instance();
-                }
-                else if (!$p['instance']) {
-                    $p['instance'] = $this->_plugins[$name]['instance'] = $p['ref']->newInstance();
-                }
-
-                if (count($args) === 0) {
-                    return $p['instance'];
-                }
-                else if ($p['ref']->hasMethod('dispatch')) {
-                    return call_user_func_array([$p['instance'], 'dispatch'], $args);
-                }
-                else if (isset($args[0]) AND $p['ref']->hasMethod($args[0])) {
-                    $method = array_shift($args);
-                    return call_user_func_array([$p['instance'], $method], $args);
-                }
-                else {
-                    return $p['instance'];
-                }
-
-            }
-            else {
-                return $p['ref']->newInstanceArgs($args);
-            }
-
         }
 
         // helper class
@@ -154,22 +118,6 @@ class base {
         ];
 
         return $this;
-    }
-
-    public function plug($name, $class) {
-        $ref = new \ReflectionClass($class);
-
-        // add to plugins
-        $this->_plugins[$name] = [
-            'name' => $name,
-            'class' => $ref->name,
-            'type' => $ref->isSubclassOf('bolt\plugin\singleton') ? 'singleton' : 'factory',
-            'ref' => $ref,
-            'instance' => false
-        ];
-
-        return $this;
-
     }
 
 

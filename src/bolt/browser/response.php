@@ -6,6 +6,7 @@ use \b;
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
 class response extends SymfonyResponse {
+    use \bolt\plugin;
 
     private $_bguid = false;
 

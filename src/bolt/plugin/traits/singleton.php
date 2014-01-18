@@ -1,15 +1,15 @@
 <?php
 
-namespace bolt\plugin;
+namespace bolt\plugin\traits;
 
-trait singletonTraits {
+trait singleton {
 
     private static $_instance = false;
 
-    public static function instance() {
+    public static function instance($config=[]) {
         if (!self::$_instance) {
             $class = __CLASS__;
-            self::$_instance = new $class;
+            self::$_instance = new $class($config);
         }
         return self::$_instance;
     }

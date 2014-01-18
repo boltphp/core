@@ -10,7 +10,9 @@ use Symfony\Component\Routing\Exception\RouteNotFoundException;
  * browser class
  *
  */
-class browser {
+class browser implements \ArrayAccess {
+    use \bolt\plugin;
+    use \bolt\plugin\arrayAccess;
 
     /**
      * start a new browser app
@@ -85,8 +87,8 @@ class browser {
     public function __construct($req = false, $res = false) {
 
         // set the request and response or create new onse
-        $this->_request = $req ?: b::browser('request\createFromGlobals');
-        $this->_response = $res ?: new browser\response();
+        $this->setRequest($req ?: b::browser('request\createFromGlobals'));
+        $this->setResponse($res ?: new browser\response());
 
         // routes
         $this->_routes = new browser\route\collection();
@@ -138,6 +140,10 @@ class browser {
             $inst = new $class($config);
             $inst->setClosure($name);
             $name = 'closure'.microtime();
+        }
+        else {
+
+
         }
 
         $ref = b::getReflectionClass($class);
@@ -197,6 +203,17 @@ class browser {
 
     }
 
+    public function setResponse(\bolt\browser\response $resp) {
+
+        // if the request is plugable, we want a part of that
+        if (property_exists($resp, 'isPlugable') AND $resp->isPlugable) {
+            $resp->inherit($this);
+        }
+
+        $this->_response = $resp;
+        return $this;
+    }
+
     /**
      * set the request object
      *
@@ -205,7 +222,15 @@ class browser {
      * @return \bolt\browser\request request object
      */
     public function setRequest(\bolt\browser\request $req) {
+
+        // if the request is plugable, we want a part of that
+        if (property_exists($req, 'isPlugable') AND $req->isPlugable) {
+            $req->inherit($this);
+        }
+
+        // set our request
         $this->_request = $req;
+
         return $this;
     }
 
@@ -287,6 +312,11 @@ class browser {
 
             // we can get started
             $controller = new $params['_controller']($this->_request, $this->_response);
+
+            // check if we can plugin to the controller
+            if (property_exists($controller, 'isPlugable') AND $controller->isPlugable) {
+                $controller->inherit($this);
+            }
 
             // build the controller
             $resp = $controller->run($this->_request->attributes->all());

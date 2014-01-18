@@ -25,11 +25,6 @@ class route extends browser\controller implements browser\route\face {
 
     }
 
-    public function __get($name) {
-
-        return false;
-    }
-
     public function exception($class, $message=null, $code=null) {
         switch($class) {
             case 'MethodNotAllowedException':

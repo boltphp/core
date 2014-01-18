@@ -7,6 +7,7 @@ use Symfony\Component\Finder\Finder;
 
 
 class controller {
+    use \bolt\plugin;
 
     protected $layout = null;
 
@@ -20,6 +21,27 @@ class controller {
 
     public function __set($name, $value) {
         $this->_parameters[$name] = $value;
+    }
+
+    public function model($class, $config=[]) {
+
+        // nope
+        if (!class_exists($class, true)) {
+            var_dump('bad model class');
+            return false;
+        }
+
+        // we need a source manager
+        $source = $this->source;
+
+        // no source we stop
+        if (!$source OR !is_a($source, 'bolt\source')) {
+            var_dump('bad');
+            return false;
+        }
+
+        return new $class($source, $config);
+
     }
 
     public function view($file, $vars=[], $paths=[]) {
@@ -51,7 +73,10 @@ class controller {
                 return new view([
                     'file' => $first->getRealPath(),
                     'vars' => $vars,
-                    'parent' => $this
+                    'context' => $this,
+                    'helpers' => [
+
+                    ]
                 ]);
             }
         }

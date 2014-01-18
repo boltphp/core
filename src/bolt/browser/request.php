@@ -8,6 +8,7 @@ use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\Routing\RequestContext as SymfonyRequestContext;
 
 class request extends SymfonyRequest {
+    use \bolt\plugin;
 
     private $_bguid = false;
 

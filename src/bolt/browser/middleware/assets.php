@@ -43,7 +43,7 @@ class assets extends \bolt\browser\middleware {
         $content = "";
 
         // paths
-        $paths = b::settings('browser.paths.assets')->value;
+        $paths = $req->assets->getDirs();
 
         // explode out the path
         foreach (explode('&', $params['path']) as $path) {

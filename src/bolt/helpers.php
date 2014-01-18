@@ -97,4 +97,18 @@ class helpers {
         return $implements;
     }
 
+    public function getClassExtends($name) {
+        $extends = [];
+        $name = $this->normalizeClassName($name);
+
+        foreach ($this->getDefinedClasses() as $class) {
+            $c = $this->getReflectionClass($class);
+            if ($c->getParentClass() AND $c->getParentClass()->name == $name) {
+                $extends[] = $c;
+            }
+        }
+
+        return $extends;
+    }
+
 }

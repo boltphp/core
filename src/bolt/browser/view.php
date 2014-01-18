@@ -7,7 +7,7 @@ class view {
 
     private $_file;
     private $_vars;
-    private $_parent;
+    private $_context;
 
     private $_before = [];
     private $_after = [];
@@ -15,7 +15,7 @@ class view {
     public function __construct($config=[]) {
         $this->_file = b::param('file', false, $config);
         $this->_vars = b::param('vars', [], $config);
-        $this->_parent = b::param('parent', false, $config);
+        $this->_context = b::param('context', false, $config);
     }
 
     public function before() {
@@ -30,7 +30,7 @@ class view {
 
         // render
         $str = b::render('file', $this->_file, [
-                'self' => $this->_parent,
+                'context' => $this->_context,
                 'vars' => $this->_vars
             ]);
 

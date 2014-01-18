@@ -15,19 +15,72 @@ use Assetic\Asset\StringAsset;
 use Assetic\Filter\CssRewriteFilter;
 
 class assets implements \bolt\plugin\singleton {
-    use \bolt\plugin\singletonTraits;
+    use \bolt\plugin\traits\singleton;
 
     public static $route = '/a/{path}';
 
     private $_manager = false;
-    private $_paths = [];
+    private $_dir = [];
     private $_filters = ['*' => []];
 
+    private $_output = [
+        'script' => [],
+        'style' => []
+    ];
 
-    public function __construct() {
+
+    public function __construct($config=[]) {
+
+        // dirs
+        $this->_dir = b::param('dir', [], $config);
 
         // manager
         $this->_manager = new AssetManager();
+
+    }
+
+    public function add($type, $config=false) {
+        if (is_array($type) AND !$config) {
+            foreach ($type as $item) {
+                $this->add($item[0], $item[1]);
+            }
+            return $this;
+        }
+
+        $o = $type == 'script' ? new assets\script($this) : new assets\style($this);
+
+        if (is_string($config)) {
+            $o->setPath($config);
+        }
+        else if (is_array($config)) {
+            foreach ($config as $k => $v) {
+                call_user_func([$o, "set{$k}"], $v);
+            }
+        }
+        $this->_output[$type][] = $o;
+        return $o;
+    }
+
+    public function out($group, $type=false) {
+        $tag = [];
+
+        if (!$type OR $type == 'script') {
+            foreach ($this->_output['script'] as $script) {
+                if ($script->inGroup($group)) {
+                    $tag[] = $script->out();
+                }
+            }
+        }
+
+        if (!$type OR $type == 'style') {
+            foreach ($this->_output['style'] as $leaf) {
+                if ($leaf->inGroup($group)) {
+                    $tag[] = $leaf->out();
+                }
+            }
+        }
+
+        return implode("\n", $tag);
 
     }
 
@@ -82,16 +135,19 @@ class assets implements \bolt\plugin\singleton {
 
     }
 
-    public function addPaths($paths=[]) {
-        $this->_paths = array_replace($this->_paths, $paths);
+    public function addDir($paths=[]) {
+        $this->_dir = array_replace($this->_dir, $paths);
         return $this;
+    }
+
+    public function getDirs() {
+        return $this->_dir;
     }
 
     public function find($find, $root=false) {
         if (substr($find,0,4) === 'http') {return [null, $find];}
 
-        $this->addPaths(b::settings()->value("browser.paths.assets", []));
-        foreach (array_merge([$root], $this->_paths) as $path) {
+        foreach (array_merge([$root], $this->_dir) as $path) {
             $_ = b::path($path, $find);
             if (file_exists($_)) {
                 return [$path, $_];

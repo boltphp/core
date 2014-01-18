@@ -45,7 +45,7 @@ class render {
                 $content = self::string($content, [
                         'engine' => self::getEngine($name),
                         'vars' => $config['vars'],
-                        'self' => $config['self']
+                        'context' => $config['context']
                     ]);
             }
         }
