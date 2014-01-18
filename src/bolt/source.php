@@ -8,7 +8,7 @@ class source implements plugin\singleton, \ArrayAccess {
 
     public function __construct($config=null) {
         if (is_array($config)) {
-            $this->add('default', $config);
+            $this->add('default', $config['adapter'], $config);
         }
     }
 
@@ -19,9 +19,8 @@ class source implements plugin\singleton, \ArrayAccess {
         return false;
     }
 
-    public function add($name, $config) {
-        $adapter = $config['adapter'];
-        $this->_instance[$name] = new $adapter($config);
+    public function add($name, $class, $config=[]) {
+        $this->_instance[$name] = new $class($config);
         return $this;
     }
 

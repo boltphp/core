@@ -5,7 +5,7 @@ namespace bolt\source;
 use \Doctrine\DBAL\Configuration;
 use \Doctrine\DBAL\DriverManager;
 
-class db {
+class db implements face {
 
     private $_config = [];
     private $_handle = false;
