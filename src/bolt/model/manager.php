@@ -107,7 +107,7 @@ class manager implements \bolt\plugin\singleton, \ArrayAccess {
 
     public function offsetGet($name) {
         if (array_key_exists($name, $this->_entities)) {
-            return new entity\proxy($this, $this->_entities[$name]);
+            return new proxy($this, $this->_entities[$name]);
         }
         return false;
     }

@@ -17,6 +17,7 @@ class helpers {
     }
 
     public static function param($key, $default=false, $object=[]) {
+
         return array_key_exists($key, $object) ? $object[$key] : $default;
     }
 

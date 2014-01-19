@@ -14,6 +14,12 @@ class browser implements \ArrayAccess {
     use \bolt\plugin;
     use \bolt\plugin\arrayAccess;
 
+    public static function mode(base $bolt, $config=[]) {
+        $i = self::start($config);
+        $i->inherit($bolt);
+        return $i;
+    }
+
     /**
      * start a new browser app
      *

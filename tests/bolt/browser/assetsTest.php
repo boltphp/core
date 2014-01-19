@@ -8,7 +8,7 @@ class assetsTest extends Test {
     public function setup() {
         $this->dir = realpath(MOCK_DIR."/assets");
         $this->a = new bolt\browser\assets();
-        $this->a->addPaths([$this->dir]);
+        $this->a->addDir([$this->dir]);
     }
 
 

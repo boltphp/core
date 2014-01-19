@@ -1,6 +1,6 @@
 <?php
 
-namespace bolt\model\entity;
+namespace bolt\model;
 use \b;
 
 class proxy {

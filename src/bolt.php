@@ -44,6 +44,22 @@ class bolt {
         return self::$_instance;
     }
 
+    // init
+    public static function init($config) {
+
+        $i = self::instance();
+
+        // add our internal helper class
+        $i->helper('\bolt\helpers');
+
+        // env
+        $i->env(b::params('env', 'dev', $config));
+
+        // return our instnace
+        return $i;
+
+    }
+
     /**
      * call a static function on a bolt class
      *
@@ -54,8 +70,30 @@ class bolt {
      */
     public static function __callStatic($name, $args=[]){
 
-        // passoff to our instance call method
-        return self::instance()->call($name, $args);
+
+
+        if (self::instance()->helperExists($name)) {
+            return self::instance()->callHelper($name, $args);
+        }
+
+        // name has a / in it
+        if (isset($args[0]) AND stripos($args[0], '\\') !== false) {
+            $parts = explode('\\', array_shift($args));
+            array_unshift($args, array_pop($parts));
+            array_unshift($parts, $name);
+            $name = implode("_", $parts);
+        }
+
+        // is it a bolt class?
+        $class = '\bolt\\'.str_replace("_", '\\', $name);
+
+        // first of the args should be a function name
+        $func = array_shift($args);
+
+        // the function with the named args
+        if (method_exists($class, $func)) {
+            return call_user_func_array(array($class, $func), $args);
+        }
 
     }
 

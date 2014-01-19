@@ -86,7 +86,22 @@ trait plugin {
             }
         }
 
-        var_dump('bad'); die;
+        // helpers
+        if (property_exists($this, 'hasHelpers') AND $this->hasHelpers) {
+
+            foreach ($this->_helpers as $helper) {
+
+                if (in_array($name, $helper['methods'])) {
+
+                    if (!$helper['instance']) {
+                        $this->_helpers[$helper['name']]['instance'] = $helper['ref']->newInstance();
+                    }
+
+                    return call_user_func_array([$this->_helpers[$helper['name']]['instance'], $name], $args);
+                }
+            }
+        }
+
 
     }
 
