@@ -75,7 +75,7 @@ class browser implements \ArrayAccess {
 
     private $_middleware = [];
 
-    private $_rootPath = false;
+    private $_paths = [];
 
     private $_engines = [
         'hbr' => 'bolt\render\engine\handlebars',
@@ -113,16 +113,6 @@ class browser implements \ArrayAccess {
             return call_user_func([$this, 'route'], $route);
         }
 
-    }
-
-
-    public function setRootPath($path) {
-        $this->_rootPath = $path;
-        return $this;
-    }
-
-    public function getRootPath() {
-        return $this->_rootPath;
     }
 
 
@@ -170,25 +160,30 @@ class browser implements \ArrayAccess {
     /**
      * paths
      */
-    public function path($name, $value=false) {
+    public function path($name, $value=null) {
         if (is_array($name)){
             array_walk($name, function($val, $key){
                 $this->path($key, $val);
             });
             return $this;
         }
-
-        if ($name == 'root') {
-            return $this->setRootPath($value);
+        else if ($value === null) {
+            return array_key_exists($name, $this->_paths) ? $this->_paths[$name] : false;
         }
 
-        // set in browser settings
-        b::settings("browser.paths.{$name}", array_map(function($val) {
-            return b::path($this->getRootPath(), $val);
-        }, $value));
+        if (is_array($value)) {
+            $this->_paths[$name] = array_map(function($value){
+                return b::instance()->path($value);
+            }, $value);
+        }
+        else {
+            $this->_paths[$name] = b::instance()->path($value);
+        }
 
         return $this;
     }
+
+
 
     /**
      * load sub modules

@@ -37,27 +37,20 @@ class bolt {
 
     private static $_instance = false;
 
-    public static function instance() {
+    public static function instance($config=[]) {
         if (!self::$_instance) {
-            self::$_instance = new bolt\base();
+            self::$_instance = new bolt\base($config);
         }
         return self::$_instance;
     }
 
     // init
     public static function init($config) {
+        return self::instance($config);
+    }
 
-        $i = self::instance();
-
-        // add our internal helper class
-        $i->helper('\bolt\helpers');
-
-        // env
-        $i->env(b::params('env', 'dev', $config));
-
-        // return our instnace
-        return $i;
-
+    public static function env($env=null) {
+        return self::instance()->env($env);
     }
 
     /**
@@ -69,7 +62,6 @@ class bolt {
      * @return mixed submodule::func return or false for no sub module
      */
     public static function __callStatic($name, $args=[]){
-
 
 
         if (self::instance()->helperExists($name)) {

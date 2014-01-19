@@ -54,8 +54,10 @@ class controller {
             }
         }
 
+        if (!is_array($paths)) {$paths = [];}
+
         // paths to find
-        $paths += b::settings('browser.paths.views')->value;
+        $paths += $this->parent('bolt\browser')->path('views');
 
         // find this template
         $find = new Finder();

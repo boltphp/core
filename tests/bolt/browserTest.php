@@ -20,12 +20,6 @@ class browserTest extends Test {
 
     }
 
-    public function test_getSetRootPath() {
-        $b = new bolt\browser();
-        $r = $b->setRootPath('/test/path');
-        $this->assertEquals('/test/path', $b->getRootPath());
-        $this->assertEquals($r, $b);
-    }
 
     public function test_getResponse() {
         $b = new bolt\browser();

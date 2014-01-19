@@ -130,7 +130,7 @@ class route extends browser\controller implements browser\route\face {
                 $this->view(
                     $this->layout,
                     ['yeild' => $resp->getContent()],
-                    b::settings('browser.paths.layouts')->value
+                    false
                 )
             );
         }

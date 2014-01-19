@@ -11,7 +11,7 @@ trait plugin {
     public $isPlugable = true;
 
     public function inherit($parent) {
-        $this->_parents[] = $parent;
+        $this->_parents[get_class($parent)] = $parent;
         return $this;
     }
 
@@ -40,6 +40,10 @@ trait plugin {
 
     public function __call($name, $args) {
         return $this->call($name, $args);
+    }
+
+    public function parent($name) {
+        return $this->_parents[$name];
     }
 
     public function call($name, $args=[]) {

@@ -3,10 +3,7 @@
 namespace bolt;
 use \b;
 
-use \RecursiveDirectoryIterator;
-use \RecursiveIteratorIterator;
-use \RecursiveRegexIterator;
-use \RegexIterator;
+
 use \Closure;
 
 // symfony
@@ -19,18 +16,34 @@ class base implements \ArrayAccess {
 
     /**
      * our environment settings
+     * @var
      */
     private $_env = 'dev';
 
     /**
      * callbacks for initating modes
+     * @var
      */
     private $_modes = [];
 
     /**
+     * root path
+     * @var
+     */
+    private $_root = "";
+
+    /**
      * construct a new base boject
      */
-    public function __construct() {
+    public function __construct($config) {
+
+        // add our internal helper class
+        $this->helper('\bolt\helpers');
+
+        $this->_root = isset($config['root']) ? $config['root'] : false;
+        $this->env( isset($config['env']) ? $config['env'] : 'dev' );
+
+        // loader
         $this->loader = new ClassLoader();
         $this->loader->setUseIncludePath(true);
     }
@@ -84,10 +97,36 @@ class base implements \ArrayAccess {
      *
      * @return self
      */
-    public function load($prefix, $path) {
-        $this->loader->addPrefix($prefix, $path);
-        $this->loader->register();
+    public function load($class, $path) {
+
+        if (is_array($class)) {
+            array_walk($class, function($opt){
+                call_user_func_array([$this, 'load'], $opt);
+            });
+            return $this;
+        }
+
+        b::requireFromPath($path);
+
+//        b::load($class, $path);
+
         return $this;
+
+
+        // $this->loader->addPrefix($prefix, $path);
+        // $this->loader->register();
+        // return $this;
+    }
+
+    /**
+     * get a path relative to $root
+     *
+     * @param $path
+     *
+     * @return string path relative to $root
+     */
+    public function path($path) {
+        return b::path($this->_root, $path);
     }
 
 }
