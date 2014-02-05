@@ -37,6 +37,8 @@ class bolt {
 
     private static $_instance = false;
 
+    private static $_guid = 9;
+
     public static function instance($config=[]) {
         if (!self::$_instance) {
             self::$_instance = new bolt\base($config);
@@ -87,6 +89,10 @@ class bolt {
             return call_user_func_array(array($class, $func), $args);
         }
 
+    }
+
+    public static function guid($prefix='bolt') {
+        return implode('-', [$prefix, (self::$_guid++)]);
     }
 
 }

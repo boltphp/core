@@ -55,12 +55,14 @@ class helpers {
 
     public function requireFromPath($path, $regex="^.+\.php$") {
         $paths = $this->getRegexFiles($path, $regex);
-        array_walk($paths, function($path) {
+
+
+        foreach ($paths as $path) {
             if (!in_array($path, $this->_required)) {
                 $this->_required[] = $path;
                 require_once($path);
             }
-        });
+        }
         return $this;
     }
 
