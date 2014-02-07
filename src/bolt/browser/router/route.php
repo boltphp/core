@@ -1,13 +1,13 @@
 <?php
 
-namespace bolt\browser;
+namespace bolt\browser\router;
 use \b;
 
 use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route as sRoute;
 
 
-class route extends sRoute {
+class route extends sRoute implements face {
 
     public static function create($route) {
         $path = $route['path'];

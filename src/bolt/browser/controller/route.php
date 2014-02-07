@@ -8,7 +8,7 @@ use \b;
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
-class route extends browser\controller implements browser\route\face {
+class route extends browser\controller implements browser\router\face {
 
 
     private $_formats = [];
@@ -16,7 +16,7 @@ class route extends browser\controller implements browser\route\face {
     protected $response = false;
     protected $request = false;
 
-    final public function __construct($req, $res) {
+    final public function __construct(\bolt\application $app, \bolt\browser\request $req, \bolt\browser\response $res) {
 
         $this->request = $req;
         $this->response = $res;

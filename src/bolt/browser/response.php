@@ -1,14 +1,14 @@
 <?php
 
 namespace bolt\browser;
-use \b;
 
+/// require symfony response
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
 
-class response extends SymfonyResponse {
-    use \bolt\plugin;
 
-    private $_bguid = false;
+class response extends SymfonyResponse {
+
+    private $_bguid;
 
     public function __construct() {
         $this->_bguid = "bguid".microtime(true);

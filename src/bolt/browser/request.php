@@ -3,14 +3,13 @@
 namespace bolt\browser;
 use \b;
 
-
+/// require symfony request and response
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\Routing\RequestContext as SymfonyRequestContext;
 
 class request extends SymfonyRequest {
-    use \bolt\plugin;
 
-    private $_bguid = false;
+    private $_bguid;
 
     public function __construct() {
         $this->_bguid = "bguid".microtime(true);

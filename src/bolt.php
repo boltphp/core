@@ -31,29 +31,58 @@ define('bStart', microtime(true));
 // default to utc
 date_default_timezone_set('UTC');
 
+//
 class bolt {
+    const VERSION = '0.4.0';
 
-    const VERSION = '0.3.1';
-
-    private static $_instance = false;
-
+    /**
+     * global guid counter
+     */
     private static $_guid = 9;
 
-    public static function instance($config=[]) {
-        if (!self::$_instance) {
-            self::$_instance = new bolt\base($config);
-        }
-        return self::$_instance;
-    }
 
-    // init
+    /**
+     * name of environment
+     */
+    private static $_env = 'dev';
+
+    /**
+     * helpers holder
+     */
+    private static $_helpers = [];
+
+
+    /**
+     * inialize a new application interface
+     *
+     * @param $config array configuration array
+     *
+     * @return \bolt\application instance
+     */
     public static function init($config) {
-        return self::instance($config);
+
+        // register some helpers
+        self::helpers([
+            '\bolt\helpers\classes',
+            '\bolt\helpers\fs'
+        ]);
+
+        // new application
+        return new bolt\application($config);
+
     }
 
+
+    /**
+     * set the env
+     *
+     * @param $env string name of env
+     *
+     */
     public static function env($env=null) {
-        return self::instance()->env($env);
+        return self::$_env = $env;
     }
+
 
     /**
      * call a static function on a bolt class
@@ -65,34 +94,55 @@ class bolt {
      */
     public static function __callStatic($name, $args=[]){
 
+        // loop through each helper and
+        // figure out who can handle this method
+        foreach (self::$_helpers as $key => $helper) {
+            if (in_array($name, $helper['methods'])) {
+                if (!$helper['instance']) {
+                    $helper['instance'] = self::$_helpers[$key]['instance'] = $helper['ref']->newInstance();
+                }
 
-        if (self::instance()->helperExists($name)) {
-            return self::instance()->callHelper($name, $args);
-        }
-
-        // name has a / in it
-        if (isset($args[0]) AND stripos($args[0], '\\') !== false) {
-            $parts = explode('\\', array_shift($args));
-            array_unshift($args, array_pop($parts));
-            array_unshift($parts, $name);
-            $name = implode("_", $parts);
-        }
-
-        // is it a bolt class?
-        $class = '\bolt\\'.str_replace("_", '\\', $name);
-
-        // first of the args should be a function name
-        $func = array_shift($args);
-
-        // the function with the named args
-        if (method_exists($class, $func)) {
-            return call_user_func_array(array($class, $func), $args);
+                return call_user_func_array([$helper['instance'], $name], $args);
+            }
         }
 
     }
 
+
+    /**
+     * return a globally unique string
+     *
+     * @param $prefix string name of prefix
+     *
+     * @return string
+     */
     public static function guid($prefix='bolt') {
-        return implode('-', [$prefix, (self::$_guid++)]);
+        return implode('', [$prefix, (self::$_guid++)]);
+    }
+
+
+    /**
+     * attache helper classes to the global bolt instance
+     *
+     * @param $class
+     *
+     */
+    public static function helpers($class) {
+        if (is_array($class)) {
+            foreach ($class as $name) {
+                self::helpers($name);
+            }
+            return true;
+        }
+
+        $ref = new \ReflectionClass($class);
+        self::$_helpers[$ref->name] = [
+            'ref' => $ref,
+            'methods' => array_map(function($m){ return $m->name; }, $ref->getMethods()),
+            'instance' => false
+        ];
+
+        return true;
     }
 
 }

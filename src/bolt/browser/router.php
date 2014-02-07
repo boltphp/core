@@ -1,23 +1,49 @@
 <?php
 
-namespace bolt\browser\route;
+namespace bolt\browser;
 use \b;
 
-use Symfony\Component\Routing\RouteCollection;
+use Symfony\Component\Routing\Matcher\UrlMatcher;
 
-class collection extends RouteCollection {
+use Symfony\Component\Routing\Exception\ResourceNotFoundException;
+use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
-    public static function create($routes=[]) {
-        $c = new collection();
-        array_map(function($route) use ($c){ $c->add($route->getName(), $route); }, $routes);
-        return $c;
+class router {
+
+
+    private $_collection;
+
+    private $_app;
+
+    public function __construct(\bolt\application $app) {
+        $this->_app = $app;
+
+        $this->_collection = new router\collection();
+
     }
 
-    public static function fromControllers(\bolt\browser\route\collection $collection) {
+    public function match(\bolt\browser\request $req) {
+
+        // matcher
+        $matcher = new UrlMatcher($this->_collection, $req->getContext());
+
+        // try to match the request
+        try {
+            $params = $matcher->matchRequest($req);
+        }
+        catch(ResourceNotFoundException $e) {
+            var_dump('bad'); die;
+        }
+
+        return $params;
+
+    }
+
+    public function loadFromControllers() {
         $routes = [];
 
         // get all loaded classes
-        if (($classes = b::getClassImplements('\bolt\browser\route\face')) != false) {
+        if (($classes = b::getClassImplements('\bolt\browser\router\face')) != false) {
             foreach ($classes as $class) {
                 if (
                     $class->name === 'bolt\browser\controller' OR
@@ -45,7 +71,7 @@ class collection extends RouteCollection {
         }
 
         foreach ($routes as $class) {
-            $c = new collection();
+            $c = new router\collection();
 
             // loop through routes
             foreach ($class['routes'] as $key => $route) {
@@ -67,7 +93,7 @@ class collection extends RouteCollection {
                 $route['action'] = b::param('action', false, $route);
 
                 // loop through each part and set it
-                $c->add($name,  b::browser_route('create', $route) );
+                $c->add($name, router\route::create($route) );
 
             }
 
@@ -81,7 +107,7 @@ class collection extends RouteCollection {
             $c->addPrefix($prefix, $requirements, $options, $host, $schemes);
 
             // add this collection
-            $collection->addCollection($c);
+            $this->_collection->addCollection($c);
 
         }
 

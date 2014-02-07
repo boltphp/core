@@ -3,11 +3,7 @@
 namespace bolt\browser;
 use \b;
 
-use Symfony\Component\Finder\Finder;
-
-
 class controller {
-    use \bolt\plugin;
 
     protected $layout = null;
 
@@ -22,72 +18,6 @@ class controller {
     public function __set($name, $value) {
         $this->_parameters[$name] = $value;
     }
-
-    public function model($class, $config=[]) {
-
-        // nope
-        if (!class_exists($class, true)) {
-            var_dump('bad model class');
-            return false;
-        }
-
-        // we need a source manager
-        $source = $this->source;
-
-        // no source we stop
-        if (!$source OR !is_a($source, 'bolt\source')) {
-            var_dump('bad');
-            return false;
-        }
-
-        return new $class($source, $config);
-
-    }
-
-    public function view($file, $vars=[], $paths=[]) {
-
-        // loop through vars and
-        // print our params
-        foreach ($this->_parameters as $key => $value) {
-            if (!array_key_exists($key, $vars)) {
-                $vars[$key] = $value;
-            }
-        }
-
-        if (!is_array($paths)) {$paths = [];}
-
-        // paths to find
-        $paths += $this->parent('bolt\browser')->path('views');
-
-        // find this template
-        $find = new Finder();
-
-        $base = pathinfo($file)['dirname'];
-        $name = pathinfo($file)['basename'];
-
-        // loop through each path
-        foreach ($paths as $path) {
-            $files = $find->files()->in(b::path($path, $base))->name($name);
-            if (iterator_count($files)) {
-                $it = iterator_to_array($files);
-                $first = array_shift($it);
-
-                return new view([
-                    'file' => $first->getRealPath(),
-                    'vars' => $vars,
-                    'context' => $this,
-                    'helpers' => [
-
-                    ]
-                ]);
-            }
-        }
-
-        // nope
-        return false;
-
-    }
-
     protected function getArgsFromMethodRef($ref, $params) {
 
         // we need to get all args

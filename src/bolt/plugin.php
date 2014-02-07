@@ -3,122 +3,129 @@
 namespace bolt;
 use \b;
 
-trait plugin {
+class plugin implements \ArrayAccess {
 
     private $_plugins = [];
-    private $_parents = [];
 
-    public $isPlugable = true;
+    /**
+     * plug a new class into this parent class
+     *
+     * @param $name string name of plugin
+     * @param $class string|callback what to call when access
+     * @param $args array arguments to pass to callback
+     *
+     * @return self
+     */
+    public function plug($name, $class=null, $args=[]) {
+        if (is_array($name)) {
+            foreach ($name as $plug) {
+                call_user_func_array([$this, 'plug'], $plug);
+            }
+            return $this;
+        }
 
-    public function inherit($parent) {
-        $this->_parents[get_class($parent)] = $parent;
-        return $this;
-    }
+        if (!class_exists($class, true)) {
+            throw new Exception("Unknwon class");
+            return false;
+        }
 
-    public function plug($name, $class, $config=[]) {
-        $ref = new \ReflectionClass($class);
+        $ref = b::getClassRef($class);
 
-        // add to plugins
         $this->_plugins[$name] = [
-            'name' => $name,
-            'class' => $ref->name,
-            'type' => $ref->isSubclassOf('bolt\plugin\singleton') ? 'singleton' : 'factory',
             'ref' => $ref,
-            'config' => $config,
-            'instance' => false
+            'type' => $ref->isSubclassOf('\bolt\plugin\factory') ? 'factory' : 'singleton',
+            'instance' => false,
+            'initRun' => true
         ];
 
+        // if it's a singleton, we construct right away
+        if ($this->_plugins[$name]['type'] == 'singleton') {
+            $this->_constructPluginInstance($name);
+            $this->_plugins[$name]['initRun'] = !$this->_plugins[$name]['ref']->hasMethod('firstRun');
+        }
+
+
         return $this;
 
     }
 
-    public function __get($name) {
-        if ($this->pluginCanCall($name)) {
-            return $this->call($name);
+    public function pluginExists($name) {
+        return array_key_exists($name, $this->_plugins);
+    }
+
+    /**
+     * get a plugin instance
+     *
+     * @param $name string name of plugin
+     *
+     * @return mixed instance of plugin
+     */
+    public function plugin($name) {
+        $plugin = $this->_plugins[$name];
+
+        // factory
+        if ($plugin['type'] == 'factory' AND $plugin['ref']->hasMethod('factory') ) {
+            $class = $plugin['ref']->name;
+            return $class::factory();
         }
+        else if ($plugin['type'] == 'factory') {
+            return $this->_constructPluginInstance($name);
+        }
+
+        // no instance
+        if (!$plugin['initRun']) {
+            call_user_func([$plugin['instance'], 'firstRun']);
+            $this->_plugins[$name]['initRun'] = true;
+        }
+
+
+        return $plugin['instance'];
     }
 
-    public function __call($name, $args) {
-        return $this->call($name, $args);
-    }
+    private function _constructPluginInstance($name) {
+        $plugin = $this->_plugins[$name];
+        $ref = $plugin['ref'];
+        $args = [];
 
-    public function parent($name) {
-        return $this->_parents[$name];
-    }
+        // get our constructor
+        $constr = $ref->getConstructor();
 
-    public function call($name, $args=[]) {
+        if ($constr AND $constr->getNumberOfParameters() > 0) {
+            $parent =  get_called_class();
 
-        // see if we have a plugin name $name
-        if (array_key_exists($name, $this->_plugins)) {
-            $p = $this->_plugins[$name];
-
-            // see if this plugin is a singleton or factory
-            if ($p['type'] == 'singleton') {
-                if (!$p['instance'] AND $p['ref']->hasMethod('instance')) {
-                    $class = $this->_plugins[$name]['class'];
-                    $p['instance'] = $class::instance($p['config']);
+            foreach ($constr->getParameters() as $p) {
+                if (($c = $p->getClass()) !== null AND $c->name == $parent) {
+                    $args[] = $this;
                 }
-                else if (!$p['instance']) {
-                    $p['instance'] = $this->_plugins[$name]['instance'] = $p['ref']->newInstance($p['config']);
-                }
-
-                if (count($args) === 0) {
-                    return $p['instance'];
-                }
-                else if ($p['ref']->hasMethod('dispatch')) {
-                    return call_user_func_array([$p['instance'], 'dispatch'], $args);
-                }
-                else if (isset($args[0]) AND $p['ref']->hasMethod($args[0])) {
-                    $method = array_shift($args);
-                    return call_user_func_array([$p['instance'], $method], $args);
+                else if ($p->isOptional()) {
+                    $args[] = $p->getDefaultValue();
                 }
                 else {
-                    return $p['instance'];
-                }
-
-            }
-            else {
-                return $p['ref']->newInstanceArgs([$p['config'], $args]);
-            }
-        }
-
-        if (count($this->_parents) > 0) {
-            foreach ($this->_parents as $parent) {
-                if ($parent->pluginCanCall($name)) {
-                    return $parent->call($name, $args);
+                    $args[] = null;
                 }
             }
         }
 
-        // helpers
-        if (property_exists($this, 'hasHelpers') AND $this->hasHelpers) {
 
-            foreach ($this->_helpers as $helper) {
-
-                if (in_array($name, $helper['methods'])) {
-
-                    if (!$helper['instance']) {
-                        $this->_helpers[$helper['name']]['instance'] = $helper['ref']->newInstance();
-                    }
-
-                    return call_user_func_array([$this->_helpers[$helper['name']]['instance'], $name], $args);
-                }
-            }
-        }
-
+        // set back globally
+        return $this->_plugins[$name]['instance'] = $ref->newInstanceArgs($args);
 
     }
 
-    public function pluginCanCall($name) {
-        if (array_key_exists($name, $this->_plugins)) {
-            return true;
-        }
-        foreach ($this->_parents as $parent) {
-            if ($parent->pluginCanCall($name)) {
-                return true;
-            }
-        }
-        return false;
+
+    public function offsetSet($name, $class) {
+        return;
+    }
+
+    public function offsetExists($name) {
+        return $this->pluginExists($name);
+    }
+
+    public function offsetUnset($name) {
+        $this->unplug($name);
+    }
+    public function offsetGet($name) {
+        return $this->plugin($name);
     }
 
 }
