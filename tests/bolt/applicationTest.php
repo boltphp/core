@@ -3,7 +3,7 @@
 class applicationTest extends Test {
 
     public function setUp() {
-        $this->app = new bolt\application();
+        $this->app = new bolt\application(['root' => TEST_ROOT]);
     }
 
     public function test_inherits() {
