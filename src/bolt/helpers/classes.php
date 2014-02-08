@@ -8,7 +8,7 @@ class classes {
     private $_ref = [];
     private $_classes = [];
 
-    public function getClassRef($class) {
+    public function getReflectionClass($class) {
         $name = $this->normalizeClassName($class);
 
         if (array_key_exists($name, $this->_ref)) {
@@ -34,7 +34,7 @@ class classes {
         $name = $this->normalizeClassName($name);
 
         foreach ($this->getDeclaredClasses() as $class) {
-            $c = $this->getClassRef($class);
+            $c = $this->getReflectionClass($class);
 
             if (in_array($name, $c->getInterfaceNames()) ) {
                 $implements[] = $c;

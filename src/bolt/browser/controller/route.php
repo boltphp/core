@@ -10,19 +10,37 @@ use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 class route extends browser\controller implements browser\router\face {
 
+    private $_app;
+    private $_browser;
 
     private $_formats = [];
 
     protected $response = false;
     protected $request = false;
 
-    final public function __construct(\bolt\application $app, \bolt\browser\request $req, \bolt\browser\response $res) {
+    final public function __construct(\bolt\application $app, \bolt\browser $browser) {
 
-        $this->request = $req;
-        $this->response = $res;
+        $this->_app = $app;
+        $this->_browser = $browser;
+
+
+        $this->request = $browser->getRequest();
+        $this->response = $browser->getResponse();
 
         $this->init();
 
+    }
+
+    public function __get($name) {
+        switch($name) {
+            case 'app':
+                return $this->_app;
+            case 'browser':
+                return $this->_browser;
+
+        };
+
+        return false;
     }
 
     public function exception($class, $message=null, $code=null) {

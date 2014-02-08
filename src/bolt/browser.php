@@ -6,6 +6,7 @@ use \b;
 
 
 class browser {
+    use events;
 
     private $_request;
     private $_response;
@@ -36,11 +37,41 @@ class browser {
     }
 
     public function getResponse() {
-        return $this->_repsonse;
+        return $this->_response;
     }
 
     public function setResponse(\bolt\browser\response $resp) {
-        $this->_repsonse = $resp;
+        $this->_response = $resp;
+        return $this;
+    }
+
+    public function bind($name, $class = null, $args = []) {
+        if (is_array($name)) {
+            foreach ($name as $item) {
+                call_user_func_array([$this, 'bind'], $item);
+            }
+            return $this;
+        }
+
+        // annon function
+        if (is_callable($name)) {
+            $class = 'bolt\browser\middleware\closure';
+            $inst = new $class($config);
+            $inst->setClosure($name);
+            $name = 'closure'.microtime();
+        }
+
+        // get the reflection class
+        $ref = b::getReflectionClass($class);
+
+        $this->_middleware[] = [
+            'name' => $name,
+            'ref' => $ref,
+            'instance' => $inst,
+            'class' => $class,
+            'config' => $config
+        ];
+
         return $this;
     }
 
@@ -52,9 +83,13 @@ class browser {
         if (isset($this->_app['router'])) {
 
             // run the request router againts this request
-            $match = $this->_app['router']->match($this->_request);
+            $params = $this->_app['router']->match($this->_request);
 
-            var_dump($match); die;
+            // bind our params to request::attributes
+            $this->_request->attributes->replace($params);
+
+            // create our controller
+            $controller = new $params['_controller']($this->_app, $this);
 
         }
 

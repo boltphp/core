@@ -29,6 +29,10 @@ class application extends plugin {
 
     }
 
+    public function path() {
+
+    }
+
     public function run() {
 
         // fire any run events
