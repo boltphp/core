@@ -7,19 +7,21 @@ use \b;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\Routing\RequestContext as SymfonyRequestContext;
 
+
 class request extends SymfonyRequest {
 
-    private $_bguid;
-
+    /**
+     * Constructor.
+     */
     public function __construct() {
-        $this->_bguid = "bguid".microtime(true);
         call_user_func_array([get_parent_class(), '__construct'], func_get_args());
     }
 
-    public function bguid() {
-        return $this->_bguid;
-    }
-
+    /**
+     * get the request context
+     *
+     * return Symfony\Component\Routing\RequestContext
+     */
     public function getContext() {
         $ctx = new SymfonyRequestContext();
         $ctx->fromRequest($this);

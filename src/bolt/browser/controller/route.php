@@ -15,17 +15,13 @@ class route extends browser\controller implements browser\router\face {
 
     private $_formats = [];
 
-    protected $response = false;
-    protected $request = false;
+    protected $_response = false;
+    protected $_request = false;
 
     final public function __construct(\bolt\application $app, \bolt\browser $browser) {
 
         $this->_app = $app;
         $this->_browser = $browser;
-
-
-        $this->request = $browser->getRequest();
-        $this->response = $browser->getResponse();
 
         $this->init();
 
@@ -37,6 +33,10 @@ class route extends browser\controller implements browser\router\face {
                 return $this->_app;
             case 'browser':
                 return $this->_browser;
+            case 'request':
+                return $this->_browser->getRequest();
+            case 'response':
+                return $this->_browser->getResponse();
 
         };
 
@@ -65,7 +65,7 @@ class route extends browser\controller implements browser\router\face {
         $class = 'bolt\browser\response\format\\'.$format;
         $this->_formats[$format] = new $class($this->response);
         $this->_formats[$format]->setContent($content);
-        return $this;
+        return $this->_formats[$format];
     }
 
     public function build($params=[]) {
@@ -108,52 +108,54 @@ class route extends browser\controller implements browser\router\face {
         // resp
         $resp = $this->build($params);
 
-        // if it's an array,
-        // we assume they have given formats
-        if (is_string($resp)) {
-            $this->response->setContent($resp);
-            $resp = false; // fallback to default response
-        }
-        else if ($resp instanceof \bolt\browser\view) {
-            $this->response->setContent($resp->render());
-            $resp = false; // fallback to default response
-        }
-
         // if resp is a request
         // we can reset our request and be done
         if (is_array($resp))  {
             $this->format($resp);
         }
 
+        // if it's an array,
+        // we assume they have given formats
+        if (is_string($resp)) {
+            $this->response->setContent($resp);
+        }
+        else if ($resp instanceof \bolt\browser\view) {
+            $content = $resp->render();
+        }
+        else if (is_a($resp, 'bolt\browser\response') AND $resp !== $this->response) {
+            return $resp;
+        }
+
+        // if the build function set content and
+        // we don't have any formats set
+        // assume they set the default format
+        if ($this->response->getContent() !== "" AND count($this->_formats) === 0) {
+            $this->_formats[$params["_format"]] = $this->response->getContent();
+        }
+
+
+        // our default content
+        $content = "";
+
         // if _format exists in response. no we return
         if (array_key_exists('_format', $params) AND array_key_exists($params['_format'], $this->_formats)) {
-            $resp = $this->_formats[$params['_format']];
+            $content = $this->_formats[$params['_format']];
         }
         else if (array_key_exists('_format', $params)) {
             throw new \ResourceNotFoundException("Unable to match response", 404);
+            return;
         }
 
-        if (is_callable($resp)) {
-            $resp = call_user_func($resp);
+        // if our content is callable
+        // we want to do that now
+        while(is_callable($content)) {
+            $content = call_user_func($content);
         }
 
-        if (!$resp) {
-            $resp = $this->response;
-        }
+        // set our content in the response
+        $this->response->setContent($content);
 
-        // if we have a layout, we need to
-        // wrap our current content in that layout
-        if ($this->layout !== null AND $resp->useLayout() === true) {
-            $resp->setContent(
-                $this->view(
-                    $this->layout,
-                    ['yeild' => $resp->getContent()],
-                    false
-                )
-            );
-        }
-
-        return $resp;
+        return $this->response;
     }
 
 }

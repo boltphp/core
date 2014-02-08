@@ -3,12 +3,16 @@
 namespace bolt;
 use \b;
 
-class plugin implements \ArrayAccess {
+use \Exception;
+
+
+/**
+ * Base plugin abstract
+ */
+abstract class plugin implements \ArrayAccess {
 
     /**
-     * list of plugins
-     *
-     * @var
+     * @var array
      */
     private $_plugins = [];
 
@@ -16,9 +20,9 @@ class plugin implements \ArrayAccess {
     /**
      * plug a new class into this parent class
      *
-     * @param $name string name of plugin
-     * @param $class string|callback what to call when access
-     * @param $config array arguments to pass to callback
+     * @param string $name name of plugin
+     * @param string|callback $class what to call when access
+     * @param array $config arguments to pass to callback
      *
      * @return self
      */
@@ -30,7 +34,7 @@ class plugin implements \ArrayAccess {
             return $this;
         }
 
-        if (!class_exists($class, true)) {
+        if (is_string($class) AND !class_exists($class, true)) {
             throw new Exception("Unknwon class");
             return false;
         }
@@ -45,8 +49,14 @@ class plugin implements \ArrayAccess {
             'config' => $config
         ];
 
+        // do we have a class already
+        if (!is_string($class)) {
+            $this->_plugins[$name]['instance'] = $class;
+            $this->_plugins[$name]['initRun'] = !$this->_plugins[$name]['ref']->hasMethod('firstRun');
+        }
+
         // if it's a singleton, we construct right away
-        if ($this->_plugins[$name]['type'] == 'singleton') {
+        else if ($this->_plugins[$name]['type'] == 'singleton') {
             $this->_constructPluginInstance($name);
             $this->_plugins[$name]['initRun'] = !$this->_plugins[$name]['ref']->hasMethod('firstRun');
         }
@@ -55,11 +65,20 @@ class plugin implements \ArrayAccess {
 
     }
 
+    /**
+     * return all plugins
+     *
+     * @return array list of plugins
+     */
+    public function getPlugins() {
+        return $this->_plugins;
+    }
+
 
     /**
      * does plugin exist
      *
-     * @param $name string name of plugin
+     * @param string $name name of plugin
      *
      * @return bool value of plugin exists
      */
@@ -71,20 +90,22 @@ class plugin implements \ArrayAccess {
     /**
      * get a plugin instance
      *
-     * @param $name string name of plugin
+     * @param string $name name of plugin
      *
      * @return mixed instance of plugin
      */
     public function plugin($name) {
+        if (!$this->pluginExists($name)) {
+            throw new Exception("Plugin $name does not exist", 404);
+            return;
+        }
+
         $plugin = $this->_plugins[$name];
 
         // factory
-        if ($plugin['type'] == 'factory' AND $plugin['ref']->hasMethod('factory') ) {
+        if ($plugin['type'] == 'factory') {
             $class = $plugin['ref']->name;
             return $class::factory();
-        }
-        else if ($plugin['type'] == 'factory') {
-            return $this->_constructPluginInstance($name);
         }
 
         // no instance
@@ -101,7 +122,7 @@ class plugin implements \ArrayAccess {
     /**
      * construct a plugin instance
      *
-     * @param $name string name of plugin to construct
+     * @param string $name name of plugin to construct
      *
      * @return plugin instance
      *
@@ -127,9 +148,6 @@ class plugin implements \ArrayAccess {
                 else if ($p->isOptional()) {
                     $args[] = $p->getDefaultValue();
                 }
-                else {
-                    $args[] = null;
-                }
             }
         }
 
@@ -140,24 +158,47 @@ class plugin implements \ArrayAccess {
 
 
     /**
+     * unplug a plugin
+     *
+     * @param string $name name of plugin to remove
+     *
+     * @return self
+     */
+    public function unplug($name) {
+        if (!$this->pluginExists($name)) {
+            throw new Exception("Unknown plugin $name");
+            return false;
+        }
+
+        if ($this->_plugins[$name]['instance']) {
+            unset($this->_plugins[$name]['instance']);
+        }
+
+        unset($this->_plugins[$name]);
+
+        return $this;
+    }
+
+
+    /**
      * set offset
      *
-     * @param $name string set the name
-     * @param $class class name
+     * @param string $name set the name
+     * @param string $class class name
      *
      * @return self
      */
     public function offsetSet($name, $class) {
-        return $this->plugin($name, $class);
+        return $this->plug($name, $class);
     }
 
 
     /**
      * offset get
      *
-     * @param $name string name of plugin
+     * @param string $name name of plugin
      *
-     * @return bool name of plugin
+     * @return bool
      */
     public function offsetExists($name) {
         return $this->pluginExists($name);
@@ -167,7 +208,7 @@ class plugin implements \ArrayAccess {
     /**
      * unplug
      *
-     * @param $name string name of plugin to unplug
+     * @param string $name name of plugin to unplug
      *
      * @return void
      */
@@ -179,9 +220,9 @@ class plugin implements \ArrayAccess {
     /**
      * get a plugin
      *
-     * @param $name string name of plugin
+     * @param string $name name of plugin
      *
-     * @return plugin refrance
+     * @return mixed
      */
     public function offsetGet($name) {
         return $this->plugin($name);

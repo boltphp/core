@@ -3,10 +3,20 @@
 namespace bolt;
 use \b;
 
-class application extends plugin {
-    use events;
 
+/**
+ * Base bolt applicatin class
+ *
+ */
+class application extends plugin {
+    use events; /// use events class
+
+
+    /**
+     * @var string
+     */
     private $_root = false;
+
 
     /**
      * construct a new application instance
@@ -15,24 +25,68 @@ class application extends plugin {
      *
      * @return self
      */
-    public function __construct($config) {
+    public function __construct($config=[]) {
 
-        $this->_root = isset($config['root']) ? realpath($config['root']) : getcwd();
-
-    }
-
-    public function load($ns, $root) {
-        $rootPath = b::path($this->_root, $root);
-
-        b::requireFromPath($rootPath);
-
+        $this->_root = b::path(isset($config['root']) ? realpath($config['root']) : getcwd());
 
     }
 
+    /**
+     * get the root path
+     *
+     * @return string
+     */
+    public function getRoot() {
+        return $this->_root;
+    }
+
+
+    /**
+     * set the root path for the app
+     *
+     * @param string $root new root path
+     *
+     * @return self
+     */
+    public function setRoot($root){
+        $this->_root = b::path($root);
+        return $this;
+    }
+
+
+    /**
+     * get a path relative to the $root
+     *
+     * @params ... path parts
+     *
+     * @return string
+     */
     public function path() {
+        return b::path($this->_root, call_user_func_array([b::instance(), 'path'], func_get_args()));
+    }
+
+
+    /**
+     * add a ns to the class loader
+     *
+     * @param string $ns namespace of class
+     * @param string $path path of classes relative to $root
+     *
+     * @return self
+     */
+    public function load($ns, $path) {
+
+        b::requireFromPath( $this->path($path) );
+
 
     }
 
+
+    /**
+     * run the application
+     *
+     * @return void
+     */
     public function run() {
 
         // fire any run events

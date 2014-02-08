@@ -22,6 +22,24 @@ class router {
 
     }
 
+    public function __call($name, $args) {
+
+
+
+        // one of our methods
+        if (in_array(strtolower($name), ['get','post','put','delete','head'])) {
+            $r = new router\route($args[0]);
+            $r->setController($args[1]);
+            $this->add($r);
+            return $r;
+        }
+
+    }
+
+    public function add(\bolt\browser\router\route $route) {
+        $this->_collection->add($route->getName(), $route);
+    }
+
     public function match(\bolt\browser\request $req) {
 
         // matcher

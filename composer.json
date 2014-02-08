@@ -35,7 +35,8 @@
 
         "leafo/lessphp": "*",
         "leafo/scssphp": "*",
-        "natxet/cssmin": "*"
+        "natxet/cssmin": "*",
+        "mockery/mockery": "dev-master@dev"
     },
     "autoload": {
         "psr-0": {

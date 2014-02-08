@@ -5,5 +5,6 @@ use \b;
 
 interface factory {
 
+    public static function factory($config = []);
 
 }

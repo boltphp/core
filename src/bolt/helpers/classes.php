@@ -9,7 +9,7 @@ class classes {
     private $_classes = [];
 
     public function getReflectionClass($class) {
-        $name = $this->normalizeClassName($class);
+        $name = is_string($class) ? $this->normalizeClassName($class) : get_class($class);
 
         if (array_key_exists($name, $this->_ref)) {
             return $this->_ref[$name];

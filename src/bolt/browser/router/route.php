@@ -9,6 +9,8 @@ use Symfony\Component\Routing\Route as sRoute;
 
 class route extends sRoute implements face {
 
+    private $_name = null;
+
     public static function create($route) {
         $path = $route['path'];
         $r = new route($path);
@@ -20,8 +22,13 @@ class route extends sRoute implements face {
         return $r;
     }
 
+    public function setName($name) {
+        return $this->_name = $name;
+    }
+
     public function getName() {
-        return false;
+        if ($this->_name === null) { $this->setName(b::guid('route')); }
+        return $this->_name;
     }
 
     public function setController($controller) {

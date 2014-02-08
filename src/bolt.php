@@ -31,41 +31,48 @@ define('bStart', microtime(true));
 // default to utc
 date_default_timezone_set('UTC');
 
-//
+/**
+ * BOLT!
+ */
 class bolt {
     const VERSION = '0.4.0';
 
     /**
-     * global guid counter
+     * @var int
      */
-    private static $_guid = 9;
+    private $_guid = 9;
 
 
     /**
-     * name of environment
+     * @var string
      */
-    private static $_env = 'dev';
+    private $_env = 'dev';
 
     /**
-     * helpers holder
+     * @var array
      */
-    private static $_helpers = [];
+    private $_helpers = [];
 
+
+    /**
+     * Constructor
+     *
+     * @param array $helpers list of helper classes to register
+     *
+     * @return self
+     */
+    public function __construct($helpers=[]) {
+        if (count($helpers)) { $this->helpers($helpers); }
+    }
 
     /**
      * inialize a new application interface
      *
-     * @param $config array configuration array
+     * @param array $config configuration array
      *
-     * @return \bolt\application instance
+     * @return \bolt\application
      */
-    public static function init($config) {
-
-        // register some helpers
-        self::helpers([
-            '\bolt\helpers\classes',
-            '\bolt\helpers\fs'
-        ]);
+    public function init($config=[]) {
 
         // new application
         return new bolt\application($config);
@@ -76,80 +83,131 @@ class bolt {
     /**
      * set the env
      *
-     * @param $env string name of env
+     * @param string $env name of env
      *
      */
-    public static function env($env=null) {
-        return self::$_env = $env;
-    }
-
-
-    /**
-     * call a static function on a bolt class
-     *
-     * @param string $name name of submodule
-     * @param array $args list of args where args[0] is the function name
-     *
-     * @return mixed submodule::func return or false for no sub module
-     */
-    public static function __callStatic($name, $args=[]){
-
-        // loop through each helper and
-        // figure out who can handle this method
-        foreach (self::$_helpers as $key => $helper) {
-            if (in_array($name, $helper['methods'])) {
-                if (!$helper['instance']) {
-                    $helper['instance'] = self::$_helpers[$key]['instance'] = $helper['ref']->newInstance();
-                }
-
-                return call_user_func_array([$helper['instance'], $name], $args);
-            }
-        }
-
+    public function env($env=null) {
+        return ($env === null ? $this->_env : $this->_env = $env);
     }
 
 
     /**
      * return a globally unique string
      *
-     * @param $prefix string name of prefix
+     * @param string $prefix name of prefix
      *
      * @return string
      */
-    public static function guid($prefix='bolt') {
-        return implode('', [$prefix, (self::$_guid++)]);
+    public function guid($prefix='bolt') {
+        return implode('', [$prefix, ($this->_guid++)]);
+    }
+
+
+    /**
+     * call a helper method
+     *
+     * @param string $name name of helper class
+     * @param array $args arguments to pass to help func
+     *
+     * @return mixed
+     */
+    public function __call($name, $args) {
+
+        // loop through each helper and
+        // figure out who can handle this method
+        foreach ($this->_helpers as $key => $helper) {
+            if (in_array($name, $helper['methods'])) {
+                if (!$helper['instance']) {
+                    $helper['instance'] = $this->_helpers[$key]['instance'] = $helper['ref']->newInstance();
+                }
+                return call_user_func_array([$helper['instance'], $name], $args);
+            }
+        }
+
+        return false;
     }
 
 
     /**
      * attache helper classes to the global bolt instance
      *
-     * @param $class
+     * @param string $class
      *
      */
-    public static function helpers($class) {
+    public function helpers($class) {
         if (is_array($class)) {
             foreach ($class as $name) {
-                self::helpers($name);
+                $this->helpers($name);
             }
             return true;
         }
-
         $ref = new \ReflectionClass($class);
-        self::$_helpers[$ref->name] = [
+
+        // already there
+        if (array_key_exists($ref->name, $this->_helpers));
+
+        $this->_helpers[$ref->name] = [
             'ref' => $ref,
             'methods' => array_map(function($m){ return $m->name; }, $ref->getMethods()),
             'instance' => false
         ];
 
-        return true;
+        return $this;
+    }
+
+    public function getHelpers() {
+        return $this->_helpers;
     }
 
 }
 
-class b extends bolt {};
-function b() {
-    return b::instance();
-}
 
-define("bLoaded", true);
+/**
+ * define our static bolt oporator
+ *
+ */
+class b {
+
+    /**
+     * @var b
+     */
+    private static $_instance;
+
+    /**
+     * @var array
+     */
+    public static $helpers = [
+        '\bolt\helpers\classes',
+        '\bolt\helpers\fs'
+    ];
+
+    /**
+     * instance
+     *
+     * @return b
+     */
+    public static function instance() {
+        if (!self::$_instance) {
+            self::$_instance = new bolt(self::$helpers);
+        }
+        return self::$_instance;
+    }
+
+
+    /**
+     * forward call onto the bolt instance
+     *
+     * @param string $name name of submodule
+     * @param array $args list of args where args[0] is the function name
+     *
+     * @return mixed
+     */
+    public static function __callStatic($name, $args=[]){
+        return call_user_func_array([b::instance(), $name], $args);
+    }
+
+};
+
+
+
+
