@@ -53,7 +53,7 @@ class browser extends plugin {
         $this->_app = $app;
 
         // we need to
-        $app->on('run', [$this, 'run']);
+        $app->on('run', [$this, 'execute']);
 
         // new request and response
         $this->_request = $req ?: browser\request::createFromGlobals();
@@ -94,8 +94,8 @@ class browser extends plugin {
 
         // shortcut to router methods
         if (in_array($name, ['get','post','put','delete','head'])) {
-            if (!isset($this->_app['router'])) { throw new Exception("No router plugin defined"); return; }
-            return call_user_func_array([$this->_app['router'], $name], $args);
+            if (!isset($this['router'])) { throw new Exception("No router plugin defined"); return; }
+            return call_user_func_array([$this['router'], $name], $args);
         }
 
     }
@@ -156,6 +156,29 @@ class browser extends plugin {
 
 
     /**
+     * get a path relative to root
+     *
+     * @see bolt\application::path
+     *
+     * @return string
+     */
+    public function path() {
+        return call_user_func_array([$this->_app, 'path'], func_get_args());
+    }
+
+    /**
+     * load passthrough to app
+     *
+     * @see bolt\application::load
+     *
+     * @return self
+     */
+    public function load() {
+        call_user_func_array([$this->_app, 'load'], func_get_args());
+        return $this;
+    }
+
+    /**
      * bind middleware to this request and response
      *
      * @param string|callback $name name of middleware or callback function
@@ -189,6 +212,7 @@ class browser extends plugin {
         // get the reflection class
         $ref = b::getReflectionClass($class);
 
+
         $this->_middleware[$name] = [
             'name' => $name,
             'ref' => $ref,
@@ -198,16 +222,26 @@ class browser extends plugin {
             'methods' => array_map(function($m) {return $m->name;}, $ref->getMethods())
         ];
 
+
         return $this;
     }
 
+
+    /**
+     * pass off a run call to the app
+     *
+     * @return void
+     */
+    public function run() {
+        $this->_app->run();
+    }
 
     /**
      * run the browser request and send a response to the browser
      *
      * @return void
      */
-    public function run() {
+    public function execute() {
 
         // run before we have run any router
         $this->runMiddleware('before');
@@ -215,21 +249,38 @@ class browser extends plugin {
         // if we have a router
         // we need to match some routers
         if (isset($this['router'])) {
+            $controller = false;
 
             // run the request router againts this request
-            $params = $this['router']->match($this->_request);
+            try {
 
-            // bind our params to request::attributes
-            $this->_request->attributes->replace($params);
+                // find some route params
+                $params = $this['router']->match($this->_request);
 
-            // create our controller
-            $controller = new $params['_controller']($this);
+                // bind our params to request::attributes
+                $this->_request->attributes->replace($params);
 
-            // run before we have run any router
-            $this->runMiddleware('handle', ['controller' => $controller]);
+                // create our controller
+                $controller = new $params['_controller']($this);
 
-            // run the controller
-            $this->_response = $controller->run($params);
+            }
+            catch (\Exception $e) {
+                // load 404 response
+                $this->response->setStatusCode(404);
+            }
+
+            // controller
+            if ($controller) {
+
+                // run before we have run any router
+                $this->runMiddleware('handle', ['controller' => $controller]);
+
+                // run the controller
+                $this->_response = $controller->run($params);
+            }
+            else {
+                $this->runMiddleware('handle');
+            }
 
         }
         else {
@@ -282,7 +333,7 @@ class browser extends plugin {
         }
         $ware = $this->_middleware[$name];
         if (!$ware['instance']) {
-            $this->_middleware[$ware['name']] = $ware['instance'] = $ware['ref']->newInstance($this, $ware['config']);
+            $this->_middleware[$ware['name']]['instance'] = $ware['instance'] = $ware['ref']->newInstance($this, $ware['config']);
         }
         return $ware['instance']->execute($method, $params);
     }

@@ -4,7 +4,8 @@ class rotuerTest extends Test {
 
     public function setUp() {
         $this->a = new bolt\application();
-        $this->r = new bolt\browser\router($this->a);
+        $this->b = new bolt\browser($this->a);
+        $this->r = new bolt\browser\router($this->b);
     }
 
     public function test_add() {

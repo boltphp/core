@@ -43,6 +43,24 @@ abstract class middleware {
 
 
     /**
+     * magic get
+     *
+     * @param string $name
+     *
+     * @return mixed
+     */
+    public function __get($name) {
+        switch($name) {
+            case 'request':
+                return $this->browser->getRequest();
+            case 'response':
+                return $this->browser->getResponse();
+        };
+        return null;
+    }
+
+
+    /**
      * execute a middleware method
      *
      * @param string $method name of middleware method

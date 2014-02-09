@@ -55,6 +55,23 @@ class controller {
         return $this->_parameters;
     }
 
+
+    /**
+     * create a view
+     *
+     * @param string $file file name
+     * @param array $vars
+     *
+     * @return mixed (view object)
+     */
+    public function view($file, $vars=[]) {
+        if (!$this->browser['views']) {
+            throw new \Exception('No view manager');
+            return;
+        }
+        return $this->browser['views']->create($file, $vars, $this);
+    }
+
     /**
      * return a list of arguments matched
      * against a method refactor class

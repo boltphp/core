@@ -90,7 +90,8 @@ class router {
             $params = $matcher->matchRequest($req);
         }
         catch(ResourceNotFoundException $e) {
-            var_dump('bad'); die;
+            throw new \Exception("No route match found");
+            return false;
         }
 
         return $params;

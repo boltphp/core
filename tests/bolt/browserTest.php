@@ -102,7 +102,7 @@ class browserTest extends Test {
         $this->assertFalse($i->beforeRun);
         $this->assertFalse($i->handleRun);
         $this->assertFalse($i->afterRun);
-        $this->browser->run();
+        $this->browser->execute();
         $this->assertTrue($i->beforeRun);
         $this->assertTrue($i->handleRun);
         $this->assertTrue($i->afterRun);
@@ -111,9 +111,9 @@ class browserTest extends Test {
     }
 
     public function test_runWithRouter() {
-        $this->app['router'] = 'bolt\browser\router';
+        $this->browser['router'] = 'bolt\browser\router';
 
-        $this->app['router']->get('/', function(){
+        $this->browser['router']->get('/', function(){
 
         });
 
@@ -123,7 +123,7 @@ class browserTest extends Test {
         $this->assertFalse($i->beforeRun);
         $this->assertFalse($i->handleRun);
         $this->assertFalse($i->afterRun);
-        $this->browser->run();
+        $this->browser->execute();
         $this->assertTrue($i->beforeRun);
         $this->assertTrue($i->handleRun);
         $this->assertTrue($i->afterRun);
