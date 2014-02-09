@@ -8,7 +8,7 @@ use \Exception;
 /**
  * Base browser (http) handler
  */
-class browser {
+class browser extends plugin {
     use events;
 
     /**
@@ -31,6 +31,15 @@ class browser {
      */
     private $_app;
 
+
+    /**
+     * start a new browser instance
+     */
+    public static function start($config = []) {
+        $app = b::init($config);
+        $app->plug('browser', 'bolt\browser');
+        return $app['browser'];
+    }
 
     /**
      * Constructor.
@@ -205,10 +214,10 @@ class browser {
 
         // if we have a router
         // we need to match some routers
-        if (isset($this->_app['router'])) {
+        if (isset($this['router'])) {
 
             // run the request router againts this request
-            $params = $this->_app['router']->match($this->_request);
+            $params = $this['router']->match($this->_request);
 
             // bind our params to request::attributes
             $this->_request->attributes->replace($params);

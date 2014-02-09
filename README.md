@@ -1,5 +1,5 @@
 # Bolt Core
-a(nother) PHP Framework
+it's not a framework, it's just code.
 
 [![Latest Stable Version](https://poser.pugx.org/boltphp/core/version.png)](https://packagist.org/packages/boltphp/core)
 [![Build Status](https://travis-ci.org/boltphp/core.png)](https://travis-ci.org/boltphp/core)

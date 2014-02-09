@@ -212,16 +212,17 @@ class route extends browser\controller implements browser\router\face {
             return $resp;
         }
 
+
         // if the build function set content and
         // we don't have any formats set
         // assume they set the default format
-        if ($this->response->getContent() !== "" AND count($this->_formats) === 0) {
+        if ($this->response->getContent() !== "" AND count($this->_formats) !== 0 AND isset($params["_format"])) {
             $this->_formats[$params["_format"]] = $this->response->getContent();
         }
 
 
         // our default content
-        $content = "";
+        $content = $this->response->getContent();
 
         // if _format exists in response. no we return
         if (array_key_exists('_format', $params) AND array_key_exists($params['_format'], $this->_formats)) {

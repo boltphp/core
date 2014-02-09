@@ -19,9 +19,9 @@ class router {
     private $_collection;
 
     /**
-     * @var bolt\application
+     * @var bolt\browser
      */
-    private $_app;
+    private $_browser;
 
 
     /**
@@ -29,8 +29,8 @@ class router {
      *
      * @param bolt\application $app
      */
-    public function __construct(\bolt\application $app) {
-        $this->_app = $app;
+    public function __construct(\bolt\browser $browser) {
+        $this->_browser = $browser;
         $this->_collection = new router\collection();
     }
 
