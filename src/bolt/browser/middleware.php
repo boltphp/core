@@ -6,55 +6,78 @@ use \b;
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 
+/**
+ * Abstract middleware class
+ */
 abstract class middleware {
 
+    /**
+     * @var bolt\browser
+     */
     protected $browser = false;
 
+    /**
+     * @var array
+     */
     protected $config = false;
 
+
+    /**
+     * Constructor
+     *
+     * @param bolt\browser $browser
+     * @param array $config array of configs to pass to middleware constructor
+     */
     final public function __construct(\bolt\browser $browser, $config=[]) {
         $this->browser = $browser;
         $this->config = $config;
         $this->init();
     }
 
+    /**
+     * default init class
+     *
+     * @return void
+     */
+    public function init() {}
 
-    final public function setBrowser($browser){
-        $this->browser = $browser;
-    }
 
-    final public function matchRoute(\bolt\browser\route $route, \bolt\browser\request $req) {
-
-        $collection = b::browser('route\collection\create', [$route]);
-        $match = new UrlMatcher($collection, $req->getContext());
-
-        // we're going to try and match our request
-        // if not we fall back to error
-        try {
-            return $match->matchRequest($req);
-        }
-        catch(ResourceNotFoundException $e) {
-            return false;
-        }
-
-    }
-
-    public function init() {
-
-    }
-
-    final public function execute($method, $args) {
+    /**
+     * execute a middleware method
+     *
+     * @param string $method name of middleware method
+     * @param array $args list of arguments to pass to method
+     *
+     * @return mixed
+     */
+    final public function execute($method, $args = []) {
 
         // get the method ref
         $ref =  b::getReflectionClass($this)->getMethod($method);
 
         // call it
-        return call_user_func_array([$this, $method], $this->getArgsFromRef($ref, $args));
+        return call_user_func_array([$this, $method], $this->getArgsFromMethodRef($ref, $args));
 
     }
 
-    protected function getArgsFromRef($ref, $params) {
+
+    /**
+     * get a list arguments from a method ref
+     *
+     * @param object $ref
+     * @param array $params
+     *
+     * @return array
+     */
+    protected function getArgsFromMethodRef($ref, $params) {
         $args = [];
+
+
+        // must be a subclass of ReflectionFunctionAbstract
+        if (!is_subclass_of($ref, 'ReflectionFunctionAbstract')) {
+            throw new \Exception('Class must be an implementation of "ReflectionFunctionAbstract"');
+            return false;
+        }
 
         foreach ($ref->getParameters() as $param) {
             $name = $param->getName();
@@ -95,9 +118,6 @@ abstract class middleware {
             }
             else if ($param->isOptional()) {
                 $args[] = $param->getDefaultValue();
-            }
-            else if ($param->isOptional()) {
-                $args[] = null;
             }
 
         }

@@ -3,27 +3,47 @@
 namespace bolt\browser;
 use \b;
 
+/// depend
 use Symfony\Component\Routing\Matcher\UrlMatcher;
-
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
+/**
+ * router manager
+ */
 class router {
 
-
+    /**
+     * @var bolt\router\collection
+     */
     private $_collection;
 
+    /**
+     * @var bolt\application
+     */
     private $_app;
 
+
+    /**
+     * Constructor
+     *
+     * @param bolt\application $app
+     */
     public function __construct(\bolt\application $app) {
         $this->_app = $app;
-
         $this->_collection = new router\collection();
-
     }
 
-    public function __call($name, $args) {
 
+    /**
+     * magic call
+     *
+     * @param string $name
+     * @param array $args
+     *
+     * @return mix
+     */
+    public function __call($name, $args) {
 
 
         // one of our methods
@@ -36,10 +56,30 @@ class router {
 
     }
 
+
+    /**
+     * add a route to the toplevel collection
+     *
+     * @param bolt\browser\router\route $route
+     *
+     * @return self
+     */
     public function add(\bolt\browser\router\route $route) {
         $this->_collection->add($route->getName(), $route);
+        return $this;
     }
 
+    public function getByName($name) {
+        return $this->_collection->get($name);
+    }
+
+    /**
+     * match a request to defined routes
+     *
+     * @param bolt\browser\request $req
+     *
+     * @return array
+     */
     public function match(\bolt\browser\request $req) {
 
         // matcher
@@ -57,6 +97,13 @@ class router {
 
     }
 
+
+    /**
+     * load all routes that are defined in controllers
+     * that exend bolt\browser\router\face
+     *
+     * @return void
+     */
     public function loadFromControllers() {
         $routes = [];
 
@@ -129,7 +176,6 @@ class router {
 
         }
 
-        return null;
     }
 
 

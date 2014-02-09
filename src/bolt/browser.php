@@ -214,7 +214,7 @@ class browser {
             $this->_request->attributes->replace($params);
 
             // create our controller
-            $controller = new $params['_controller']($this->_app, $this);
+            $controller = new $params['_controller']($this);
 
             // run before we have run any router
             $this->runMiddleware('handle', ['controller' => $controller]);

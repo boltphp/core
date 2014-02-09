@@ -7,10 +7,23 @@ use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route as sRoute;
 
 
+/**
+ * base route class
+ */
 class route extends sRoute implements face {
 
+    /**
+     * @var string
+     */
     private $_name = null;
 
+    /**
+     * static create a route class
+     *
+     * @param array $route
+     *
+     * @return bolt\browser\router\route
+     */
     public static function create($route) {
         $path = $route['path'];
         $r = new route($path);
@@ -22,15 +35,38 @@ class route extends sRoute implements face {
         return $r;
     }
 
+
+    /**
+     * set the route name
+     *
+     * @param string $name
+     *
+     * @return self
+     */
     public function setName($name) {
-        return $this->_name = $name;
+        $this->_name = $name;
+        return $this;
     }
 
+
+    /**
+     * get the route name
+     *
+     * @return string
+     */
     public function getName() {
         if ($this->_name === null) { $this->setName(b::guid('route')); }
         return $this->_name;
     }
 
+
+    /**
+     * set the route controller
+     *
+     * @param mixed $controller
+     *
+     * @return self
+     */
     public function setController($controller) {
         if (is_a($controller, 'Closure')) {
             $this->addDefaults(['_closure' => $controller]);
@@ -40,16 +76,40 @@ class route extends sRoute implements face {
         return $this;
     }
 
+
+    /**
+     * set a required param
+     *
+     * @param string $require
+     *
+     * @return self
+     */
     public function setRequire($require) {
         $this->addRequirements($require);
         return $this;
     }
 
+
+    /**
+     * set the controller action
+     *
+     * @param string $action
+     *
+     * @return self
+     */
     public function setAction($action) {
         $this->addDefaults(['_action' => $action]);
         return $this;
     }
 
+
+    /**
+     * set response formats
+     *
+     * @param string $format
+     *
+     * @return self
+     */
     public function setFormats($format) {
         $default = $this->getDefaults();
         $formats = array_merge(
@@ -67,6 +127,12 @@ class route extends sRoute implements face {
         return $this;
     }
 
+
+    /**
+     * compile the route
+     *
+     * @return mixed
+     */
     public function compile() {
         $defaults = $this->getDefaults();
 

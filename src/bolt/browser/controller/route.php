@@ -4,29 +4,61 @@ namespace bolt\browser\controller;
 use \bolt\browser;
 use \b;
 
-
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
+/**
+ * route controller
+ */
 class route extends browser\controller implements browser\router\face {
 
+    /**
+     * @var bolt\application
+     */
     private $_app;
+
+    /**
+     * @var bolt\browser
+     */
     private $_browser;
 
+    /**
+     * @var bolt\browser\response\format[]
+     */
     private $_formats = [];
 
+    /**
+     * @var bolt\browser\response
+     */
     protected $_response = false;
+
+    /**
+     * @var bolt\browser\request
+     */
     protected $_request = false;
 
-    final public function __construct(\bolt\application $app, \bolt\browser $browser) {
+    /**
+     * Construct
+     *
+     * @param bolt\browser
+     *
+     */
+    final public function __construct(\bolt\browser $browser) {
 
-        $this->_app = $app;
         $this->_browser = $browser;
+        $this->_app = $browser->app;
 
         $this->init();
 
     }
 
+    /**
+     * magic get method
+     *
+     * @param string $name
+     *
+     * @return mixed
+     */
     public function __get($name) {
         switch($name) {
             case 'app':
@@ -40,9 +72,19 @@ class route extends browser\controller implements browser\router\face {
 
         };
 
-        return false;
+        return null;
     }
 
+
+    /**
+     * throw an exception
+     *
+     * @param string $class
+     * @param string $message
+     * @param int $code
+     *
+     * @return self
+     */
     public function exception($class, $message=null, $code=null) {
         switch($class) {
             case 'MethodNotAllowedException':
@@ -55,6 +97,15 @@ class route extends browser\controller implements browser\router\face {
         return $this;
     }
 
+
+    /**
+     * add a response format
+     *
+     * @param string|array $format format name or array of formats
+     * @param mixed $content
+     *
+     * @return bolt\browser\response\format
+     */
     public function format($format, $content=false) {
         if (is_array($format)) {
             array_walk($format, function($content, $format){
@@ -62,12 +113,39 @@ class route extends browser\controller implements browser\router\face {
             });
             return $this;
         }
-        $class = 'bolt\browser\response\format\\'.$format;
-        $this->_formats[$format] = new $class($this->response);
+
+        $class = $format;
+
+        if (!class_exists($class, true)) {
+            $class = 'bolt\browser\response\format\\'.$format;
+        }
+
+        if (!class_exists($class, true)) {
+            throw new \Exception("Unknown format class $class");
+            return;
+        }
+
+        $o = new $class($this->response);
+
+
+        if (!is_subclass_of($o, 'bolt\browser\response\format\face')) {
+            throw new \Exception('Format class does not implement bolt\browser\response\format\face');
+            return;
+        }
+
+        $this->_formats[$format] = $o;
         $this->_formats[$format]->setContent($content);
         return $this->_formats[$format];
     }
 
+
+    /**
+     * build the controller
+     *
+     * @param array $params
+     *
+     * @return mixed
+     */
     public function build($params=[]) {
 
         // what method
@@ -103,6 +181,14 @@ class route extends browser\controller implements browser\router\face {
 
     }
 
+
+    /**
+     * run the controller
+     *
+     * @param array $params
+     *
+     * @return bolt\browser\response
+     */
     public function run($params) {
 
         // resp

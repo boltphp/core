@@ -7,7 +7,9 @@ use \b;
 use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 use Symfony\Component\Routing\RequestContext as SymfonyRequestContext;
 
-
+/**
+ * request class
+ */
 class request extends SymfonyRequest {
 
     /**
