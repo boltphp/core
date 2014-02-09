@@ -11,11 +11,11 @@ $iterator = Finder::create()
     ->in(__DIR__.'/../src')
 ;
 
-
 return new Sami($iterator, array(
     'title'               => 'Bolt Dir',
     'theme'               => 'enhanced',
-    'build_dir'           => __DIR__.'/../build/zf2',
-    'cache_dir'           => __DIR__.'/../cache/zf2',
+    'build_dir'           => __DIR__.'/api/',
+    'cache_dir'           => __DIR__.'/api/cache',
     'include_parent_data' => false,
+    'default_opened_level' => 2
 ));

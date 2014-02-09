@@ -33,6 +33,7 @@
         "aws/aws-sdk-php": "2.4.*",
         "phpunit/phpunit": "3.7.*",
 
+        "sami/sami": "*",
         "leafo/lessphp": "*",
         "leafo/scssphp": "*",
         "natxet/cssmin": "*",
