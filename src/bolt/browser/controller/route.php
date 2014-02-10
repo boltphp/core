@@ -221,7 +221,6 @@ class route extends browser\controller implements browser\router\face {
             $this->_formats[$params["_format"]] = $this->response->getContent();
         }
 
-
         // if _format exists in response. no we return
         if (array_key_exists('_format', $params) AND array_key_exists($params['_format'], $this->_formats)) {
             $content = $this->_formats[$params['_format']];
@@ -235,6 +234,11 @@ class route extends browser\controller implements browser\router\face {
         // we want to do that now
         while(is_callable($content)) {
             $content = call_user_func($content);
+        }
+
+        // use the layout
+        if ($this->_useLayout AND $this->layout) {
+            $content = $this->browser['views']->layout($this->layout, ['yield' => $content], $this)->render();
         }
 
         // set our content in the response

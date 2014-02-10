@@ -32,7 +32,7 @@ class view implements face {
 
     public function render() {
         $str = file_get_contents($this->_file);
-
+        $this->_vars['context'] = $this->_context;
         return $this->_engine->render($str, $this->_vars);
     }
 

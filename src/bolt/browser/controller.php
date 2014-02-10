@@ -14,6 +14,11 @@ class controller {
     protected $layout = null;
 
     /**
+     * @var bool
+     */
+    protected $_useLayout = true;
+
+    /**
      * @var array
      */
     private $_parameters = [];
@@ -31,6 +36,18 @@ class controller {
 
     }
 
+
+    /**
+     * toggle use the layout
+     *
+     * @param bool $layout
+     *
+     * @return self
+     */
+    public function useLayout($layout) {
+        $this->_useLayout = $layout;
+        return $this;
+    }
 
     /**
      * set a paramater
@@ -69,7 +86,7 @@ class controller {
             throw new \Exception('No view manager');
             return;
         }
-        return $this->browser['views']->create($file, $vars, $this);
+        return $this->browser['views']->view($file, $vars, $this);
     }
 
     /**

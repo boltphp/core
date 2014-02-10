@@ -32,7 +32,7 @@ class assets extends \bolt\browser\middleware {
         $this->_assets = $this->browser['assets'];
     }
 
-    public function before() {
+    public function handle() {
 
         // don't handle this
         if (!isset($this->config['path'])) {

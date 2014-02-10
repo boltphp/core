@@ -251,6 +251,7 @@ class browser extends plugin {
         if (isset($this['router'])) {
             $controller = false;
 
+
             // run the request router againts this request
             try {
 
@@ -266,8 +267,10 @@ class browser extends plugin {
             }
             catch (\Exception $e) {
                 // load 404 response
-                $this->response->setStatusCode(404);
+                // $this->response->setStatusCode(404);
+                // $this->response->setContent("404 - Not Found");
             }
+
 
             // controller
             if ($controller) {
@@ -277,9 +280,10 @@ class browser extends plugin {
 
                 // run the controller
                 $this->_response = $controller->run($params);
+
             }
             else {
-                $this->runMiddleware('handle');
+//                $this->runMiddleware('handle');
             }
 
         }

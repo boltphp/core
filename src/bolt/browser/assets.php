@@ -37,6 +37,10 @@ class assets implements \bolt\plugin\singleton {
         $this->_browser = $browser;
         $this->_config = $config;
         $this->_dirs = isset($config['dirs']) ? $config['dirs'] : [];
+
+        if (isset($config['path'])) {
+            $browser->bind('assets', 'bolt\browser\middleware\assets', $config);
+        }
     }
 
 
@@ -76,6 +80,45 @@ class assets implements \bolt\plugin\singleton {
         }
 
         return false;
+    }
+
+    public function out($group, $type=false) {
+        $tag = [];
+
+        if (!$type OR $type == 'script') {
+            foreach ($this->_output['script'] as $script) {
+                if ($script->inGroup($group)) {
+                    $tag[] = $script->out();
+                }
+            }
+        }
+
+        if (!$type OR $type == 'style') {
+            foreach ($this->_output['style'] as $leaf) {
+                if ($leaf->inGroup($group)) {
+                    $tag[] = $leaf->out();
+                }
+            }
+        }
+
+        return implode("\n", $tag);
+
+    }
+
+
+    public function stylesheet($leafs) {
+        if (is_string($leafs)) { $leafs = [$leafs]; }
+
+        $output = [];
+
+        foreach ($leafs as $leaf) {
+            $output[] = str_replace('{path}', "{$leaf}", rtrim($this->_config['path'],'/'));
+        }
+
+        return implode("\n", array_map(function($href) {
+            return '<link rel="stylesheet" href="'.$href.'" type="text/css">';
+        }, $output));
+
     }
 
 

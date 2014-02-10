@@ -37,8 +37,8 @@ class views {
         return $this;
     }
 
-    public function find($file) {
-        foreach ($this->_dirs as $dir) {
+    public function find($file, $dirs) {
+        foreach ($dirs as $dir) {
             $_ = $this->_browser->path($dir, $file);
             if (file_exists($_)){
                 return $_;
@@ -47,8 +47,23 @@ class views {
         return false;
     }
 
+    public function view($file, $vars = [], $context = false) {
+        return $this->create(
+                        $this->find($file, $this->_dirs),
+                        $vars,
+                        $context
+                    );
+    }
+
+    public function layout($file, $vars = [], $context = false) {
+        return $this->create(
+                $this->find($file, $this->_layouts),
+                $vars,
+                $context
+            );
+    }
+
     public function create($file, $vars = [], $context = false) {
-        $file = $this->find($file);
 
         if (!$file) {
             throw new Exception("Unable to find view '$file'.");

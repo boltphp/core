@@ -14,6 +14,13 @@ class handlebars extends base {
             self::$_instance = new HBR([
                     'delimiters' => "<% %>",
                 ]);
+            self::$_instance->addHelper('=', function($template, $context, $args, $source) {
+                $ctx = $context->get('context');
+                $func = function($args) {
+                    return eval('return '.trim($args, '; ').';');
+                };
+                return call_user_func($func->bindto($ctx, $ctx), $args);
+            });
         }
     }
 
