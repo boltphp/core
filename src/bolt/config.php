@@ -1,6 +1,7 @@
 <?php
 
 namespace bolt;
+use \b;
 
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
@@ -13,11 +14,14 @@ class config implements \IteratorAggregate, \ArrayAccess {
 
     private $_access = [];
 
-    public function __construct(\bolt\application $app) {
+    public function __construct(\bolt\application $app, $config = []) {
         $this->_app = $app;
         $this->_access = PropertyAccess::createPropertyAccessorBuilder()
                 ->disableExceptionOnInvalidIndex()
-                ->getPropertyAccessor();;
+                ->getPropertyAccessor();
+        if (isset($config['register'])) {
+            $this->register($config['register']);
+        }
     }
 
     public function register($name, $file = []) {
@@ -27,7 +31,17 @@ class config implements \IteratorAggregate, \ArrayAccess {
             }
             return $this;
         }
-        $this->_storage[$name] = $this->_readFile($file);
+
+        $data = $this->_readFile($file);
+
+        // if there's an _$env we need to merge it
+        // into the base
+        $env = b::env();
+        if (isset($data["_{$env}"])) {
+            $data = b::mergeArray($data, $data["_{$env}"]);
+        }
+
+        $this->_storage[$name] = $data;
         return $this;
     }
 

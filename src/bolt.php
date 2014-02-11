@@ -177,6 +177,7 @@ class b {
      * @var array
      */
     public static $helpers = [
+        '\bolt\helpers\base',
         '\bolt\helpers\classes',
         '\bolt\helpers\fs'
     ];
