@@ -8,4 +8,13 @@ class render {
         $this->_app = $app;
     }
 
+    public function engine() {
+
+    }
+
+    public function render($engine, $str, $vars = []) {
+
+
+    }
+
 }
