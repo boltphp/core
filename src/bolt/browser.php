@@ -199,10 +199,17 @@ class browser extends plugin {
         $inst = false;
 
         // annon function
-        if (is_object($class)) {
+        if (is_callable($class)) {
+            $inst = new browser\middleware\closure($this, $config);
+            $inst->setEvent($name);
+            $inst->setClosure($class);
+            $name = 'closure'.microtime();
+            $class = 'bolt\browser\middleware\closure';
+        }
+        else if (is_object($class)) {
             $inst = $class;
         }
-        if (is_callable($name)) {
+        else if (is_callable($name)) {
             $class = 'bolt\browser\middleware\closure';
             $inst = new $class($this, $config);
             $inst->setClosure($name);
@@ -219,7 +226,7 @@ class browser extends plugin {
             'instance' => $inst,
             'class' => $ref->name,
             'config' => $config,
-            'methods' => array_map(function($m) {return $m->name;}, $ref->getMethods())
+            'methods' => array_map(function($m) {return $m->name;}, $ref->getMethods()),
         ];
 
 
@@ -242,9 +249,15 @@ class browser extends plugin {
      * @return void
      */
     public function execute() {
+        $is404 = false;
 
         // run before we have run any router
         $this->runMiddleware('before');
+
+        // redirect now
+        if ($this->response->isRedirection()) {
+            return $this->send();
+        }
 
         // if we have a router
         // we need to match some routers
@@ -266,11 +279,8 @@ class browser extends plugin {
 
             }
             catch (\Exception $e) {
-                // load 404 response
-                // $this->response->setStatusCode(404);
-                // $this->response->setContent("404 - Not Found");
+                $is404 = true;
             }
-
 
             // controller
             if ($controller) {
@@ -283,7 +293,7 @@ class browser extends plugin {
 
             }
             else {
-//                $this->runMiddleware('handle');
+                $this->runMiddleware('handle');
             }
 
         }
@@ -291,16 +301,34 @@ class browser extends plugin {
             $this->runMiddleware('handle');
         }
 
+        // if response is now a
+        if ($this->response->isRedirection()) {
+            return $this->send();
+        }
+
 
         // run before we have run any router
         $this->runMiddleware('after');
 
-        // prepare our response
+        if ($is404 AND $this->response->getContent() === "") {
+            $this->response->setStatusCode(404);
+            $this->response->setContent("404 - Not Found");
+        }
+
+        // send
+        $this->send();
+
+    }
+
+
+    /**
+     * send the response
+     *
+     * @return void
+     */
+    private function send() {
         $this->_response->prepare($this->_request);
-
-        // send a response
         $this->_response->send();
-
     }
 
 

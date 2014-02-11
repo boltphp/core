@@ -35,4 +35,8 @@ class base {
         return in_array($group, $this->groups);
     }
 
+    public function url() {
+        return $this->parent->url($this->path);
+    }
+
 }

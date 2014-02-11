@@ -3,8 +3,10 @@
 namespace bolt\browser\middleware;
 use \b;
 
-use Symfony\Component\Finder\Finder;
-
+use Assetic\Asset\AssetCollection;
+use Assetic\Asset\FileAsset;
+use Assetic\Asset\GlobAsset;
+use Assetic\Asset\StringAsset;
 
 class assets extends \bolt\browser\middleware {
 
@@ -54,6 +56,7 @@ class assets extends \bolt\browser\middleware {
         // content
         $content = [];
 
+
         // explode out the path
         foreach (explode('&', $matches[1]) as $path) {
             $info = pathinfo($path);
@@ -63,9 +66,28 @@ class assets extends \bolt\browser\middleware {
             $file = $info['basename'];
             $ext = $info['extension'];
 
+
             // loop through each path
             if (($file = $this->_assets->find($path)) !== false) {
-                $content[] = file_get_contents($file['path']);
+
+                if ($this->_assets->getGlobals($ext)) {
+
+                    // fm
+                    $fm = new AssetCollection([]);
+
+                    foreach ($this->_assets->getGlobals($ext) as $path) {
+                        if (is_string($path)) {
+                            $fm->add( stripos($path, '*') !== false ? new GlobAsset($path) : new FileAsset($path) );
+                        }
+                    }
+
+                    $fm->add(new FileAsset($file['path']));
+                    $last = new StringAsset($fm->dump(), $this->_assets->getFilters($ext));
+                }
+                else {
+                    $last = new FileAsset($file['path'], $this->_assets->getFilters($ext));
+                }
+                $content[] = $last->dump();
             }
 
         }

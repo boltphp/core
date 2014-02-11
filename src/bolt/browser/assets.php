@@ -25,7 +25,9 @@ class assets implements \bolt\plugin\singleton {
 
     private $_manager;
 
-    private $_filters = ['*' => []];
+    private $_filters = [];
+
+    private $_globals = [];
 
 
     private $_output = [
@@ -41,8 +43,43 @@ class assets implements \bolt\plugin\singleton {
         if (isset($config['path'])) {
             $browser->bind('assets', 'bolt\browser\middleware\assets', $config);
         }
+        if (isset($config['filters'])) {
+            $this->filter($config['filters']);
+        }
+        if (isset($config['globals'])) {
+            $this->globals($config['globals']);
+        }
     }
 
+    public function globals($ext, $path = false) {
+        if (is_array($ext)) {
+            foreach ($ext as $item) {
+                call_user_func_array([$this, 'globals'], $item);
+            }
+            return $this;
+        }
+        if (!array_key_exists($ext, $this->_globals)) { $this->_globals[$ext] = []; }
+        $this->_globals[$ext][] = $this->_browser->path($path);
+        return $this;
+    }
+
+    public function filter($ext, $class=false, $args = []) {
+        if (is_array($ext)) {
+            foreach ($ext as $item) {
+                call_user_func_array([$this, 'filter'], $item);
+            }
+            return $this;
+        }
+
+        if (!array_key_exists($ext, $this->_filters)) { $this->_filters[$ext] = []; }
+        $this->_filters[$ext][] = [
+            'class' => $class,
+            'instance' => false,
+            'args' => $args,
+            'ref' => b::getReflectionClass($class)
+        ];
+        return $this;
+    }
 
     public function add($type, $config=false) {
         if (is_array($type) AND !$config) {
@@ -105,6 +142,19 @@ class assets implements \bolt\plugin\singleton {
 
     }
 
+    public function url($path) {
+        return str_replace('{path}', "{$path}", rtrim($this->_config['path'],'/'));
+    }
+
+    public function getByGroup($type, $group) {
+        $items = [];
+        foreach ($this->_output[$type] as $item) {
+            if ($item->inGroup($group)) {
+                $items[] = $item;
+            }
+        }
+        return $items;
+    }
 
     public function stylesheet($leafs) {
         if (is_string($leafs)) { $leafs = [$leafs]; }
@@ -121,5 +171,21 @@ class assets implements \bolt\plugin\singleton {
 
     }
 
+    public function getGlobals($ext) {
+        return array_key_exists($ext, $this->_globals) ? $this->_globals[$ext] : [];
+    }
+
+    public function getFilters($ext) {
+        $items = [];
+        if (array_key_exists($ext, $this->_filters)) {
+            foreach ($this->_filters[$ext] as $i => $filter) {
+                if (!$filter['instance']) {
+                    $this->_filters[$ext][$i]['instance'] = $filter['instance'] = $filter['ref']->newInstanceArgs($filter['args']);
+                }
+                $items[] = $filter['instance'];
+            }
+        }
+        return $items;
+    }
 
 }

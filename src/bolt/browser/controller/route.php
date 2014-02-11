@@ -191,8 +191,12 @@ class route extends browser\controller implements browser\router\face {
      */
     public function run($params) {
 
+        $this->before();
+
         // resp
         $resp = $this->build($params);
+
+        $this->after();
 
         // if resp is a request
         // we can reset our request and be done

@@ -17,6 +17,25 @@ class closure extends \bolt\browser\middleware {
     private $_closure = false;
 
     /**
+     * @var string
+     */
+    private $_event = 'handle';
+
+
+    /**
+     * set the event to fire middleware
+     *
+     * @param string $event
+     *
+     * @return self
+     */
+    public function setEvent($event) {
+        $this->_event = $event;
+        return $this;
+    }
+
+
+    /**
      * set the middleware closure
      *
      * @param Closure $closure
@@ -30,15 +49,52 @@ class closure extends \bolt\browser\middleware {
 
 
     /**
+     * execute the callback
+     *
+     * @param string $event event that was fired
+     * @param array $args
+     *
+     * @return mixed
+     */
+    private function _execute($event, $args) {
+        if ($event !== $this->_event) {return;}
+        $ref = new \ReflectionFunction($this->_closure);
+        return call_user_func_array(cc::bind($this->_closure, $this->browser), $this->getArgsFromMethodRef($ref, $args));
+    }
+
+
+    /**
+     * before middleware event
+     *
+     * @param array $args
+     *
+     * @return mixed
+     */
+    public function before($args = []) {
+        return $this->_execute('before', $args);
+    }
+
+
+    /**
      * handle the middleware request
      *
      * @param array $args
      *
      * @return mixed
      */
-    public function handle($args) {
-        $ref = new \ReflectionFunction($this->_closure);
-        return call_user_func_array(cc::bind($this->_closure, $this->browser), $this->getArgsFromMethodRef($ref, $args));
+    public function handle($args = []) {
+        return $this->_execute('handle', $args);
+    }
+
+    /**
+     * after middleware event
+     *
+     * @param array $args
+     *
+     * @return mixed
+     */
+    public function after($args = []) {
+        return $this->_execute('after', $args);
     }
 
 }

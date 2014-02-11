@@ -32,9 +32,11 @@ class controller {
     /**
      * initalize class holder class
      */
-    public function init() {
+    public function init() {}
 
-    }
+    public function before() {}
+
+    public function after() {}
 
 
     /**
