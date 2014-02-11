@@ -5,10 +5,20 @@ use \b;
 
 use Handlebars\Handlebars as HBR;
 
+/**
+ * handlare renderer
+ */
 class handlebars extends base {
 
+    /**
+     * @var Handlebars\Handlebars
+     */
     private static $_instance;
 
+
+    /**
+     * Constructor
+     */
     public function __construct() {
         if (!self::$_instance) {
             self::$_instance = new HBR([
@@ -24,12 +34,22 @@ class handlebars extends base {
         }
     }
 
-    public function compile() {
+
+    /**
+     * compile to freezable class
+     */
+    public function compile() {}
 
 
-    }
-
-    public function render($str, $vars) {
+    /**
+     * render a handlebar template
+     *
+     * @param string $str handlebar template
+     * @param array $vars
+     *
+     * @return string
+     */
+    public function render($str, $vars = []) {
         return self::$_instance->render($str, $vars);
     }
 
