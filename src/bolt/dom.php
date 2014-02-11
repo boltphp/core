@@ -3,20 +3,39 @@
 namespace bolt;
 use \b;
 
-
 use Symfony\Component\CssSelector\CssSelector;
 
 use \DOMDocument;
 use \DOMXPath;
 
 
+/**
+ * DOM HTML parser
+ */
 class dom implements \ArrayAccess {
 
+    /**
+     * @var DOMDocument
+     */
     protected $_doc;
 
+    /**
+     * @var array
+     */
     private $_ref = [];
+
+    /**
+     * @var string
+     */
     private $_guid;
 
+
+    /**
+     * Constructor
+     *
+     * @param string $html starting HTML
+     * @param string $charset
+     */
     public function __construct($html=false, $charset='UTF-8') {
 
         $this->_doc = new DOMDocument('1.0', $charset);
@@ -33,23 +52,61 @@ class dom implements \ArrayAccess {
 
     }
 
+
+    /**
+     * return the global unique id of this dom object
+     *
+     * @return string
+     */
     public function guid() {
         return $this->_guid;
     }
 
+
+    /**
+     * return the root document
+     *
+     * @return DOMDocument
+     */
     public function doc() {
         return $this->_doc;
     }
 
-    public function addRef($el) {
+
+    /**
+     * add an element refrance to this DOM
+     *
+     * @param bolt\dom\element $el
+     *
+     * @return self
+     */
+    public function addRef(dom\element $el) {
         $this->_ref[$el->guid()] = $el;
+        return $this;
     }
 
 
+    /**
+     * import a node into this document
+     *
+     * @param mixed $node
+     * @param bool $deep
+     *
+     * @return
+     */
     public function importNode($node, $deep=false) {
         return $this->_doc->importNode($node, $deep);
     }
 
+
+    /**
+     * query the DOM (using CSS selector) to find a node
+     *
+     * @param string $query CSS selector
+     * @param bool $returnRef return a refrance to the elemet
+     *
+     * @return bolt\dom\nodeList
+     */
     public function find($query, $returnRef=true) {
         $xpath = CssSelector::toXPath($query);
         $prefixes = $this->findNamespacePrefixes($xpath);
@@ -72,6 +129,14 @@ class dom implements \ArrayAccess {
         return $nl;
     }
 
+
+    /**
+     * find any namespaces in an xpath
+     *
+     * @param string $xpath
+     *
+     * @return array
+     */
     private function findNamespacePrefixes($xpath) {
         if (preg_match_all('/(?P<prefix>[a-z_][a-z_0-9\-\.]*):[^"\/]/i', $xpath, $matches)) {
             return array_unique($matches['prefix']);
@@ -79,6 +144,12 @@ class dom implements \ArrayAccess {
         return array();
     }
 
+
+    /**
+     * return the HTML of this document
+     *
+     * @return string
+     */
     public function html() {
         $ref = clone $this->_doc;
 
@@ -92,14 +163,39 @@ class dom implements \ArrayAccess {
         return $ref->saveHTML();
     }
 
+
+    /**
+     * check if a node exists using a CSS selector
+     *
+     * @param string $name CSS selector
+     *
+     * @return bool
+     */
     public function offsetExists($name) {
         return count($this->find($name)) > 0;
     }
 
+
+    /**
+     * get a node using a CSS selector
+     *
+     * @param string $name css selector
+     *
+     * @return mixed
+     */
     public function offsetGet($name) {
         return $this->find($name);
     }
 
+
+    /**
+     * create a node or replace an exists node
+     *
+     * @param string $name CSS selector
+     * @param mixed $value
+     *
+     * @return self
+     */
     public function offsetSet($name, $value) {
         $el = $this->find($name)->first();
 
@@ -129,15 +225,39 @@ class dom implements \ArrayAccess {
         return $this;
     }
 
+
+    /**
+     * remove a node using a CSS selector
+     *
+     * @param string $name CSS selector
+     *
+     * @return void
+     */
     public function offsetUnset($name) {
         $el = $this->find($name);
         $el->parentNode->removeChild($el);
     }
 
+
+    /**
+     * return a string rep of DOM
+     *
+     * @return string
+     */
     public function __toString() {
         return $this->html();
     }
 
+
+    /**
+     * create a new element
+     *
+     * @param string $name name of tag
+     * @param mixed $value
+     * @param array $attr attributes
+     *
+     * @return bolt\dom\element
+     */
     public function create($tag, $value="", $attr=[]) {
         $el = $this->_doc->createElement($tag, $value);
         $_ = new dom\element($this, $el);

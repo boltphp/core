@@ -9,6 +9,11 @@ use \b;
  */
 interface factory {
 
+    /**
+     * factory function interface
+     *
+     * @param array $config
+     */
     public static function factory($config = []);
 
 }

@@ -4,16 +4,41 @@ namespace bolt\browser;
 
 use \Exception;
 
+
+/**
+ * views manager
+ */
 class views {
 
+    /**
+     * @var array
+     */
     private $_dirs = [];
+
+    /**
+     * @var array
+     */
     private $_layouts = [];
 
+
+    /**
+     * @var array
+     */
     private $_engines = [];
 
+    /**
+     * @var string
+     */
     private $_class = 'bolt\browser\views\view';
 
-    public function __construct(\bolt\browser $browser, $config) {
+
+    /**
+     * Constructor
+     *
+     * @param bolt\browser $browser
+     * @param array $config
+     */
+    public function __construct(\bolt\browser $browser, $config = []) {
 
         $this->_browser = $browser;
 
@@ -29,6 +54,14 @@ class views {
     }
 
 
+    /**
+     * register a new engine
+     *
+     * @param string $ext
+     * @param string $class
+     *
+     * @return self
+     */
     public function engine($ext, $class) {
         $this->_engines[$ext] = [
             'class' => $class,
@@ -37,6 +70,15 @@ class views {
         return $this;
     }
 
+
+    /**
+     * find a view file in given dirs
+     *
+     * @param string $file
+     * @param array $dirs
+     *
+     * @return string
+     */
     public function find($file, $dirs) {
         foreach ($dirs as $dir) {
             $_ = $this->_browser->path($dir, $file);
@@ -47,6 +89,16 @@ class views {
         return false;
     }
 
+
+    /**
+     * return a view of self::$class for given file
+     *
+     * @param string $file relative file path to $_dirs
+     * @param array $var
+     * @param mixed $context
+     *
+     * @return self::$_class
+     */
     public function view($file, $vars = [], $context = false) {
         return $this->create(
                         $this->find($file, $this->_dirs),
@@ -55,6 +107,16 @@ class views {
                     );
     }
 
+
+    /**
+     * return a view of self::$class for layout file given
+     *
+     * @param string $file relative file path to $_layouts
+     * @param array $vars
+     * @param mixed $context
+     *
+     * @return self::$_class
+     */
     public function layout($file, $vars = [], $context = false) {
         return $this->create(
                 $this->find($file, $this->_layouts),
@@ -63,6 +125,16 @@ class views {
             );
     }
 
+
+    /**
+     * create a view of self::$_class
+     *
+     * @param string $file absolute file path
+     * @param array $vars
+     * @param object $context
+     *
+     * @return self::$_class
+     */
     public function create($file, $vars = [], $context = false) {
 
         if (!$file) {

@@ -1,5 +1,16 @@
 <?php
 
+$opt = getopt("c::r");
+
+// if this request isn't from the internal
+// server assume they want to run the server
+if (php_sapi_name() === 'cli' AND isset($opt['r'])) {
+    $dir = realpath(__DIR__."/../vendor/sami/sami/sami.php");
+    $cmd = "$dir {$opt['c']} api.php";
+    echo `$cmd`;
+    exit;
+}
+
 require "../vendor/autoload.php";
 
 use Sami\Sami;
