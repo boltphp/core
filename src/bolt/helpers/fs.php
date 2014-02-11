@@ -51,4 +51,18 @@ class fs {
         return $this;
     }
 
+    public function fs() {
+        $args = func_get_args();
+        $type = array_shift($args);
+
+        switch($type) {
+            case 'file':
+                return new fs\file($args[0]);
+            case 'glob':
+                return new fs\glob($args[0]);
+        };
+
+        return false;
+    }
+
 }

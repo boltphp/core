@@ -62,8 +62,7 @@ class config implements \IteratorAggregate, \ArrayAccess {
         }
 
         if (is_string($data)) {
-            $path = $this->_app->path($file);
-            $data = $this->_readFile($file);
+            $data = $this->_readFile($this->_app->path($data));
         }
 
         // if there's an _$env we need to merge it
