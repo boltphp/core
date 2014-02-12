@@ -11,6 +11,9 @@ before_script:
 
 script: phpunit -c ./tests/phpunit.xml -d memory_limit=1024M ./tests
 
+after_script:
+  - php vendor/bin/coveralls -v
+
 matrix:
   allow_failures:
     - php: hhvm

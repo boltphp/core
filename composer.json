@@ -35,7 +35,7 @@
     "require-dev": {
         "aws/aws-sdk-php": "2.4.*",
         "phpunit/phpunit": "3.7.*",
-
+        "satooshi/php-coveralls": "dev-master"
         "sami/sami": "*",
         "leafo/lessphp": "*",
         "leafo/scssphp": "*",
