@@ -14,6 +14,7 @@ class repository {
     private $_curl;
     private $_entity;
     private $_driver;
+    private $_manager;
     private $_map = false;
 
     /**
@@ -23,9 +24,10 @@ class repository {
      * @param string $entity entity class
      * @param bolt\models\driver $driver
      */
-    public function __construct(\bolt\source\curl $curl, $entity, \bolt\models\driver $driver) {
+    public function __construct(\bolt\source\curl $curl, $entity, \bolt\models $manager, \bolt\models\driver $driver) {
         $this->_curl = $curl;
         $this->_entity = $entity;
+        $this->_manager = $manager;
         $this->_driver = $driver;
     }
 
@@ -55,15 +57,13 @@ class repository {
      * @return array[string $url, array $query, array $headers]
      */
     private function _getRequestUri($type, $args) {
-        if (method_exists($this->_entity, 'curl')) {
-            var_dump('x'); die;
-        }
+
 
         $map = $this->_map();
 
         switch($type) {
             case 'find':
-                return [$map->getTableName()."/{$args[0]}", []];
+                return [$map->getTableName()."/{$args[0]}", [], []];
 
             case 'findBy':
                 return [$map->getTableName(), [
@@ -113,9 +113,20 @@ class repository {
             $_ = $map->getFieldMapping($name);
             $value = null;
 
-            if (Type::hasType($_['type'])) {
-                $value = Type::getType($_['type'])->convertToPHPValueSQL($item[$name]);
+            // target entity
+            if (isset($_['targetEntity'])) {
+                // reach back to curl to get a repo for this entity
+                $repo = $this->_curl->getRepository($_['targetEntity']);
+                $value = $repo->generateEntity($item[$name]);
+                $value->setLoaded(true);
+                $value->setManager($this->_manager);
             }
+
+            else if (Type::hasType($_['type'])) {
+                $value = Type::getType($_['type'])->convertToPHPValueSQL($item[$name], null);
+            }
+
+
 
             $prop = $ref->getProperty($name);
 

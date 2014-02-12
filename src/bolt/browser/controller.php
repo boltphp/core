@@ -26,7 +26,28 @@ class controller {
     /**
      * @var bolt\browser
      */
-    private $_browser;
+    protected $_browser;
+
+    /**
+     * @var bolt\application
+     */
+    protected $_app;
+
+
+    /**
+     * Construct
+     *
+     * @param bolt\browser
+     *
+     */
+    final public function __construct(\bolt\browser $browser) {
+
+        $this->_browser = $browser;
+        $this->_app = $browser->app;
+
+        $this->init();
+
+    }
 
 
     /**
@@ -49,6 +70,39 @@ class controller {
     public function useLayout($layout) {
         $this->_useLayout = $layout;
         return $this;
+    }
+
+    /**
+     * get a magic variables
+     *
+     * @param string $name
+     *
+     * @return mixed
+     */
+    public function __get($name) {
+        if (array_key_exists($name, $this->_parameters)) {
+            return $this->_parameters[$name];
+        }
+
+        // fallback
+        switch($name) {
+            case 'app':
+                return $this->_app;
+            case 'browser':
+                return $this->_browser;
+        }
+
+        // browser plugin exists
+        if ($this->_browser->pluginExists($name)) {
+            return $this->_browser->plugin($name);
+        }
+
+        // app plugin exists
+        if ($this->_browser->app->pluginExists($name)) {
+            return $this->_browser->app->plugin($name);
+        }
+
+        return null;
     }
 
     /**

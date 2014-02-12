@@ -99,6 +99,10 @@ class element {
             }
             return $this;
         }
+        if (is_a($this->_node, 'DOMText')) {
+            return;
+        }
+
         if ($value !== null) {
             $this->_node->setAttribute($name, $value);
             return $this;

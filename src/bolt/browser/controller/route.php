@@ -13,16 +13,6 @@ use Symfony\Component\Routing\Exception\RouteNotFoundException;
 class route extends browser\controller implements browser\router\face {
 
     /**
-     * @var bolt\application
-     */
-    private $_app;
-
-    /**
-     * @var bolt\browser
-     */
-    private $_browser;
-
-    /**
      * @var bolt\browser\response\format[]
      */
     private $_formats = [];
@@ -37,20 +27,6 @@ class route extends browser\controller implements browser\router\face {
      */
     protected $_request = false;
 
-    /**
-     * Construct
-     *
-     * @param bolt\browser
-     *
-     */
-    final public function __construct(\bolt\browser $browser) {
-
-        $this->_browser = $browser;
-        $this->_app = $browser->app;
-
-        $this->init();
-
-    }
 
     /**
      * magic get method
@@ -61,18 +37,13 @@ class route extends browser\controller implements browser\router\face {
      */
     public function __get($name) {
         switch($name) {
-            case 'app':
-                return $this->_app;
-            case 'browser':
-                return $this->_browser;
             case 'request':
                 return $this->_browser->getRequest();
             case 'response':
                 return $this->_browser->getResponse();
-
         };
 
-        return null;
+        return parent::__get($name);
     }
 
 

@@ -14,6 +14,7 @@ class curl {
 
     private $_client;
 
+    private $_modelManager;
     private $_modelDriver;
     private $_repositories = [];
 
@@ -30,6 +31,7 @@ class curl {
     }
 
     public function getModelEntityManager(\bolt\models $manager, \bolt\models\driver $driver) {
+        $this->_modelManager = $manager;
         $this->_modelDriver = $driver;
         return $this;
     }
@@ -38,7 +40,7 @@ class curl {
         if (array_key_exists($entity, $this->_repositories)) {
             return $this->_repositories[$entity];
         }
-        return $this->_repositories[$entity] = new curl\repository($this, $entity, $this->_modelDriver);
+        return $this->_repositories[$entity] = new curl\repository($this, $entity, $this->_modelManager, $this->_modelDriver);
     }
 
     public function __call($name, $args) {
