@@ -9,11 +9,6 @@
          syntaxCheck="false"
 >
 
-
-    <logging>
-        <log type="coverage-clover" target="./coverage/clover.xml"/>
-    </logging>
-
     <filter>
         <whitelist addUncoveredFilesFromWhitelist="false">
             <directory suffix=".php">../src</directory>

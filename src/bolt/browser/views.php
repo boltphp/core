@@ -55,6 +55,25 @@ class views {
 
 
     /**
+     * add a dir
+     *
+     * @param string $path
+     *
+     * @return self
+     */
+    public function dir($path) {
+        if (is_array($path)) {
+            foreach ($path as $item) {
+                $this->dir($item);
+            }
+            return $this;
+        }
+
+        $this->_dirs[] = $path;
+        return $this;
+    }
+
+    /**
      * register a new engine
      *
      * @param string $ext
@@ -89,6 +108,17 @@ class views {
         return false;
     }
 
+
+    /**
+     * check if a view exists
+     *
+     * @param string $file
+     *
+     * @return bool
+     */
+    public function exists($file) {
+        return $this->find($file, $this->_dirs) !== false;
+    }
 
     /**
      * return a view of self::$class for given file

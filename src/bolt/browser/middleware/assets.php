@@ -58,8 +58,10 @@ class assets extends \bolt\browser\middleware {
 
 
         // explode out the path
-        foreach (explode('&', $matches[1]) as $path) {
+        foreach (explode('&', trim($matches[1], '&')) as $path) {
             $info = pathinfo($path);
+
+            if (!$info) {continue;}
 
             // get our path
             $dir = $info['dirname'];

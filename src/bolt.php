@@ -74,6 +74,10 @@ class bolt {
      */
     public function init($config=[]) {
 
+        if (isset($config['env'])) {
+            self::env($config['env']);
+        }
+
         // new application
         return new bolt\application($config);
 

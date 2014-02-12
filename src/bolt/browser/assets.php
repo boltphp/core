@@ -47,10 +47,7 @@ class assets implements \bolt\plugin\singleton {
     /**
      * @var array
      */
-    private $_output = [
-        'script' => [],
-        'style' => []
-    ];
+    private $_groups = [];
 
 
     /**
@@ -128,33 +125,35 @@ class assets implements \bolt\plugin\singleton {
     /**
      * add a new file to the manager
      *
-     * @param string|array $type file type or array of files
-     * @param array $config
+     * @param string $type script or style
+     * @param string $name name of group
+     * @param array $files array of files
      *
-     * @return mixed
+     * @return self
      */
-    public function add($type, $config=false) {
-        if (is_array($type) AND !$config) {
+    public function add($type, $name = false, $files = false) {
+        if (is_array($type)) {
             foreach ($type as $item) {
-                $this->add($item[0], $item[1]);
+                call_user_func_array([$this, 'add'], $item);
             }
             return $this;
         }
 
-        $o = $type == 'script' ? new assets\script($this) : new assets\style($this);
+        $_ = $this->_groupName($type, $name);
 
-        if (is_string($config)) {
-            $o->setPath($config);
+        if (!array_key_exists($_, $this->_groups)) {
+            $this->_groups[$_] = new assets\group($this, $name, $type);
         }
-        else if (is_array($config)) {
-            foreach ($config as $k => $v) {
-                call_user_func([$o, "set{$k}"], $v);
-            }
-        }
-        $this->_output[$type][] = $o;
-        return $o;
+
+        // add some files
+        $this->_groups[$_]->add($files);
+
+        return $this;
     }
 
+    private function _groupName($type, $name) {
+        return implode("_", [$type, $name]);
+    }
 
     /**
      * find a file in one of $dirs
@@ -187,23 +186,13 @@ class assets implements \bolt\plugin\singleton {
      *
      * @return string
      */
-    public function out($group, $type=false) {
+    public function out($name, $type=false) {
         $tag = [];
 
-        if (!$type OR $type == 'script') {
-            foreach ($this->_output['script'] as $script) {
-                if ($script->inGroup($group)) {
-                    $tag[] = $script->out();
-                }
-            }
-        }
+        foreach ($this->_groups as $group) {
+            if ($group['name'] != $name OR ($type AND $type !== $group['type'])) {continue;}
 
-        if (!$type OR $type == 'style') {
-            foreach ($this->_output['style'] as $leaf) {
-                if ($leaf->inGroup($group)) {
-                    $tag[] = $leaf->out();
-                }
-            }
+            var_dump($group); die;
         }
 
         return implode("\n", $tag);
@@ -231,14 +220,9 @@ class assets implements \bolt\plugin\singleton {
      *
      * @return array
      */
-    public function getByGroup($type, $group) {
-        $items = [];
-        foreach ($this->_output[$type] as $item) {
-            if ($item->inGroup($group)) {
-                $items[] = $item;
-            }
-        }
-        return $items;
+    public function getGroup($name, $type) {
+        $_ = $this->_groupName($type, $name);
+        return array_key_exists($_, $this->_groups) ? $this->_groups[$_] : null;
     }
 
 
