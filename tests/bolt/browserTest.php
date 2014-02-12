@@ -144,7 +144,6 @@ class browserTest extends Test {
 
 
     public function test_path() {
-        $this->assertEquals(TEST_ROOT."/test", $this->browser->path('test'));
         $this->app->setRoot(__DIR__);
         $this->assertEquals(__DIR__."/test_aa", $this->browser->path('test_aa/'));
     }
