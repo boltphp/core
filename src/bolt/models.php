@@ -4,10 +4,7 @@ namespace bolt;
 use \b;
 
 // doctrine stuff
-use \Doctrine\ORM\EntityManager,
-    \Doctrine\ORM\Configuration,
-    \Doctrine\ORM\Mapping\Driver\StaticPHPDriver,
-    \Doctrine\DBAL\Types\Type;
+use \Doctrine\DBAL\Types\Type;
 
 
 /**
@@ -34,20 +31,16 @@ class models implements plugin\singleton, \ArrayAccess {
             $this->load($config['load']);
         }
 
-        $handle = $config['source']->getHandle();
+        // make sure it can implement a model handler
+        if (!method_exists($config['source'], 'getModelEntityManager')) {
+            throw new \Exception('source does not implement repositoy');
+            return false;
+        }
 
-        // configure
-        $cfg = new Configuration();
+        // get the entity manager
+        $this->_em = $config['source']->getModelEntityManager($this, new models\driver($this));
 
-        // set
-        $cfg->setMetadataDriverImpl(new models\driver($this));
-
-        $cfg->setProxyDir("/tmp");
-        $cfg->setProxyNamespace('bolt\models\proxy');
-
-        // create our entity manager
-        $this->_em = EntityManager::create($handle, $cfg, $handle->getEventManager());
-
+        // add our custom types
         foreach (self::$types as $name => $class) {
             Type::addType($name, $class);
         }
