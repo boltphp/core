@@ -24,6 +24,11 @@ abstract class format implements format\face {
      */
     private $_content;
 
+    /**
+     * @var string
+     */
+    protected $contentType = "text/plain";
+
 
     /**
      * Construct
@@ -52,11 +57,6 @@ abstract class format implements format\face {
     }
 
 
-    public function useLayout() {
-        return false;
-    }
-
-
     /**
      * set the format content
      *
@@ -79,6 +79,15 @@ abstract class format implements format\face {
         return $this->_content;
     }
 
+
+    /**
+     * get the content type
+     *
+     * @return string
+     */
+    public function getContentType() {
+        return $this->contentType;
+    }
 
     /**
      * invoke the format and return content

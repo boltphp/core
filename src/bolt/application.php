@@ -17,6 +17,10 @@ class application extends plugin {
      */
     private $_root = false;
 
+    /**
+     * @var bool
+     */
+    private $_hasRun = false;
 
     /**
      * construct a new application instance
@@ -29,6 +33,16 @@ class application extends plugin {
 
         $this->_root = b::path(isset($config['root']) ? realpath($config['root']) : getcwd());
 
+    }
+
+
+    /**
+     * has the application run yet
+     *
+     * @return bool
+     */
+    public function hasRun() {
+        return $this->_hasRun;
     }
 
     /**
@@ -91,6 +105,9 @@ class application extends plugin {
 
         // fire any run events
         $this->fire('run');
+
+
+        $this->_hasRun = true;
 
     }
 

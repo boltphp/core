@@ -98,6 +98,8 @@ class browser extends plugin {
             return call_user_func_array([$this['router'], $name], $args);
         }
 
+        return null;
+
     }
 
     /**
@@ -241,6 +243,8 @@ class browser extends plugin {
      */
     public function run() {
         $this->_app->run();
+
+        return $this;
     }
 
     /**

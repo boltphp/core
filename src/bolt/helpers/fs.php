@@ -14,6 +14,8 @@ class fs {
     public function getRegexFiles($path, $regex="^.+\.php$") {
         $files = [];
 
+        if (!is_dir($path)) {return [];}
+
         $findFiles = function($path, &$files, $findFiles) use ($regex) {
             $dirs = [];
 

@@ -78,6 +78,16 @@ class route extends sRoute implements face {
 
 
     /**
+     * get route controller
+     *
+     * @return mixed
+     */
+    public function getController() {
+        $defaults = $this->getDefaults();
+        return b::param('_controller', null, $defaults);
+    }
+
+    /**
      * set a required param
      *
      * @param string $require
@@ -85,7 +95,7 @@ class route extends sRoute implements face {
      * @return self
      */
     public function setRequire($require) {
-        $this->addRequirements($require);
+        $this->addRequirements(is_string($require) ? explode(",", $require) : $require);
         return $this;
     }
 
