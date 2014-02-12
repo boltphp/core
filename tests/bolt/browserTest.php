@@ -96,6 +96,17 @@ class browserTest extends Test {
         $this->assertTrue($this->browser->runMiddlewareByName('test', 'handle'));
     }
 
+
+    public function test_bindWithClosure() {
+        $called = false;
+        $cb = function() use (&$called) {
+            $called = true;
+        };
+        $this->eq($this->browser, $this->browser->bind('handle', $cb));
+        $this->browser->runMiddleware('handle');
+        $this->assertTrue($called);
+    }
+
     public function test_runNoRouter() {
         $i = new browserTest_testMiddlewareFull($this->browser);
         $this->browser->bind('test', $i);
@@ -129,6 +140,21 @@ class browserTest extends Test {
         $this->assertTrue($i->afterRun);
         $this->assertTrue($i->hasController);
 
+    }
+
+
+    public function test_path() {
+        $this->app->setRoot(__DIR__);
+        $this->assertEquals(__DIR__."/test_aa", $this->browser->path('test_aa/'));
+    }
+
+    public function test_load() {
+        $this->eq($this->browser, $this->browser->load('test', __DIR__));
+    }
+
+    public function test_run(){
+        $this->eq($this->browser, $this->browser->run());
+        $this->assertTrue($this->browser->getApp()->hasRun());
     }
 
 }

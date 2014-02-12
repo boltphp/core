@@ -36,6 +36,15 @@ class router {
 
 
     /**
+     * get collection
+     *
+     * @return bolt\router\collection
+     */
+    public function getCollection() {
+        return $this->_collection;
+    }
+
+    /**
      * magic call
      *
      * @param string $name
@@ -113,6 +122,7 @@ class router {
             foreach ($classes as $class) {
                 if (
                     $class->name === 'bolt\browser\controller' OR
+                    $class->name === 'bolt\browser\router\route' OR
                     (!$class->hasProperty('routes') AND !$class->hasMethod('getRoutes'))
                 ) {continue;} // skip our controller class and make sure we have at least $routes || getRoutes()
 
@@ -144,15 +154,13 @@ class router {
 
                 $name = b::param('name', false, $route);
 
+
                 if (!$name AND !is_string($key)) {
                     $name = "route".rand(9, 999);
                 }
                 else if (!$name) {
                     $name = $key;
                 }
-
-                // no name
-                unset($route['name']);
 
                 // add our two default things
                 $route['controller'] = $class['ref']->name;

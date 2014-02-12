@@ -8,6 +8,10 @@ class json extends \bolt\browser\response\format {
     public $contentType = 'application/json';
 
     public function format($content) {
+        if (is_resource($content)) {
+            throw new \Exception("Can not json_encode resource");
+            return false;
+        }
         return json_encode($content);
     }
 

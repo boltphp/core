@@ -73,6 +73,17 @@ class views {
         return $this;
     }
 
+
+    /**
+     * get dirs
+     *
+     * @return array
+     */
+    public function getDirs() {
+        return $this->_dirs;
+    }
+
+
     /**
      * register a new engine
      *
@@ -87,6 +98,16 @@ class views {
             'instance' => false
         ];
         return $this;
+    }
+
+
+    /**
+     * get all register engiens
+     *
+     * @return array
+     */
+    public function getEngines() {
+        return $this->_engines;
     }
 
 
