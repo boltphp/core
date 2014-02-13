@@ -57,10 +57,10 @@ class repository {
      * @return array[string $url, array $query, array $headers]
      */
     private function _getRequestUri($type, $args) {
-
-
+        if (method_exists($this->_entity, 'curlRequest')) {
+            return call_user_func([$this->_entity, 'curlRequest'], $type, $args);
+        }
         $map = $this->_map();
-
         switch($type) {
             case 'find':
                 return [$map->getTableName()."/{$args[0]}", [], []];
@@ -74,7 +74,6 @@ class repository {
                     ],
                     []
                 ];
-
         };
     }
 
@@ -88,7 +87,7 @@ class repository {
      * @return [items => array, total => int]
      */
     private function _getTransform($type, $data) {
-        return call_user_func([$this->_entity, 'transform'], $type, $data);
+        return call_user_func([$this->_entity, 'curlTransform'], $type, $data);
     }
 
 
@@ -108,6 +107,13 @@ class repository {
         // get a relection of this method
         $ref = b::getReflectionClass($this->_entity);
 
+        $p = new \Doctrine\DBAL\Platforms\MySqlPlatform();
+
+        // entity before
+        if (method_exists($entity, 'curlBefore')) {
+            $entity->curlBefore($map);
+        }
+
         // loop through each field name
         foreach ($map->getFieldNames() as $name) {
             $_ = $map->getFieldMapping($name);
@@ -123,16 +129,19 @@ class repository {
             }
 
             else if (Type::hasType($_['type'])) {
-                $value = Type::getType($_['type'])->convertToPHPValueSQL($item[$name], null);
+                $value = Type::getType($_['type'])->convertToPHPValue(b::param($name, null, $item), $p);
             }
-
-
 
             $prop = $ref->getProperty($name);
 
             $prop->setAccessible(true);
             $prop->setValue($entity, $value);
 
+        }
+
+        // method exists
+        if (method_exists($entity, 'curlAfter')) {
+            $entity->curlAfter($map);
         }
 
         return $entity;
@@ -150,6 +159,7 @@ class repository {
         // get our return url
         list($url, $query, $headers) = $this->_getRequestUri('find', func_get_args());
 
+
         // make our request
         $resp = $this->_curl->get($url, $headers, ['query' => $query])->send();
 
@@ -160,6 +170,8 @@ class repository {
 
         // see if the enity wants to transform
         $data = $this->_getTransform('find', $resp->json());
+
+
 
         // generate an entity
         return $this->generateEntity($data);

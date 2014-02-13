@@ -21,7 +21,8 @@ class models implements plugin\singleton, \ArrayAccess {
     private $_em;
 
     public static $types = [
-        'timestamp' => 'bolt\models\types\timestamp'
+        'timestamp' => 'bolt\models\types\timestamp',
+        'string_array' => 'bolt\models\types\stringArray'
     ];
 
     public function __construct(application $app, $config = []) {
@@ -46,6 +47,27 @@ class models implements plugin\singleton, \ArrayAccess {
             if (!Type::hasType($name)) {
                 Type::addType($name, $class);
                 unset(self::$types[$name]);
+            }
+        }
+
+        // preload modules
+        if (isset($config['preload'])) {
+
+            // load each into context
+            foreach ($config['preload'] as $file) {
+                if (is_a($file, 'bolt\helpers\fs\glob')) {
+                    foreach ($file as $_) {
+                        require($_);
+                    }
+                }
+            }
+
+        }
+
+        // find all aliases
+        foreach (b::getSubClassOf('bolt\models\entity') as $entity) {
+            if ($entity->hasConstant('ALIAS')) {
+                $this->alias($entity->getConstant('ALIAS'), $entity->name);
             }
         }
 

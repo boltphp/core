@@ -162,10 +162,17 @@ class route extends browser\controller implements browser\router\face {
      */
     public function run($params) {
 
+        // run before
         $this->before();
 
         // resp
-        $resp = $this->build($params);
+        try {
+            $resp = $this->build($params);
+        }
+        catch (\Exception $e) {
+            $this->request->is404(true);
+            return $this->response;
+        }
 
         $this->after();
 
@@ -203,6 +210,9 @@ class route extends browser\controller implements browser\router\face {
         else if (array_key_exists('_format', $params)) {
             throw new \ResourceNotFoundException("Unable to match response", 404);
             return;
+        }
+        else if (count($this->_formats) == 1) {
+            $content = array_shift($this->_formats);
         }
 
         // if our content is callable

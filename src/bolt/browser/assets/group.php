@@ -33,14 +33,24 @@ class group {
 
     public function add($files) {
 
+
         if (is_string($files)) {
             $f = $this->_assets->find($files);
             $this->_col->add(new FileAsset($f['path'], [], $f['rel']));
         }
+        else if (is_a($files, 'SplFileInfo')) {
+            // figure out which root this file is
+            $dir = $this->_assets->findDir($files->getRealPath());
+            $this->_col->add(new FileAsset($files->getPathName(), [], $dir));
+        }
+        else if (is_a($files, 'bolt\helpers\fs\glob')) {
+            foreach ($files as $file) {
+                $this->add($file);
+            }
+        }
         else if (is_array($files)) {
             foreach ($files as $file) {
-                $f = $this->_assets->find($file);
-                $this->_col->add(new FileAsset($f['path'], [], $f['rel']));
+                $this->add($file);
             }
         }
 

@@ -34,7 +34,9 @@ class direct extends \bolt\browser\middleware {
             $this->response->headers->set("Content-Type", self::$mime[$ext]);
         }
 
-        $this->response->setContent( file_get_contents($file) );
+        $this->response
+            ->setContent( file_get_contents($file) )
+            ->isReadyToSend(true);
 
     }
 
@@ -49,6 +51,7 @@ class direct extends \bolt\browser\middleware {
         'xml' => 'application/xml',
         'swf' => 'application/x-shockwave-flash',
         'flv' => 'video/x-flv',
+        'less' => 'text/css',
 
         // images
         'png' => 'image/png',

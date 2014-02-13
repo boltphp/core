@@ -179,6 +179,25 @@ class assets implements \bolt\plugin\singleton {
 
 
     /**
+     * find a files dir
+     *
+     * @param string file
+     *
+     * @return mixed
+     */
+    public function findDir($path) {
+        $path = b::path($path);
+        foreach ($this->_dirs as $dir) {
+            $_ = $this->_browser->path($dir);
+            if (preg_match("#^".preg_quote($_,'#')."#", $path)) {
+                return $_;
+            }
+        }
+        return false;
+    }
+
+
+    /**
      * output a tag for give group
      *
      * @param string $group

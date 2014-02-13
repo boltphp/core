@@ -24,6 +24,10 @@ abstract class entity {
         return $this->_loaded;
     }
 
+    public function loaded() {
+        return $this->_loaded;
+    }
+
     public function __get($name){
         return $this->{$name};
     }

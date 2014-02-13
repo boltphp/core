@@ -44,4 +44,19 @@ class classes {
         return $implements;
     }
 
+    public function getSubClassOf($name) {
+        $classes = [];
+        $name = $this->normalizeClassName($name);
+
+        foreach ($this->getDeclaredClasses() as $class) {
+            $c = $this->getReflectionClass($class);
+
+            if ($c->isSubclassOf($name)) {
+                $classes[] = $c;
+            }
+        }
+
+        return $classes;
+    }
+
 }

@@ -23,15 +23,21 @@ class router {
      */
     private $_browser;
 
+    /**
+     * @var array
+     */
+    private $_config;
+
 
     /**
      * Constructor
      *
      * @param bolt\application $app
      */
-    public function __construct(\bolt\browser $browser) {
+    public function __construct(\bolt\browser $browser, $config = []) {
         $this->_browser = $browser;
         $this->_collection = new router\collection();
+        $this->_config = $config;
     }
 
 
@@ -99,14 +105,55 @@ class router {
             $params = $matcher->matchRequest($req);
         }
         catch(ResourceNotFoundException $e) {
+
+            // no match found for collections
+            // try to match agaist our fallback
+            if (isset($this->_config['fallback']) AND is_a($this->_config['fallback'], '\bolt\browser\router\route')) {
+                return $this->_tryFallback($req);
+            }
+
+            // trow an error
             throw new \Exception("No route match found");
             return false;
+
         }
 
         return $params;
 
     }
 
+
+    /**
+     * try the registered callback route
+     *
+     * @param bolt\browser\request $req
+     *
+     * @return void
+     */
+    private function _tryFallback(\bolt\browser\request $req) {
+
+        // collection of one
+        $co = new router\collection();
+        $route = $this->_config['fallback'];
+
+        $co->add($route->getName(), $route);
+
+        // matcher
+        $matcher = new UrlMatcher($co, $req->getContext());
+
+        // try to match the request
+        try {
+            $params = $matcher->matchRequest($req);
+        }
+        catch(\ResourceNotFoundException $e) {
+            throw new \Exception("Unable to match fallback route.");
+            return false;
+        }
+
+        return $params;
+
+
+    }
 
     /**
      * load all routes that are defined in controllers

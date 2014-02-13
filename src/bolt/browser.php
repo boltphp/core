@@ -259,7 +259,7 @@ class browser extends plugin {
         $this->runMiddleware('before');
 
         // redirect now
-        if ($this->response->isRedirection()) {
+        if ($this->response->isRedirection() OR $this->response->isReadyToSend()) {
             return $this->send();
         }
 
@@ -267,7 +267,6 @@ class browser extends plugin {
         // we need to match some routers
         if (isset($this['router'])) {
             $controller = false;
-
 
             // run the request router againts this request
             try {
@@ -281,9 +280,14 @@ class browser extends plugin {
                 // create our controller
                 $controller = new $params['_controller']($this);
 
+                // format
+                if (isset($params['_format'])) {
+                    $this->_request->setRequestFormat($params['_format']);
+                }
+
             }
             catch (\Exception $e) {
-                $is404 = true;
+                $this->_request->is404(true);
             }
 
             // controller
@@ -306,15 +310,14 @@ class browser extends plugin {
         }
 
         // if response is now a
-        if ($this->response->isRedirection()) {
+        if ($this->response->isRedirection() OR $this->response->isReadyToSend()) {
             return $this->send();
         }
-
 
         // run before we have run any router
         $this->runMiddleware('after');
 
-        if ($is404 AND $this->response->getContent() === "") {
+        if ($this->_request->is404() AND $this->response->getContent() === "") {
             $this->response->setStatusCode(404);
             $this->response->setContent("404 - Not Found");
         }

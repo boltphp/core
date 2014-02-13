@@ -12,20 +12,9 @@ class assets extends \bolt\browser\middleware {
 
     private $_assets;
 
-    //
-    private $_headerMap = [
-        'text/css' => ['css','sass','less'],
-        'text/javascript' => ['js'],
-        'image/png' => ['png'],
-        'image/jpeg' => ['jpg','jpeg'],
-        'image/gif' => ['gif']
-    ];
-
     private function _mapContentTypeFromExt($ext) {
-        foreach ($this->_headerMap as $type => $exts) {
-            if (in_array(strtolower($ext), $exts)) {
-                return $type;
-            }
+        if (array_key_exists($ext, direct::$mime)) {
+            return direct::$mime[$ext];
         }
         return 'text/plain';
     }
@@ -34,7 +23,7 @@ class assets extends \bolt\browser\middleware {
         $this->_assets = $this->browser['assets'];
     }
 
-    public function handle() {
+    public function before() {
 
         // don't handle this
         if (!isset($this->config['path'])) {
@@ -66,7 +55,7 @@ class assets extends \bolt\browser\middleware {
             // get our path
             $dir = $info['dirname'];
             $file = $info['basename'];
-            $ext = $info['extension'];
+            $ext = strtolower($info['extension']);
 
 
             // loop through each path
@@ -99,6 +88,9 @@ class assets extends \bolt\browser\middleware {
 
         // set our content
         $this->response->setContent(implode("",$content));
+
+        // send
+        $this->response->isReadyToSend(true);
 
         return $this->response;
 

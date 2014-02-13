@@ -163,6 +163,11 @@ class bolt {
         return $this->_helpers;
     }
 
+    public function exepction($class, $message = null, $code = null) {
+        $cn = '\bolt\exceptions\\'.$class;
+        throw new $cn($message, $code);
+    }
+
 }
 
 
