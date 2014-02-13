@@ -6,7 +6,7 @@ use \b;
 use \Guzzle\Http\Client;
 
 
-class curl {
+class curl implements face {
 
     private $_app;
 

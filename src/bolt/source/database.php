@@ -6,7 +6,7 @@ use \b;
 use \Doctrine\DBAL\Configuration,
     \Doctrine\DBAL\DriverManager;
 
-class database {
+class database implements face {
 
     private $_app;
 

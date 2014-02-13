@@ -27,6 +27,10 @@ class models implements plugin\singleton, \ArrayAccess {
     public function __construct(application $app, $config = []) {
         $this->_app = $app;
 
+        if (!isset($config['source'])) {
+            throw new \Exception("Source instance must be provided in config");
+            return false;
+        }
 
         // make sure it can implement a model handler
         if (!method_exists($config['source'], 'getModelEntityManager')) {
@@ -39,9 +43,16 @@ class models implements plugin\singleton, \ArrayAccess {
 
         // add our custom types
         foreach (self::$types as $name => $class) {
-            Type::addType($name, $class);
+            if (!Type::hasType($name)) {
+                Type::addType($name, $class);
+                unset(self::$types[$name]);
+            }
         }
 
+    }
+
+    public function getEntityManager() {
+        return $this->_em;
     }
 
     /**
