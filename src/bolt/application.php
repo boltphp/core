@@ -4,6 +4,7 @@ namespace bolt;
 use \b;
 
 
+
 /**
  * Base bolt applicatin class
  *
@@ -23,6 +24,11 @@ class application extends plugin {
     private $_hasRun = false;
 
     /**
+     * @var array
+     */
+    private $_autoload = [];
+
+    /**
      * construct a new application instance
      *
      * @param $config array config
@@ -33,8 +39,38 @@ class application extends plugin {
 
         $this->_root = b::path(isset($config['root']) ? realpath($config['root']) : getcwd());
 
+        // autoload
+        $this->_autoload = b::param('autoload', [], $config);
+
+        // register
+        spl_autoload_register([$this, 'autoload']);
+
     }
 
+
+    /**
+     * autoload
+     *
+     * @param string $class
+     *
+     * @return void
+     */
+    public function autoload($class) {
+        foreach ($this->_autoload as $prefix => $base) {
+            if (is_string($prefix)) {
+                $l = strlen($prefix);
+                if (substr($class,0,$l) == $prefix) {
+                    $class = str_replace($prefix, '', $class);
+                }
+                else {continue;}
+            }
+            $file = str_replace('\\', DIRECTORY_SEPARATOR, $class);
+            $_ = b::path($base, $file).".php";
+            if (file_exists($_)) {
+                require_once($_);
+            }
+        }
+    }
 
     /**
      * has the application run yet
@@ -102,6 +138,7 @@ class application extends plugin {
      * @return void
      */
     public function run() {
+
 
         // fire any run events
         $this->fire('run');

@@ -27,9 +27,6 @@ class models implements plugin\singleton, \ArrayAccess {
     public function __construct(application $app, $config = []) {
         $this->_app = $app;
 
-        if (isset($config['load'])) {
-            $this->load($config['load']);
-        }
 
         // make sure it can implement a model handler
         if (!method_exists($config['source'], 'getModelEntityManager')) {
@@ -46,7 +43,6 @@ class models implements plugin\singleton, \ArrayAccess {
         }
 
     }
-
 
     /**
      * find an entity by primary key
@@ -129,6 +125,10 @@ class models implements plugin\singleton, \ArrayAccess {
 
 
     public function alias($name, $entity) {
+        if (!class_exists($entity, true)) {
+            throw new \Exception("Class $entity does not exist");
+            return;
+        }
         $this->_alias[$name] = $entity;
     }
 
