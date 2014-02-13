@@ -4,8 +4,6 @@ namespace bolt\models;
 
 abstract class entity {
 
-    abstract public static function struct($metadata);
-
     private $_manager;
 
     private $_loaded = false;

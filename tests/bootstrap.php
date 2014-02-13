@@ -9,6 +9,9 @@ define("MOCK_DIR", realpath(__DIR__."/mock"));
 
 define("TEST_ROOT", realpath(__DIR__));
 
+error_reporting(E_ALL);
+
+
 class Test extends PHPUnit_Framework_TestCase {
 
     protected function eq() {

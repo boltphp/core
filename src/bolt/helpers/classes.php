@@ -50,12 +50,11 @@ class classes {
 
         foreach ($this->getDeclaredClasses() as $class) {
             $c = $this->getReflectionClass($class);
-
+            if ($c->name === $name OR $c->isAbstract()) {continue;}
             if ($c->isSubclassOf($name)) {
-                $classes[] = $c;
+                 $classes[] = $c;
             }
         }
-
         return $classes;
     }
 
