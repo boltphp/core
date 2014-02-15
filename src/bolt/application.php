@@ -73,6 +73,22 @@ class application extends plugin {
     }
 
     /**
+     * check env and run callback if in that env
+     *
+     * @param string $env
+     * @param closure $callback
+     *
+     * @return self
+     */
+    public function env($env, \Closure $callback) {
+        if (b::env() === $env) {
+            call_user_func($callback->bindTo($this));
+        }
+        return $this;
+    }
+
+
+    /**
      * has the application run yet
      *
      * @return bool

@@ -42,7 +42,6 @@ class bolt {
      */
     private $_guid = 9;
 
-
     /**
      * @var string
      */

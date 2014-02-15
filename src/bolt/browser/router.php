@@ -167,8 +167,29 @@ class router {
      *
      * @return void
      */
-    public function loadFromControllers() {
-        $routes = [];
+    public function loadFromControllers(array $paths = []) {
+        $routes = []; $files = [];
+
+
+        //
+        foreach ($paths as $path) {
+            if (is_object($path) AND method_exists($path, 'asArray')) {
+                $files = array_merge($files, $path->asArray());
+            }
+            else if (is_a($path, 'bolt\helpers\fs\file')) {
+                $files[] = (string)$file;
+            }
+            else if (is_array($path)) {
+                $files = array_merge($files, $path);
+            }
+            else {
+                $files[] = $this->_browser->find($path);
+            }
+        }
+
+        foreach ($files as $file) {
+            require_once $file;
+        }
 
         // get all loaded classes
         if (($classes = b::getClassImplements('\bolt\browser\router\face')) != false) {

@@ -7,10 +7,8 @@ use \SplFileObject;
 
 class file extends SplFileObject {
 
-    private $_file;
-
-    public function __construct($file) {
-        $this->_file = $file;
+    public function __toString() {
+        return $this->getPathName();
     }
 
 }

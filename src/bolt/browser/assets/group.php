@@ -6,8 +6,9 @@ use \b;
 use Assetic\Asset\AssetCollection;
 use Assetic\Asset\FileAsset;
 use Assetic\Asset\GlobAsset;
+use Assetic\Asset\HttpAsset;
 
-class group {
+class group implements \IteratorAggregate {
 
     private $_assets;
     private $_name;
@@ -34,7 +35,10 @@ class group {
     public function add($files) {
 
 
-        if (is_string($files)) {
+        if (is_string($files) AND (stripos($files, 'http') !== false OR strpos($files, '//') === 0)) {
+            $this->_col->add(new HttpAsset($files));
+        }
+        else if (is_string($files)) {
             $f = $this->_assets->find($files);
             $this->_col->add(new FileAsset($f['path'], [], $f['rel']));
         }
@@ -104,6 +108,10 @@ class group {
                 }
             }
         }
+    }
+
+    public function getIterator() {
+        return $this->_col;
     }
 
 }

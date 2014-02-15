@@ -16,7 +16,7 @@ class controller {
     /**
      * @var bool
      */
-    protected $_useLayout = true;
+    protected $_useLayout = null;
 
     /**
      * @var array
@@ -70,6 +70,16 @@ class controller {
     public function useLayout($layout) {
         $this->_useLayout = $layout;
         return $this;
+    }
+
+    /**
+     * check useLayout varaible
+     */
+    public function getUseLayout() {
+        if ($this->_useLayout === null) {
+            $this->_useLayout = $this->request->getRequestFormat() === 'html';
+        }
+        return $this->_useLayout;
     }
 
     /**

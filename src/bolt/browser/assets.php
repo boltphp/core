@@ -207,34 +207,52 @@ class assets implements \bolt\plugin\singleton {
     /**
      * output a tag for give group
      *
-     * @param string $group
      * @param string $type
+     * @param string $group
      *
      * @return string
      */
-    public function out($name, $type=false) {
-        $tag = [];
+    public function out($type, $name, $combo = false) {
+        $_ = $this->_groupName($type, $name);
 
-        foreach ($this->_groups as $group) {
-            if ($group['name'] != $name OR ($type AND $type !== $group['type'])) {continue;}
-
-            var_dump($group); die;
+        // is there a group
+        if (!array_key_exists($_, $this->_groups)) {
+            return null;
         }
 
-        return implode("\n", $tag);
+        $group = $this->_groups[$_];
 
+        $tags = [];
+
+        foreach ($group as $file) {
+            if($type == 'style') {
+                $tags[] = '<link rel="stylesheet" href="'.$this->url($file).'" type="text/css">';
+            }
+        }
+
+        return implode("", $tags);
     }
 
 
     /**
      * url path
      *
-     * @param string $path
+     * @param mixed $path
      *
      * @return string
      */
     public function url($path) {
-        return str_replace('{path}', "{$path}", rtrim($this->_config['path'],'/'));
+        if (is_a($path, 'Assetic\Asset\FileAsset')) {
+            $path = $path->getSourcePath();
+        }
+
+        if (is_string($path)) {
+            return str_replace('{path}', "{$path}", rtrim($this->_config['path'],'/'));
+        }
+
+        if (is_a($path, 'Assetic\Asset\HttpAsset')) {
+            return $path->getSourceRoot()."/".$path->getSourcePath();
+        }
     }
 
 
@@ -246,7 +264,7 @@ class assets implements \bolt\plugin\singleton {
      *
      * @return array
      */
-    public function getGroup($name, $type) {
+    public function getGroup($type, $name) {
         $_ = $this->_groupName($type, $name);
         return array_key_exists($_, $this->_groups) ? $this->_groups[$_] : null;
     }

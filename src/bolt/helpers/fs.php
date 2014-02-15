@@ -1,6 +1,7 @@
 <?php
 
 namespace bolt\helpers;
+use \b;
 
 class fs {
 
@@ -56,15 +57,17 @@ class fs {
     public function fs() {
         $args = func_get_args();
         $type = array_shift($args);
+        $class = '\bolt\helpers\fs\\'.$type;
 
-        switch($type) {
-            case 'file':
-                return new fs\file($args[0]);
-            case 'glob':
-                return new fs\glob($args[0]);
-        };
+        if (!class_exists($class, true)) {
+            throw new \Exception("Unknown FS class {$type}");
+            return false;
+        }
 
-        return false;
+        $ref = b::getReflectionClass($class);
+
+        return $ref->newInstanceArgs($args);
+
     }
 
 }

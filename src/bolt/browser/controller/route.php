@@ -143,8 +143,14 @@ class route extends browser\controller implements browser\router\face {
         // and figure out what params we need
         $ref = b::getReflectionClass(get_called_class());
 
+        // things we want to map
+        $map = [
+            'bolt\browser\request' => $this->request,
+            'bolt\browser\response' => $this->response
+        ];
+
         // get
-        $args = $this->getArgsFromMethodRef($ref->getMethod($func), $params);
+        $args = $this->getArgsFromMethodRef($ref->getMethod($func), $params, $map);
 
         // wonderfull, lets call the function and figure out what
         // they respond with
@@ -184,6 +190,7 @@ class route extends browser\controller implements browser\router\face {
 
         $content = $this->response->getContent();
 
+
         // if it's an array,
         // we assume they have given formats
         if (is_string($resp)) {
@@ -222,7 +229,7 @@ class route extends browser\controller implements browser\router\face {
         }
 
         // use the layout
-        if ($this->_useLayout AND $this->layout) {
+        if ($this->getUseLayout() AND $this->layout) {
             $content = $this->browser['views']->layout($this->layout, ['yield' => $content], $this)->render();
         }
 

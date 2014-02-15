@@ -35,7 +35,7 @@ abstract class plugin implements \ArrayAccess {
         }
 
         if (is_string($class) AND !class_exists($class, true)) {
-            throw new Exception("Unknwon class");
+            throw new Exception("Unknown class $class attempted to plugin as $name");
             return false;
         }
 
