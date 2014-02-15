@@ -151,6 +151,13 @@ class assets implements \bolt\plugin\singleton {
         return $this;
     }
 
+    public function createGroup($type, $name, $files = []) {
+        $_ = $this->_groupName($type, $name);
+        if (array_key_exists($_, $this->_groups)) { return $this->_groups[$_]; }
+        $this->_groups[$_] = new assets\group($this, $name, $type);
+        return $this->_groups[$_]->add($files);
+    }
+
     private function _groupName($type, $name) {
         return implode("_", [$type, $name]);
     }

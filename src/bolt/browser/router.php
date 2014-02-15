@@ -29,6 +29,7 @@ class router {
     private $_config;
 
 
+
     /**
      * Constructor
      *
@@ -92,24 +93,25 @@ class router {
      * match a request to defined routes
      *
      * @param bolt\browser\request $req
+     * @param string $path
      *
      * @return array
      */
-    public function match(\bolt\browser\request $req) {
+    public function match(\bolt\browser\request $req, $path = null) {
 
         // matcher
         $matcher = new UrlMatcher($this->_collection, $req->getContext());
 
         // try to match the request
         try {
-            $params = $matcher->matchRequest($req);
+            $params = $path !== null ? $matcher->match($path) : $matcher->matchRequest($req);
         }
         catch(ResourceNotFoundException $e) {
 
             // no match found for collections
             // try to match agaist our fallback
             if (isset($this->_config['fallback']) AND is_a($this->_config['fallback'], '\bolt\browser\router\route')) {
-                return $this->_tryFallback($req);
+                return $this->_tryFallback($req, $path);
             }
 
             // trow an error
@@ -117,6 +119,7 @@ class router {
             return false;
 
         }
+
 
         return $params;
 
@@ -127,10 +130,11 @@ class router {
      * try the registered callback route
      *
      * @param bolt\browser\request $req
+     * @param string $path
      *
      * @return void
      */
-    private function _tryFallback(\bolt\browser\request $req) {
+    private function _tryFallback(\bolt\browser\request $req, $path = null) {
 
         // collection of one
         $co = new router\collection();
@@ -143,12 +147,14 @@ class router {
 
         // try to match the request
         try {
-            $params = $matcher->matchRequest($req);
+            $params = $path !== null ? $matcher->match($path) : $matcher->matchRequest($req);
         }
         catch(\ResourceNotFoundException $e) {
             throw new \Exception("Unable to match fallback route.");
             return false;
         }
+
+
 
         return $params;
 

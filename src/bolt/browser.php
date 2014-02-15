@@ -268,6 +268,7 @@ class browser extends plugin {
         if (isset($this['router'])) {
             $controller = false;
 
+
             // run the request router againts this request
             try {
 

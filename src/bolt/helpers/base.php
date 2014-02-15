@@ -6,7 +6,8 @@ use \b;
 
 class base {
 
-    public function param($key, $default, $array) {
+    public function param($key, $default = false, $array) {
+        if (!is_array($array)) {return $default;}
         return array_key_exists($key, $array) ? $array[$key] : $default;
     }
 

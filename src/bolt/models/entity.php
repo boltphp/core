@@ -2,6 +2,13 @@
 
 namespace bolt\models;
 
+
+/**
+ *
+ * @todo implement interface to make sure
+ *          users are implementing the struct
+ *          method
+ */
 abstract class entity {
 
     private $_manager;
@@ -11,6 +18,10 @@ abstract class entity {
     public function setManager(\bolt\models $manager) {
         $this->_manager = $manager;
         return $this;
+    }
+
+    public function getManager() {
+        return $this->_manager;
     }
 
     public function setLoaded($loaded) {

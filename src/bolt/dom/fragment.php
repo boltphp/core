@@ -1,17 +1,24 @@
 <?php
 
 namespace bolt\dom;
+use \b;
 
 class fragment implements \ArrayAccess {
 
     private $_dom = false;
     public $root = false;
 
+    private $_guid;
+
     public function __construct($tag, $attr=[]) {
         $this->_dom = new \bolt\dom();
 
-        // root node
-        $this->root = $this->create($tag, '', $attr);
+        $this->_guid = b::guid('fragment');
+
+        $this->_dom->doc()->loadHTML('<'.$tag.' data-fragmentref="'.$this->_guid.'"></'.$tag.'>');
+
+        $this->root = $this['[data-fragmentref="'.$this->_guid.'"]'];
+
 
     }
 

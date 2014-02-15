@@ -80,7 +80,7 @@ class dom implements \ArrayAccess {
      *
      * @return self
      */
-    public function addRef(dom\element $el) {
+    public function addRef($el) {
         $this->_ref[$el->guid()] = $el;
         return $this;
     }
@@ -95,6 +95,9 @@ class dom implements \ArrayAccess {
      * @return
      */
     public function importNode($node, $deep=false) {
+        if (is_a($node, 'bolt\dom\element')) {
+            $node = $node->node();
+        }
         return $this->_doc->importNode($node, $deep);
     }
 
@@ -159,9 +162,22 @@ class dom implements \ArrayAccess {
         foreach ($xpath->query(CssSelector::toXPath('*[data-domref]')) as $node) {
             $node->removeAttribute('data-domref');
         }
+        foreach ($xpath->query(CssSelector::toXPath('*[data-fragmentref]')) as $node) {
+            $node->removeAttribute('data-fragmentref');
+        }
+
+        //
 
         return $ref->saveHTML();
     }
+
+
+    /**
+     * append
+     */
+     public function append($what){
+        $this->_doc->documentElement->appendChild($what->node());
+     }
 
 
     /**
@@ -199,11 +215,17 @@ class dom implements \ArrayAccess {
     public function offsetSet($name, $value) {
         $el = $this->find($name)->first();
 
+        if (!$el) {
+            return false;
+        }
+
         if ($el->hasChildNodes()) {
             foreach ($el->childNodes as $child) {
                 $child->parentNode->removeChild($child);
             }
         }
+
+        $value = html_entity_decode($value, ENT_QUOTES, 'utf-8');
 
         if (stripos($value, '<') !== false AND stripos($value, '>') !== false) {
             $guid = b::guid("_x_dom");
@@ -259,7 +281,7 @@ class dom implements \ArrayAccess {
      * @return bolt\dom\element
      */
     public function create($tag, $value="", $attr=[]) {
-        $el = $this->_doc->createElement($tag, $value);
+        $el = $this->_doc->createElement($tag, html_entity_decode($value, ENT_QUOTES, 'utf-8'));
         $_ = new dom\element($this, $el);
         $_->attr($attr);
         return $_;

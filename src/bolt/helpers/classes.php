@@ -23,6 +23,8 @@ class classes {
     }
 
     public function getDeclaredClasses() {
+        return get_declared_classes();
+
            if (!$this->_classes) {
                $this->_classes = get_declared_classes();
            }

@@ -17,6 +17,12 @@ class route extends sRoute implements face {
      */
     private $_name = null;
 
+
+    /**
+     * @var _hasCompiled
+     */
+    private $_hasCompiled = false;
+
     /**
      * static create a route class
      *
@@ -146,7 +152,7 @@ class route extends sRoute implements face {
     public function compile() {
         $defaults = $this->getDefaults();
 
-        if (array_key_exists('_formats', $defaults)) {
+        if (array_key_exists('_formats', $defaults) AND !$this->_hasCompiled) {
             $path = $this->getPath();
 
             // add format to the path
@@ -154,6 +160,8 @@ class route extends sRoute implements face {
 
             // add a requirement
             $this->addRequirements(['_format' => implode('|', $defaults['_formats'])]);
+
+            $this->_hasCompiled = true;
 
         }
 
