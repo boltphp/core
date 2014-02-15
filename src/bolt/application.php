@@ -128,7 +128,7 @@ class application extends plugin {
      * @return string
      */
     public function path() {
-        return b::path($this->_root, call_user_func_array([b::instance(), 'path'], func_get_args()));
+        return b::path($this->_root, call_user_func_array(['b', 'path'], func_get_args()));
     }
 
 
