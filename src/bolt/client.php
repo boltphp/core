@@ -32,9 +32,6 @@ class client extends cli {
     public function run() {
 
 
-
-        var_dump('x'); die;
-
     }
 
 }
