@@ -36,7 +36,6 @@ abstract class plugin implements \ArrayAccess {
 
         if (is_string($class) AND !class_exists($class, true)) {
             throw new Exception("Unknown class $class attempted to plugin as $name");
-            return false;
         }
 
         $ref = b::getReflectionClass($class);
@@ -97,7 +96,6 @@ abstract class plugin implements \ArrayAccess {
     public function plugin($name) {
         if (!$this->pluginExists($name)) {
             throw new Exception("Plugin $name does not exist", 404);
-            return;
         }
 
         $plugin = $this->_plugins[$name];
@@ -167,7 +165,6 @@ abstract class plugin implements \ArrayAccess {
     public function unplug($name) {
         if (!$this->pluginExists($name)) {
             throw new Exception("Unknown plugin $name");
-            return false;
         }
 
         if ($this->_plugins[$name]['instance']) {

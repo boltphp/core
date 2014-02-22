@@ -4,14 +4,8 @@ namespace bolt\browser;
 use \b;
 
 
-use Assetic\FilterManager;
-use Assetic\AssetManager;
-use Assetic\Asset\AssetCollection;
 use Assetic\Asset\FileAsset;
-use Assetic\Asset\GlobAsset;
 use Assetic\Asset\HttpAsset;
-use Assetic\Asset\StringAsset;
-use Assetic\Filter\CssRewriteFilter;
 
 
 /**

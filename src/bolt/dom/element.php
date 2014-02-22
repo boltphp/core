@@ -96,7 +96,6 @@ class element {
         }
         else {
             throw new \Exception("Unable to append object of type ".get_class($what));
-            return false;
         }
 
         return $this;

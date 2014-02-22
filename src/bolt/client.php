@@ -19,12 +19,12 @@ class client extends cli {
             // ['deploy', 'bolt\client\deploy']
         ]);
 
-        $this->_console = new ConsoleApplication();
+        // $this->_console = new ConsoleApplication();
 
-        // get all plugins
-        foreach ($this->getPlugins() as $name => $plugin) {
-            $this->_console->add($this[$name]);
-        }
+        // // get all plugins
+        // foreach ($this->getPlugins() as $name => $plugin) {
+        //     $this->_console->add($this[$name]);
+        // }
 
     }
 

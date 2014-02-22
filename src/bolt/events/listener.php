@@ -58,7 +58,6 @@ class listener {
     public function __construct($parent, $callback, $type, $args = [], $context=false) {
         if (!in_array('bolt\events', class_uses($parent))) {
             throw new \Exception("Parent must use bolt\events");
-            return false;
         }
         $this->_guid = b::guid('event');
         $this->_parent = $parent;

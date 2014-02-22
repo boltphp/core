@@ -190,7 +190,6 @@ class views {
 
         if (!$file) {
             throw new Exception("Unable to find view '$file'.");
-            return;
         }
 
         // ext
@@ -199,7 +198,6 @@ class views {
         // need an engine
         if (!array_key_exists($ext, $this->_engines)) {
             throw new Exception("Unable to find render engine for '$ext'.");
-            return false;
         }
 
         $engine = $this->_engines[$ext];

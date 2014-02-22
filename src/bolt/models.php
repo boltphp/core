@@ -30,13 +30,11 @@ class models implements plugin\singleton, \ArrayAccess {
 
         if (!isset($config['source'])) {
             throw new \Exception("Source instance must be provided in config");
-            return false;
         }
 
         // make sure it can implement a model handler
         if (!method_exists($config['source'], 'getModelEntityManager')) {
             throw new \Exception('source does not implement repositoy');
-            return false;
         }
 
         // get the entity manager
@@ -160,7 +158,6 @@ class models implements plugin\singleton, \ArrayAccess {
     public function alias($name, $entity) {
         if (!class_exists($entity, true)) {
             throw new \Exception("Class $entity does not exist");
-            return;
         }
         $this->_alias[$name] = $entity;
     }

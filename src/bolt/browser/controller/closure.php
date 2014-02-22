@@ -20,14 +20,12 @@ class closure extends \bolt\browser\controller\route {
 
         if (!isset($params['_closure'])) {
             throw new \Exception('No closure provided');
-            return;
         }
 
         $func = $params['_closure'];
 
         if (!is_a($func, 'Closure')) {
             throw new \Exception('Class is not a closure');
-            return;
         }
 
         // ref

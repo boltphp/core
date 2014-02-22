@@ -3,7 +3,6 @@
 namespace bolt\browser\router;
 use \b;
 
-use Symfony\Component\Routing\RequestContext;
 use Symfony\Component\Routing\Route as sRoute;
 
 

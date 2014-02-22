@@ -3,9 +3,6 @@
 namespace bolt\browser;
 use \b;
 
-use Symfony\Component\Routing\Matcher\UrlMatcher;
-use Symfony\Component\Routing\Exception\ResourceNotFoundException;
-
 /**
  * Abstract middleware class
  */
@@ -94,7 +91,6 @@ abstract class middleware {
         // must be a subclass of ReflectionFunctionAbstract
         if (!is_subclass_of($ref, 'ReflectionFunctionAbstract')) {
             throw new \Exception('Class must be an implementation of "ReflectionFunctionAbstract"');
-            return false;
         }
 
         foreach ($ref->getParameters() as $param) {
@@ -116,10 +112,10 @@ abstract class middleware {
                 }
 
             }
-            else if ($name == 'request' OR $name == 'req') {
+            else if ($name == 'request' || $name == 'req') {
                 $args[] =  $this->browser->request;
             }
-            else if ($name == 'response' OR $name == 'resp') {
+            else if ($name == 'response' || $name == 'resp') {
                 $args[] =  $this->browser->response;
             }
             else if ($name == 'browser'){

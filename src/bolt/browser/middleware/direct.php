@@ -26,9 +26,6 @@ class direct extends \bolt\browser\middleware {
         // ext
         $ext = strtolower(pathinfo($file)['extension']);
 
-        header("Content-Type: ".self::$mime[$ext]);
-        exit(file_get_contents($file));
-
 
         if (array_key_exists($ext, self::$mime)) {
             $this->response->headers->set("Content-Type", self::$mime[$ext]);

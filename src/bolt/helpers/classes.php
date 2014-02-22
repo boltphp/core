@@ -6,7 +6,6 @@ use \b;
 class classes {
 
     private $_ref = [];
-    private $_classes = [];
 
     public function getReflectionClass($class) {
         $name = is_string($class) ? $this->normalizeClassName($class) : get_class($class);
@@ -24,12 +23,7 @@ class classes {
 
     public function getDeclaredClasses() {
         return get_declared_classes();
-
-           if (!$this->_classes) {
-               $this->_classes = get_declared_classes();
-           }
-           return $this->_classes;
-       }
+    }
 
     public function getClassImplements($name) {
         $implements = [];

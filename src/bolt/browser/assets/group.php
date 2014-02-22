@@ -35,7 +35,7 @@ class group implements \IteratorAggregate {
     public function add($files) {
 
 
-        if (is_string($files) AND (stripos($files, 'http') !== false OR strpos($files, '//') === 0)) {
+        if (is_string($files) && (stripos($files, 'http') !== false || strpos($files, '//') === 0)) {
             $this->_col->add(new HttpAsset($files));
         }
         else if (is_string($files)) {

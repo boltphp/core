@@ -61,7 +61,6 @@ class fs {
 
         if (!class_exists($class, true)) {
             throw new \Exception("Unknown FS class {$type}");
-            return false;
         }
 
         $ref = b::getReflectionClass($class);

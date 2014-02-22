@@ -151,7 +151,6 @@ class controller {
     public function view($file, $vars=[]) {
         if (!$this->browser['views']) {
             throw new \Exception('No view manager');
-            return;
         }
         return $this->browser['views']->view($file, $vars, $this);
     }
@@ -171,7 +170,6 @@ class controller {
         // must be a subclass of ReflectionFunctionAbstract
         if (!is_subclass_of($ref, 'ReflectionFunctionAbstract')) {
             throw new \Exception('Class must be an implementation of "ReflectionFunctionAbstract"');
-            return false;
         }
 
         // we need to get all args
@@ -180,7 +178,7 @@ class controller {
 
         foreach ($ref->getParameters() as $param) {
 
-            if ($param->getClass() AND array_key_exists($param->getClass()->name, $classes)) {
+            if ($param->getClass() && array_key_exists($param->getClass()->name, $classes)) {
                 $args[] = $classes[$param->getClass()->name];
             }
             else if (array_key_exists($param->getName(), $params)) {

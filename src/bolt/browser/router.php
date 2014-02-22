@@ -6,7 +6,6 @@ use \b;
 /// depend
 use Symfony\Component\Routing\Matcher\UrlMatcher;
 use Symfony\Component\Routing\Exception\ResourceNotFoundException;
-use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 /**
  * router manager
@@ -110,13 +109,12 @@ class router {
 
             // no match found for collections
             // try to match agaist our fallback
-            if (isset($this->_config['fallback']) AND is_a($this->_config['fallback'], '\bolt\browser\router\route')) {
+            if (isset($this->_config['fallback']) && is_a($this->_config['fallback'], '\bolt\browser\router\route')) {
                 return $this->_tryFallback($req, $path);
             }
 
             // trow an error
             throw new \Exception("No route match found");
-            return false;
 
         }
 
@@ -151,7 +149,6 @@ class router {
         }
         catch(\ResourceNotFoundException $e) {
             throw new \Exception("Unable to match fallback route.");
-            return false;
         }
 
 
@@ -195,9 +192,9 @@ class router {
         if (($classes = b::getClassImplements('\bolt\browser\router\face')) != false) {
             foreach ($classes as $class) {
                 if (
-                    $class->name === 'bolt\browser\controller' OR
-                    $class->name === 'bolt\browser\router\route' OR
-                    (!$class->hasProperty('routes') AND !$class->hasMethod('getRoutes'))
+                    $class->name === 'bolt\browser\controller' ||
+                    $class->name === 'bolt\browser\router\route' ||
+                    (!$class->hasProperty('routes') && !$class->hasMethod('getRoutes'))
                 ) {continue;} // skip our controller class and make sure we have at least $routes || getRoutes()
 
                 $_ = [

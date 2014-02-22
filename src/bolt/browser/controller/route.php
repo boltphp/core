@@ -5,7 +5,6 @@ use \bolt\browser;
 use \b;
 
 use Symfony\Component\Routing\Exception\MethodNotAllowedException;
-use Symfony\Component\Routing\Exception\RouteNotFoundException;
 
 /**
  * route controller
@@ -75,7 +74,6 @@ class route extends browser\controller implements browser\router\face {
             case 'MethodNotAllowedException':
                 $allowed = array_filter(['get', 'put', 'post', 'delete'], function($method) { return method_exists($this, $method); });
                 throw new MethodNotAllowedException($allowed, $message, $code);
-                break;
             default:
                 throw new $class($message, $code);
         };
@@ -107,7 +105,6 @@ class route extends browser\controller implements browser\router\face {
 
         if (!class_exists($class, true)) {
             throw new \Exception("Unknown format class $class");
-            return;
         }
 
         $o = new $class($this->response);
@@ -218,24 +215,23 @@ class route extends browser\controller implements browser\router\face {
         else if ($resp instanceof \bolt\browser\views\view) {
             $content = $resp->render();
         }
-        else if (is_a($resp, 'bolt\browser\response') AND $resp !== $this->response) {
+        else if (is_a($resp, 'bolt\browser\response') && $resp !== $this->response) {
             return $resp;
         }
 
         // if the build function set content and
         // we don't have any formats set
         // assume they set the default format
-        if ($content !== "" AND count($this->_formats) !== 0 AND isset($params["_format"])) {
+        if ($content !== "" && count($this->_formats) !== 0 && isset($params["_format"])) {
             $this->_formats[$params["_format"]] = $this->response->getContent();
         }
 
         // if _format exists in response. no we return
-        if (array_key_exists('_format', $params) AND array_key_exists($params['_format'], $this->_formats)) {
+        if (array_key_exists('_format', $params) && array_key_exists($params['_format'], $this->_formats)) {
             $content = $this->_formats[$params['_format']];
         }
         else if (array_key_exists('_format', $params)) {
             throw new \ResourceNotFoundException("Unable to match response", 404);
-            return;
         }
         else if (count($this->_formats) == 1) {
             $content = array_shift($this->_formats);
@@ -248,7 +244,7 @@ class route extends browser\controller implements browser\router\face {
         }
 
         // use the layout
-        if ($this->getUseLayout() AND $this->layout) {
+        if ($this->getUseLayout() && $this->layout) {
             $content = $this->browser['views']->layout($this->layout, ['yield' => $content], $this)->render();
         }
 

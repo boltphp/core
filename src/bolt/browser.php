@@ -94,7 +94,7 @@ class browser extends plugin {
 
         // shortcut to router methods
         if (in_array($name, ['get','post','put','delete','head'])) {
-            if (!isset($this['router'])) { throw new Exception("No router plugin defined"); return; }
+            if (!isset($this['router'])) { throw new Exception("No router plugin defined"); }
             return call_user_func_array([$this['router'], $name], $args);
         }
 
@@ -253,13 +253,12 @@ class browser extends plugin {
      * @return void
      */
     public function execute() {
-        $is404 = false;
 
         // run before we have run any router
         $this->runMiddleware('before');
 
         // redirect now
-        if ($this->response->isRedirection() OR $this->response->isReadyToSend()) {
+        if ($this->response->isRedirection() || $this->response->isReadyToSend()) {
             return $this->send();
         }
 
@@ -311,14 +310,14 @@ class browser extends plugin {
         }
 
         // if response is now a
-        if ($this->response->isRedirection() OR $this->response->isReadyToSend()) {
+        if ($this->response->isRedirection() || $this->response->isReadyToSend()) {
             return $this->send();
         }
 
         // run before we have run any router
         $this->runMiddleware('after');
 
-        if ($this->_request->is404() AND $this->response->getContent() === "") {
+        if ($this->_request->is404() && $this->response->getContent() === "") {
             $this->response->setStatusCode(404);
             $this->response->setContent("404 - Not Found");
         }
@@ -369,7 +368,6 @@ class browser extends plugin {
     public function runMiddlewareByName($name, $method, $params = []) {
         if (!array_key_exists($name, $this->_middleware)) {
             throw new Exception("Unknown middleware '$name'");
-            return false;
         }
         $ware = $this->_middleware[$name];
         if (!$ware['instance']) {

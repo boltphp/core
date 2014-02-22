@@ -28,7 +28,6 @@ class result extends SplDoublyLinkedList {
     public function push($object) {
         if (!is_a($object, 'bolt\models\entity')) {
             throw new \Exception("trying to attach a non-enitity object");
-            return false;
         }
 
         $object->setManager($this->_manager);
@@ -41,7 +40,6 @@ class result extends SplDoublyLinkedList {
     public function unshift($object) {
         if (!is_a($object, 'bolt\models\entity')) {
             throw new \Exception("trying to attach a non-enitity object");
-            return false;
         }
 
         $object->setManager($this->_manager);

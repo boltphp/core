@@ -97,7 +97,6 @@ class config implements \IteratorAggregate, \ArrayAccess {
     protected function _readFile($path) {
         if (!file_exists($path)) {
             throw new \Exception("No file to read");
-            return false;
         }
 
         $ext = strtolower(pathinfo($path)['extension']);
