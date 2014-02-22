@@ -170,7 +170,7 @@ class router {
 
         //
         foreach ($paths as $path) {
-            if (is_object($path) AND method_exists($path, 'asArray')) {
+            if (is_object($path) && method_exists($path, 'asArray')) {
                 $files = array_merge($files, $path->asArray());
             }
             else if (is_a($path, 'bolt\helpers\fs\file')) {
@@ -226,7 +226,7 @@ class router {
                 $name = b::param('name', false, $route);
 
 
-                if (!$name AND !is_string($key)) {
+                if (!$name && !is_string($key)) {
                     $name = "route".rand(9, 999);
                 }
                 else if (!$name) {

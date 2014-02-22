@@ -19,7 +19,7 @@ class timestamp extends Type {
     }
 
     public function convertToPHPValue($value, AbstractPlatform $platform) {
-        if ($value === null OR $value instanceof DateTime) {
+        if ($value === null || $value instanceof DateTime) {
             return $value;
         }
         $dt = new DateTime();

@@ -23,7 +23,7 @@ class fs {
             foreach (new \DirectoryIterator($path) as $file) {
                 if ($file->isDot()) {continue;}
 
-                if ($file->isFile() AND preg_match('#'.$regex.'#i', $file->getPathname())) {
+                if ($file->isFile() && preg_match('#'.$regex.'#i', $file->getPathname())) {
                     $files[] = $file->getRealPath();
                 }
                 else if ($file->isDir()) {

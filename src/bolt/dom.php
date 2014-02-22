@@ -121,7 +121,7 @@ class dom implements \ArrayAccess {
         foreach ($x->query($xpath) as $node) {
             $dr = $node->getAttribute('data-domref');
 
-            if ($returnRef AND $dr AND array_key_exists($dr, $this->_ref)) {
+            if ($returnRef && $dr && array_key_exists($dr, $this->_ref)) {
                 $nl->attach($this->_ref[$dr]);
             }
             else {
@@ -227,7 +227,7 @@ class dom implements \ArrayAccess {
 
         $value = html_entity_decode($value, ENT_QUOTES, 'utf-8');
 
-        if (stripos($value, '<') !== false AND stripos($value, '>') !== false) {
+        if (stripos($value, '<') !== false && stripos($value, '>') !== false) {
             $guid = b::guid("_x_dom");
 
             $_ = new \DOMDocument();

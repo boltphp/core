@@ -112,7 +112,6 @@ class route extends browser\controller implements browser\router\face {
 
         if (!is_subclass_of($o, 'bolt\browser\response\format\face')) {
             throw new \Exception('Format class does not implement bolt\browser\response\format\face');
-            return;
         }
 
         $this->_formats[$format] = $o;

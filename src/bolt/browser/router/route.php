@@ -133,7 +133,7 @@ class route extends sRoute implements face {
         );
 
         // optional
-        if (isset($formats[0]) AND $formats[0]{0} === '?') {
+        if (isset($formats[0]) && $formats[0]{0} === '?') {
             $formats[0] = substr($formats[0],1);
             $this->addDefaults(['_format' => $formats[0]]);
         }
@@ -151,7 +151,7 @@ class route extends sRoute implements face {
     public function compile() {
         $defaults = $this->getDefaults();
 
-        if (array_key_exists('_formats', $defaults) AND !$this->_hasCompiled) {
+        if (array_key_exists('_formats', $defaults) && !$this->_hasCompiled) {
             $path = $this->getPath();
 
             // add format to the path

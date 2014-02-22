@@ -123,7 +123,7 @@ class application extends plugin {
     /**
      * get a path relative to the $root
      *
-     * @params ... path parts
+     * @param ... path parts
      *
      * @return string
      */

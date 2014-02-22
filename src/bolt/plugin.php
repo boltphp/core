@@ -34,7 +34,7 @@ abstract class plugin implements \ArrayAccess {
             return $this;
         }
 
-        if (is_string($class) AND !class_exists($class, true)) {
+        if (is_string($class) && !class_exists($class, true)) {
             throw new Exception("Unknown class $class attempted to plugin as $name");
         }
 
@@ -134,10 +134,10 @@ abstract class plugin implements \ArrayAccess {
         $constr = $ref->getConstructor();
 
         // constructor and number of params
-        if ($constr AND $constr->getNumberOfParameters() > 0) {
+        if ($constr && $constr->getNumberOfParameters() > 0) {
             $parent = get_called_class();
             foreach ($constr->getParameters() as $p) {
-                if (($c = $p->getClass()) !== null AND $c->name == $parent) {
+                if (($c = $p->getClass()) !== null && $c->name == $parent) {
                     $args[] = $this;
                 }
                 else if ($p->name === 'config') {

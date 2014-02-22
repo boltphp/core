@@ -15,7 +15,7 @@ class base {
         if (!is_array($a1)) { $a1 = array(); }
         if (!is_array($a2)) { $a2 = array(); }
         foreach ( $a2 as $k => $v ) {
-            if ( array_key_exists($k, $a1) AND is_array($v) ) {
+            if ( array_key_exists($k, $a1) && is_array($v) ) {
                 $a1[$k] = self::mergeArray($a1[$k], $a2[$k]);
             }
             else {

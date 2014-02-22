@@ -86,7 +86,7 @@ class models implements plugin\singleton, \ArrayAccess {
     public function find($entity, $id) {
         $o = $this->_getRepoForEntity($entity)->find($id);
 
-       if ($o AND is_object($o)) {
+       if ($o && is_object($o)) {
            $o->setManager($this);
            $o->setLoaded(true);
            return $o;
@@ -134,7 +134,7 @@ class models implements plugin\singleton, \ArrayAccess {
     public function findOneBy($entity, array $criteria, array $order) {
         $o = $this->_getRepoForEntity($entity)->findBy($criteria, $order);
 
-        if ($o AND is_object($o)) {
+        if ($o && is_object($o)) {
             $o->setManager($this);
             $o->setLoaded(true);
             return $o;
