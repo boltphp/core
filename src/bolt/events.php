@@ -110,7 +110,7 @@ trait events {
      *
      *
      */
-    protected function fire($type, $data=[]) {
+    public function fire($type, $data=[]) {
         if (!array_key_exists($type, $this->_events)) { return false; }
 
         // event

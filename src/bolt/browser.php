@@ -268,7 +268,6 @@ class browser extends plugin {
         if (isset($this['router'])) {
             $controller = false;
 
-
             // run the request router againts this request
             try {
 
@@ -299,6 +298,7 @@ class browser extends plugin {
 
                 // run the controller
                 $this->_response = $controller->run($params);
+
 
             }
             else {

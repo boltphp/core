@@ -171,8 +171,6 @@ class repository {
         // see if the enity wants to transform
         $data = $this->_getTransform('find', $resp->json());
 
-
-
         // generate an entity
         return $this->generateEntity($data);
 

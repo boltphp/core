@@ -7,6 +7,7 @@ use \b;
  * base controller class
  */
 class controller {
+    use \bolt\events;
 
     /**
      * @var string
@@ -40,7 +41,7 @@ class controller {
      * @param bolt\browser
      *
      */
-    final public function __construct(\bolt\browser $browser) {
+    public function __construct(\bolt\browser $browser) {
 
         $this->_browser = $browser;
         $this->_app = $browser->app;

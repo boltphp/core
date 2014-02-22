@@ -39,4 +39,19 @@ class nodeList extends \SplObjectStorage {
         return count($this);
     }
 
+    public function html() {
+        $html = '';
+
+        foreach ($this as $item) {
+            $html .= $item->html();
+        }
+
+        return $html;
+
+    }
+
+    public function __toString() {
+        return (string)$this->html();
+    }
+
 }

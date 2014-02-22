@@ -3,6 +3,8 @@
 namespace bolt\dom;
 use \b;
 
+use Symfony\Component\CssSelector\CssSelector;
+
 class element {
 
     private $_guid;
@@ -53,7 +55,20 @@ class element {
     }
 
     public function html() {
-        return $this->_dom->doc()->saveHTML($this->_node);
+        $ref = clone $this->_dom->doc();
+
+        $xpath = new \DOMXPath($ref);
+
+        $el = $xpath->query(CssSelector::toXPath('[data-domref="'.$this->_guid.'"]'))->item(0);
+
+        foreach ($xpath->query(CssSelector::toXPath('*[data-domref]')) as $node) {
+            $node->removeAttribute('data-domref');
+        }
+        foreach ($xpath->query(CssSelector::toXPath('*[data-fragmentref]')) as $node) {
+            $node->removeAttribute('data-fragmentref');
+        }
+
+        return $ref->saveHTML($el);
     }
 
     public function append($what) {
@@ -160,9 +175,15 @@ class element {
     public function children() {
         $nl = new \bolt\dom\nodeList($this->_dom);
         foreach ($this->_node->childNodes as $node) {
+            if (trim($node->nodeValue) == "") {continue;}
+
             $nl->attach(new element($this->_dom, $node));
         }
         return $nl;
+    }
+
+    public function remove(){
+        $this->_node->parentNode->removeChild($this->_node);
     }
 
 }

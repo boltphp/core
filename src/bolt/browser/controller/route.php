@@ -27,6 +27,20 @@ class route extends browser\controller implements browser\router\face {
      */
     protected $_request = false;
 
+    /**
+     * Construct
+     *
+     * @param bolt\browser
+     *
+     */
+    final public function __construct(\bolt\browser $browser, \bolt\browser\request $req = null, \bolt\browser\response $resp = null) {
+        parent::__construct($browser);
+
+        $this->_request = $req ?: $browser->getRequest();
+        $this->_response = $resp ?: $browser->getResponse();
+
+    }
+
 
     /**
      * magic get method
@@ -38,9 +52,9 @@ class route extends browser\controller implements browser\router\face {
     public function __get($name) {
         switch($name) {
             case 'request':
-                return $this->_browser->getRequest();
+                return $this->_request;
             case 'response':
-                return $this->_browser->getResponse();
+                return $this->_response;
         };
 
         return parent::__get($name);
@@ -119,6 +133,8 @@ class route extends browser\controller implements browser\router\face {
      */
     public function build($params=[]) {
 
+        $this->fire('beforeBuild');
+
         // what method
         $method = $this->request->getMethod();
 
@@ -167,6 +183,9 @@ class route extends browser\controller implements browser\router\face {
      * @return bolt\browser\response
      */
     public function run($params) {
+
+
+        $this->fire('beforeRun');
 
         // run before
         $this->before();
@@ -235,6 +254,8 @@ class route extends browser\controller implements browser\router\face {
 
         // set our content in the response
         $this->response->setContent($content);
+
+        $this->fire('afterRun');
 
         return $this->response;
     }
