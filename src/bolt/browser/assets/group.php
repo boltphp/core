@@ -34,7 +34,6 @@ class group implements \IteratorAggregate {
 
     public function add($files) {
 
-
         if (is_string($files) && (stripos($files, 'http') !== false || strpos($files, '//') === 0)) {
             $this->_col->add(new HttpAsset($files));
         }
@@ -73,38 +72,39 @@ class group implements \IteratorAggregate {
 
     }
 
-    public function appendToDom($dom, $to, $combo=null) {
+    public function appendToDom($dom, $to, $combo=null, $attr = []) {
         if ($combo === null) { $combo = b::env() !== 'dev'; }
 
         if ($this->_type == 'script') {
             if ($combo) {
-                $to->append($dom->create("script", null, [
-                        'src' => $this->getComboUrl()
-                    ]));
+                $attr['src'] = $this->getComboUrl();
+                $to->append($dom->create("script", null, $attr));
             }
             else {
                 foreach ($this->_col->all() as $file) {
-                    $to->append($dom->create("script", null, [
-                            'src' => $this->_assets->url($file->getSourcePath())
-                        ]));
+                    $attr['src'] = $this->_assets->url($file);
+
+                    $to->append($dom->create("script", null, $attr));
                 }
             }
         }
         else {
             if ($combo) {
-                $to->append($dom->create("link", null, [
-                        'type' => 'text/css',
-                        'rel' => 'stylesheet',
-                        'href' => $this->getComboUrl()
-                    ]));
+                $attr += [
+                    'type' => 'text/css',
+                    'rel' => 'stylesheet',
+                    'href' => $this->getComboUrl()
+                ];
+                $to->append($dom->create("link", null, $attr));
             }
             else {
                 foreach ($this->_col->all() as $file) {
-                    $to->append($dom->create("link", null, [
-                            'type' => 'text/css',
-                            'rel' => 'stylesheet',
-                            'href' => $this->_assets->url($file->getSourcePath())
-                        ]));
+                    $attr += [
+                        'type' => 'text/css',
+                        'rel' => 'stylesheet',
+                        'href' => $this->_assets->url($file->getSourcePath())
+                    ];
+                    $to->append($dom->create("link", null, $attr));
                 }
             }
         }

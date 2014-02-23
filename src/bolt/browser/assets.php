@@ -236,16 +236,16 @@ class assets implements \bolt\plugin\singleton {
      * @return string
      */
     public function url($path) {
+        if (is_a($path, 'Assetic\Asset\HttpAsset')) {
+            return $path->getSourceRoot()."/".$path->getSourcePath();
+        }
+
         if (is_a($path, 'Assetic\Asset\FileAsset')) {
             $path = $path->getSourcePath();
         }
 
         if (is_string($path)) {
             return str_replace('{path}', "{$path}", rtrim($this->_config['path'],'/'));
-        }
-
-        if (is_a($path, 'Assetic\Asset\HttpAsset')) {
-            return $path->getSourceRoot()."/".$path->getSourcePath();
         }
     }
 
