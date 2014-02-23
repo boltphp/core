@@ -5,7 +5,7 @@ interface TestClassInterface {
 
 }
 
-class TestClass implements TestClassInterface {
+class testClass implements TestClassInterface {
 
     public $publicProperty = true;
     protected $protectedProperty = true;

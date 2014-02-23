@@ -12,19 +12,52 @@ use \Doctrine\DBAL\Types\Type;
  */
 class models implements plugin\singleton, \ArrayAccess {
 
+    /**
+     * application
+     *
+     * @var bolt\application
+     */
     private $_app;
 
+    /**
+     * configuration
+     *
+     * @var array
+     */
     private $_config = [];
 
+    /**
+     * list of entity aliases
+     *
+     * @var array
+     */
     private $_alias = [];
 
+    /**
+     * entity manager
+     *
+     * @var object
+     */
     private $_em;
 
+    /**
+     * custom type map
+     *
+     * @var array
+     */
     public static $types = [
         'timestamp' => 'bolt\models\types\timestamp',
         'string_array' => 'bolt\models\types\stringArray'
     ];
 
+
+    /**
+     * Construct
+     *
+     * @param bolt\application $app application
+     * @param array $config
+     *
+     */
     public function __construct(application $app, $config = []) {
         $this->_app = $app;
 
@@ -71,8 +104,32 @@ class models implements plugin\singleton, \ArrayAccess {
 
     }
 
+
+    /**
+     * return the entity manager refrance
+     *
+     * @return object
+     */
     public function getEntityManager() {
         return $this->_em;
+    }
+
+
+    /**
+     * get a model
+     *
+     * @param string $name entity class name or alias
+     *
+     * @return bolt\model\proxy
+     */
+    public function get($name){
+        if (array_key_exists($name, $this->_alias)) {
+            $name = $this->_alias[$name];
+        }
+        if (class_exists($name, true)) {
+            return new models\proxy($this, $name);
+        }
+        throw new \Exception("No entity class '$name' found");
     }
 
     /**
@@ -92,9 +149,13 @@ class models implements plugin\singleton, \ArrayAccess {
            return $o;
        }
 
+       $empty = new $entity();
+       $empty->setManager($this);
+
        // return blank entity
-       return new $entity();
+       return $empty;
     }
+
 
     /**
      * find all entities
@@ -106,6 +167,7 @@ class models implements plugin\singleton, \ArrayAccess {
     public function findAll($entity) {
         return new models\result($this, $entity, $this->_getRepoForEntity($entity)->findAll());
     }
+
 
     /**
      * find entities by search $criteria
@@ -122,6 +184,7 @@ class models implements plugin\singleton, \ArrayAccess {
         return new models\result($this, $entity, $this->_getRepoForEntity($entity)->findBy($criteria, $order, $limit, $offset));
     }
 
+
     /**
      * find one enitity by query $criteria
      *
@@ -131,8 +194,8 @@ class models implements plugin\singleton, \ArrayAccess {
      *
      * @return bolt\models\entity
      */
-    public function findOneBy($entity, array $criteria, array $order) {
-        $o = $this->_getRepoForEntity($entity)->findBy($criteria, $order);
+    public function findOneBy($entity, array $criteria, array $order = []) {
+        $o = $this->_getRepoForEntity($entity)->findOneBy($criteria, $order);
 
         if ($o && is_object($o)) {
             $o->setManager($this);
@@ -140,49 +203,106 @@ class models implements plugin\singleton, \ArrayAccess {
             return $o;
         }
 
+        $empty = new $entity();
+        $empty->setManager($this);
+
         // return blank entity
-        return new $entity();
+        return $empty;
 
     }
 
 
-
-    private function _getRepoForEntity($entity) {
+    /**
+     * return a repository for a give entity or alias
+     *
+     * @param  string $entity entity class name or alias name
+     *
+     * @return object
+     */
+    protected function _getRepoForEntity($entity) {
         if (array_key_exists($entity, $this->_alias)) {
             $entity = $this->_alias[$entity];
         }
+        if (!class_exists($entity, true)) {
+            throw new \Exception("No entity class for '$entity' exists");
+        }
+
         return $this->_em->getRepository($entity);
     }
 
 
+    /**
+     * register an entity alias
+     *
+     * @param  string $name alias name
+     * @param  string $entity entity class name
+     *
+     * @return self
+     */
     public function alias($name, $entity) {
         if (!class_exists($entity, true)) {
             throw new \Exception("Class $entity does not exist");
         }
         $this->_alias[$name] = $entity;
+        return $this;
     }
 
+
+    /**
+     * get all registered aliases
+     *
+     * @return array
+     */
+    public function getAliases() {
+        return $this->_alias;
+    }
+
+
+    /**
+     * register an entity alias
+     *
+     * @param  string $name
+     * @param  string $class
+     * @see alias
+     *
+     * @return void
+     */
     public function offsetSet($name, $class) {
-        $this->add($name, $class);
+        $this->alias($name, $class);
     }
 
+    /**
+     * check to see if a registered alias exists
+     *
+     * @param  string $name name of alias
+     *
+     * @return bool
+     */
     public function offsetExists($name) {
         return array_key_exists($name, $this->_alias);
     }
 
+    /**
+     * remove an alias
+     *
+     * @param  string $name
+     *
+     * @return void
+     */
     public function offsetUnset($name) {
         unset($this->_alias[$name]);
     }
 
+    /**
+     * create a new model from given alias or entity class
+     *
+     * @param  string $name
+     * @see  get
+     *
+     * @return bolt\models\proxy
+     */
     public function offsetGet($name) {
-        if (array_key_exists($name, $this->_alias)) {
-            return new models\proxy($this, $this->_alias[$name]);
-        }
-        else if (class_exists($name, true)) {
-            return new models\proxy($this, $name);
-        }
-
-        return false;
+        return $this->get($name);
     }
 
 

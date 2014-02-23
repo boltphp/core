@@ -3,7 +3,40 @@
 class applicationTest extends Test {
 
     public function setUp() {
-        $this->app = new bolt\application(['root' => TEST_ROOT]);
+        $this->app = new bolt\application([
+            'root' => TEST_ROOT,
+            'autoload' => [
+                'tester\\' => MOCK_DIR,
+                MOCK_DIR
+            ]
+        ]);
+    }
+
+    public function test_autoload() {
+        $r = new testClass();
+        $this->assertInstanceOf('testClass', $r);
+        $r = new tester\tester();
+        $this->assertInstanceOf('tester\tester', $r);
+    }
+
+    public function test_envSame() {
+        $run = false;
+        $cb = function() use (&$run) {
+            $run = true;
+        };
+        $this->assertFalse($run);
+        $this->eq($this->app, $this->app->env('dev', $cb));
+        $this->assertTrue($run);
+    }
+
+    public function test_envDiff() {
+        $run = false;
+        $cb = function() use (&$run) {
+            $run = true;
+        };
+        $this->assertFalse($run);
+        $this->eq($this->app, $this->app->env('prod', $cb));
+        $this->assertFalse($run);
     }
 
     public function test_inherits() {

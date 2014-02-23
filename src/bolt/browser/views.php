@@ -13,7 +13,7 @@ class views {
     /**
      * @var array
      */
-    private $_dirs = [];
+    private $_views = [];
 
     /**
      * @var array
@@ -42,7 +42,7 @@ class views {
 
         $this->_browser = $browser;
 
-        $this->_dirs = isset($config['dirs']) ? (array)$config['dirs'] : [];
+        $this->_views = isset($config['views']) ? (array)$config['views'] : [];
         $this->_layouts = isset($config['layouts']) ? (array)$config['layouts'] : [];
 
         if (isset($config['engines'])) {
@@ -58,29 +58,38 @@ class views {
      * add a dir
      *
      * @param string $path
+     * @param string $type type of dir to add
      *
      * @return self
      */
-    public function dir($path) {
+    public function dir($path, $type = 'views') {
         if (is_array($path)) {
             foreach ($path as $item) {
-                $this->dir($item);
+                $this->dir($item, $type);
             }
             return $this;
         }
-
-        $this->_dirs[] = $path;
+        $type == 'layouts' ? $this->_layouts[] = $path : $this->_views[] = $path;
         return $this;
     }
 
 
     /**
-     * get dirs
+     * get view directories
      *
      * @return array
      */
-    public function getDirs() {
-        return $this->_dirs;
+    public function getViewDirs() {
+        return $this->_views;
+    }
+
+    /**
+     * get layout directories
+     *
+     * @return array
+     */
+    public function getLayoutDirs() {
+        return $this->_layouts;
     }
 
 
@@ -119,7 +128,7 @@ class views {
      *
      * @return string
      */
-    public function find($file, $dirs) {
+    public function find($file, array $dirs) {
         foreach ($dirs as $dir) {
             $_ = $this->_browser->path($dir, $file);
             if (file_exists($_)){
@@ -134,11 +143,12 @@ class views {
      * check if a view exists
      *
      * @param string $file
+     * @param array $dirs
      *
      * @return bool
      */
-    public function exists($file) {
-        return $this->find($file, $this->_dirs) !== false;
+    public function exists($file, array $dirs = null) {
+        return $this->find($file, $dirs) !== false;
     }
 
     /**
@@ -152,7 +162,7 @@ class views {
      */
     public function view($file, $vars = [], $context = false) {
         return $this->create(
-                        $this->find($file, $this->_dirs),
+                        $this->find($file, $this->_views),
                         $vars,
                         $context
                     );

@@ -29,6 +29,10 @@ class view implements face {
 
     }
 
+    public function getEngine() {
+        return $this->_engine;
+    }
+
 
     public function render() {
         $str = file_get_contents($this->_file);
