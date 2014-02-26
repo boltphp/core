@@ -15,30 +15,50 @@ abstract class entity {
 
     private $_loaded = false;
 
-    public function setManager(\bolt\models $manager) {
+    final public function setManager(\bolt\models $manager) {
         $this->_manager = $manager;
         return $this;
     }
 
-    public function getManager() {
+    final public function getManager() {
         return $this->_manager;
     }
 
-    public function setLoaded($loaded) {
+    final public function setLoaded($loaded) {
         $this->_loaded = $loaded;
         return $this;
     }
 
-    public function isLoaded() {
+    final public function isLoaded() {
         return $this->_loaded;
     }
 
-    public function loaded() {
+    final public function loaded() {
         return $this->_loaded;
+    }
+
+    private function _hasOp($op, $name) {
+        if (stripos($name, '_') !== false) {
+            $name = implode("", array_map(function($part){
+                return ucfirst($part);
+            }, explode("_", $name)));
+        }
+        $func = $op.strtoupper($name)."Attr";
+        return method_exists($this, $func) ? $func : false;
     }
 
     public function __get($name){
+        if (($op = $this->_hasOp('get', $name)) !== false) {
+            return call_user_func([$this, $op]);
+        }
         return $this->{$name};
+    }
+
+    public function __set($name, $value) {
+        if (($op = $this->_hasOp('set', $name)) !== false) {
+            return call_user_func([$this, $op]);
+        }
+        return $this->{$name} = $value;
     }
 
 }

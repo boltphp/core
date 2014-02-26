@@ -107,6 +107,7 @@ class repository {
         // get a relection of this method
         $ref = b::getReflectionClass($this->_entity);
 
+        // we use a dummy platform
         $p = new \Doctrine\DBAL\Platforms\MySqlPlatform();
 
         // entity before

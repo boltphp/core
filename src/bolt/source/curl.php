@@ -30,6 +30,10 @@ class curl implements face {
 
     }
 
+    public function getClient() {
+        return $this->_client;
+    }
+
     public function getModelEntityManager(\bolt\models $manager, \bolt\models\driver $driver) {
         $this->_modelManager = $manager;
         $this->_modelDriver = $driver;

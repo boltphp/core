@@ -237,6 +237,16 @@ class browser extends plugin {
 
 
     /**
+     * return a list of all middleware
+     *
+     * @return array
+     */
+    public function getMiddleware() {
+        return $this->_middleware;
+    }
+
+
+    /**
      * pass off a run call to the app
      *
      * @return void

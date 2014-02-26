@@ -128,7 +128,9 @@ class views {
      *
      * @return string
      */
-    public function find($file, array $dirs) {
+    public function find($file, array $dirs = null) {
+        $dirs == null ? $dirs = $this->_views : [];
+
         foreach ($dirs as $dir) {
             $_ = $this->_browser->path($dir, $file);
             if (file_exists($_)){

@@ -305,5 +305,35 @@ class models implements plugin\singleton, \ArrayAccess {
         return $this->get($name);
     }
 
+    /**
+     * generate an model
+     *
+     * @param string $class
+     * @param array $data
+     *
+     * @return object
+     */
+    public static function generate($class, array $data) {
+        if (!class_exists($class, true)) {
+            throw new \Exception("Unable to load class '$class'");
+        }
+
+        // generate the blank entity
+        $entity = new $class();
+
+        // get a relection of this method
+        $ref = b::getReflectionClass($class);
+
+        foreach ($data as $name => $value) {
+            if (!$ref->hasProperty($name)) {continue;}
+            $prop = $ref->getProperty($name);
+            $prop->setAccessible(true);
+            $prop->setValue($entity, $value);
+        }
+
+        return $entity;
+
+    }
+
 
 }

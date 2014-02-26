@@ -73,6 +73,16 @@ class application extends plugin {
     }
 
     /**
+     * return all autoload settings
+     *
+     * @return array
+     */
+    public function getAutoload() {
+        return $this->_autoload;
+    }
+
+
+    /**
      * check env and run callback if in that env
      *
      * @param string $env
