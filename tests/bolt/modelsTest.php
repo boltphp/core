@@ -149,6 +149,17 @@ class modelTest extends Test {
         $this->eq($this->m, $e->getManager());
     }
 
+    public function test_generateNoClass() {
+        $this->setExpectedException('Exception');
+        bolt\models::generate("NO_CLASS", []);
+    }
+
+    public function test_generate() {
+        $ref = bolt\models::generate('modelTest_entityNoAlias', ['test' => 9]);
+        $this->assertInstanceOf('modelTest_entityNoAlias', $ref);
+        $this->eq(9, $ref->test);
+    }
+
 }
 
 class modelTest_Source implements bolt\source\face {
@@ -200,6 +211,7 @@ class modelTest_Repo {
 
 class modelTest_entityNoAlias extends \bolt\models\entity {
 
+    protected $test = false;
 
 }
 
