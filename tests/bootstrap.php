@@ -15,6 +15,10 @@ error_reporting(E_ALL);
 
 class Test extends PHPUnit_Framework_TestCase {
 
+    protected function getApp() {
+        return new \bolt\application();
+    }
+
     protected function eq() {
         return call_user_func_array([$this, 'assertEquals'], func_get_args());
     }
