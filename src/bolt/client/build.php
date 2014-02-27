@@ -4,13 +4,12 @@ namespace bolt\client;
 use \b;
 
 
+class build extends command {
 
-class build extends \bolt\cli\command {
+    public static $name = "build";
 
-    static $NS = "bolt";
-
-    public function configure() {
-
+    // build
+    public function call() {
 
 
     }

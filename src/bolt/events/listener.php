@@ -70,7 +70,6 @@ class listener {
 
     }
 
-
     /**
      * return private variables
      *

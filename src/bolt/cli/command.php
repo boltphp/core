@@ -5,7 +5,9 @@ use \b;
 
 use \Symfony\Component\Console\Command\Command as SymfonyCommand,
     \Symfony\Component\Console\Input\InputArgument,
-    \Symfony\Component\Console\Input\InputOption;
+    \Symfony\Component\Console\Input\InputOption,
+    \Symfony\Component\Console\Input\InputInterface,
+    \Symfony\Component\Console\Output\OutputInterface;
 
 class command extends SymfonyCommand {
 
@@ -36,13 +38,13 @@ class command extends SymfonyCommand {
                     case 'options':
                         foreach ($value as $name => $opt) {
                             $opt['name'] = $name;
-                            $this->addOption($opt);
+                            $this->_addOption($opt);
                         }
                         break;
                     case 'arguments':
                         foreach ($value as $name => $opt) {
                             $opt['name'] = $name;
-                            $this->addArgument($opt);
+                            $this->_addArgument($opt);
                         }
                         break;
                 }
@@ -68,8 +70,8 @@ class command extends SymfonyCommand {
         return $this;
     }
 
-    public function addOption($opt) {
-        parent::addOption(
+    private function _addOption($opt) {
+        $this->addOption(
                 $opt['name'],
                 b::param('shortcut', null, $opt),
                 b::param('mode', null, $opt),
@@ -79,8 +81,8 @@ class command extends SymfonyCommand {
         return $this;
     }
 
-    public function addArgument($opt) {
-        parent::addArgument(
+    private function _addArgument($opt) {
+        $this->addArgument(
             $opt['name'],
             b::param('mode', null, $opt),
             b::param('description', null, $opt),
@@ -105,6 +107,11 @@ class command extends SymfonyCommand {
 
     public function init() {
 
+    }
+
+    public function execute(InputInterface $input, OutputInterface $output) {
+
+        $this->call();
     }
 
 }

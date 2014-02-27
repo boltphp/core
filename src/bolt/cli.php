@@ -27,6 +27,9 @@ class cli extends plugin {
         // loop through each plugin and add it to
         $this->_console = new ConsoleApplication();
 
+        $this->_input = new ArgvInput();
+        $this->_output = new ConsoleOutput();
+
     }
 
     public function getApp() {
@@ -46,10 +49,6 @@ class cli extends plugin {
     }
 
     public function execute() {
-
-
-        $this->_input = new ArgvInput();
-        $this->_output = new ConsoleOutput();
 
         foreach ($this->getPlugins() as $plug) {
             $i = $plug['instance'];
