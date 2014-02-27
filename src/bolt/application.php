@@ -165,9 +165,15 @@ class application extends plugin {
      */
     public function run() {
 
+        // if we're in a cli, run it
+        if (php_sapi_name() === 'cli') {
+            $this->fire('run:cli');
+        }
 
-        // fire any run events
-        $this->fire('run');
+        // else assume a browser
+        else {
+            $this->fire('run:browser');
+        }
 
 
         $this->_hasRun = true;

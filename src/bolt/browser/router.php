@@ -237,6 +237,10 @@ class router {
                 $route['controller'] = $class['ref']->name;
                 $route['action'] = b::param('action', false, $route);
 
+                if (!isset($route['formats']) AND isset($class['collection']['formats'])) {
+                    $route['formats'] = $class['collection']['formats'];
+                }
+
                 // loop through each part and set it
                 $c->add($name, router\route::create($route) );
 

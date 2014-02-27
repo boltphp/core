@@ -53,7 +53,7 @@ class browser extends plugin {
         $this->_app = $app;
 
         // we need to
-        $app->on('run', [$this, 'execute']);
+        $app->on('run:browser', [$this, 'execute']);
 
         // new request and response
         $this->_request = $req ?: browser\request::createFromGlobals();

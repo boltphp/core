@@ -5,20 +5,11 @@ use \b;
 
 
 
-class build extends bolt\cli\command {
+class build extends \bolt\cli\command {
 
-    private $_client;
-
-    public function __construct(\bolt\client $client) {
-        $this->_client = $client;
-        parent::__construct();
-    }
+    static $NS = "bolt";
 
     public function configure() {
-
-        $this
-            ->setName("build")
-            ->setDescription("Build a bolt application into a deployable package");
 
 
 
