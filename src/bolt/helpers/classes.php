@@ -3,10 +3,27 @@
 namespace bolt\helpers;
 use \b;
 
+
+/**
+ * classes helper
+ */
 class classes {
 
+    /**
+     * existing refrances
+     *
+     * @var array
+     */
     private $_ref = [];
 
+
+    /**
+     * get the reflection class
+     *
+     * @param string $class
+     *
+     * @return ReflectionClass
+     */
     public function getReflectionClass($class) {
         $name = is_string($class) ? $this->normalizeClassName($class) : get_class($class);
 
@@ -17,14 +34,36 @@ class classes {
         return $this->_ref[$name] = new \ReflectionClass($class);
     }
 
+
+    /**
+     * normalize a class name
+     *
+     * @param string $class
+     *
+     * @return string
+     */
     public function normalizeClassName($class) {
         return ltrim($class, '\\');
     }
 
+
+    /**
+     * get a list of declared classes
+     *
+     * @return array
+     */
     public function getDeclaredClasses() {
         return get_declared_classes();
     }
 
+
+    /**
+     * get classes that implement an interface
+     *
+     * @param string $name class name
+     *
+     * @return array
+     */
     public function getClassImplements($name) {
         $implements = [];
         $name = $this->normalizeClassName($name);
@@ -40,6 +79,14 @@ class classes {
         return $implements;
     }
 
+
+    /**
+     * get classes that have class as a parent
+     *
+     * @param string $name
+     *
+     * @return array
+     */
     public function getSubClassOf($name) {
         $classes = [];
         $name = $this->normalizeClassName($name);

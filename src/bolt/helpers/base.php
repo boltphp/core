@@ -3,20 +3,43 @@
 namespace bolt\helpers;
 use \b;
 
-
+/**
+ * base helpers class
+ */
 class base {
 
-    public function param($key, $default = false, $array) {
+    /**
+     * check for a variable in an array
+     *
+     * @param string $key
+     * @param mixed $default
+     * @param array $array
+     * @param int $filter
+     *
+     * @return mixed
+     */
+    public function param($key, $default = null, array $array, $filter = null) {
         if (!is_array($array)) {return $default;}
-        return array_key_exists($key, $array) ? $array[$key] : $default;
+        $resp = array_key_exists($key, $array) ? $array[$key] : $default;
+        if ($filter !== null) {
+            $resp = filter_var($resp, $filter);
+        }
+        return $resp;
     }
 
-    public function mergeArray($a1, $a2) {
-        if (!is_array($a1)) { $a1 = array(); }
-        if (!is_array($a2)) { $a2 = array(); }
+
+    /**
+     * merge two arrays recursivly
+     *
+     * @param array $a1
+     * @param array $a2
+     *
+     * @return array
+     */
+    public function mergeArray(array $a1, array $a2) {
         foreach ( $a2 as $k => $v ) {
             if ( array_key_exists($k, $a1) && is_array($v) ) {
-                $a1[$k] = self::mergeArray($a1[$k], $a2[$k]);
+                $a1[$k] = $this->mergeArray($a1[$k], $a2[$k]);
             }
             else {
                 $a1[$k] = $v;
