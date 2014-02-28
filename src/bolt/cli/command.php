@@ -13,7 +13,15 @@ class command extends SymfonyCommand {
 
     static $name = "command";
 
+    //
+    const REQUIRED = InputArgument::REQUIRED;
     const OPTIONAL = InputArgument::OPTIONAL;
+    const IS_ARRAY = InputArgument::IS_ARRAY;
+
+    const VALUE_NONE     = InputOption::VALUE_NONE;
+    const VALUE_REQUIRED = InputOption::VALUE_REQUIRED;
+    const VALUE_OPTIONAL = InputOption::VALUE_OPTIONAL;
+    const VALUE_IS_ARRAY = InputOption::VALUE_IS_ARRAY;
 
     private $_cli;
 
@@ -47,7 +55,10 @@ class command extends SymfonyCommand {
                             $this->_addArgument($opt);
                         }
                         break;
-                }
+                    case 'aliases':
+                        $this->setAliases($value);
+                        break;
+                };
             }
         }
 
@@ -61,12 +72,29 @@ class command extends SymfonyCommand {
                 return $this->_cli->getApp();
             case 'cli':
                 return $this->_cli;
+            case 'output':
+                return $this->_cli->getOutput();
+            case 'input':
+                return $this->_cli->getInput();
+        };
+        return null;
+    }
+
+    public function get($name) {
+        switch($name) {
+            case 'table':
+                return $this->_cli->getConsole()->getHelperSet()->get($name);
         };
         return null;
     }
 
     public function setName($name) {
         parent::setName(implode(":", [$this::$ns, $name]));
+        return $this;
+    }
+
+    public function setAliases(array $aliases) {
+        parent::setAliases(array_map(function($name){ return implode(":", [$this::$ns, $name]); }, $aliases));
         return $this;
     }
 
@@ -110,8 +138,25 @@ class command extends SymfonyCommand {
     }
 
     public function execute(InputInterface $input, OutputInterface $output) {
+        $method = 'call';
 
-        $this->call();
+        if ($input->hasArgument('cmd') && method_exists($this, $input->getArgument('cmd'))) {
+            $method = $input->getArgument('cmd');
+        }
+
+        $ref = new \ReflectionMethod($this, $method);
+        $params = [];
+
+        foreach ($ref->getParameters() as $param) {
+            if ($input->hasArgument($param->name)) {
+                $params[] = $input->getArgument($param->name) ?: $param->getDefaultValue();
+            }
+            else if ($input->hasOption($param->name)) {
+                $params[] = $input->getOption($param->name) ?: $param->getDefaultValue();
+            }
+        }
+
+        return call_user_func_array([$this, $method], $params);
     }
 
 }

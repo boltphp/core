@@ -11,7 +11,7 @@ class models_resultsTest extends Test {
     }
 
     public function test_implements() {
-        $this->assertInstanceOf('SplDoublyLinkedList', $this->p);
+        $this->assertInstanceOf('bolt\helpers\collection', $this->p);
     }
 
     public function test_constructWithItems() {

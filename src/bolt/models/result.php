@@ -2,12 +2,11 @@
 
 namespace bolt\models;
 
-use \SplDoublyLinkedList;
 
 /**
  * model results
  */
-class result extends SplDoublyLinkedList {
+class result extends \bolt\helpers\collection {
 
     /**
      * model manager
@@ -35,8 +34,6 @@ class result extends SplDoublyLinkedList {
         $this->_manager = $manager;
         $this->_entity = $entity;
 
-        // FIFO
-        $this->setIteratorMode(SplDoublyLinkedList::IT_MODE_FIFO);
 
         if (isset($items)) {
             foreach ($items as $item) {
@@ -81,23 +78,5 @@ class result extends SplDoublyLinkedList {
     }
 
 
-    /**
-     * first item in list
-     *
-     * @return mixed
-     */
-    public function first() {
-        return count($this) > 0 ? $this[0] : null;
-    }
-
-
-    /**
-     * last item in list
-     *
-     * @return mixed
-     */
-    public function last() {
-        return count($this) > 0 ? $this[count($this) - 1] : null;
-    }
 
 }

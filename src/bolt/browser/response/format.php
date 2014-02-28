@@ -115,6 +115,7 @@ abstract class format implements format\face {
         }
 
 
+
         return $this->_content;
 
 

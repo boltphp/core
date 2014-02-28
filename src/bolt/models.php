@@ -106,6 +106,30 @@ class models implements plugin\singleton, \ArrayAccess {
 
 
     /**
+     * get result object
+     *
+     * @param string $entity
+     *
+     * @return bolt\models\result
+     */
+    public function getResult($entity) {
+        return new \bolt\models\result($this, $entity);
+    }
+
+
+    /**
+     * generate an entity from
+     *
+     * @param string $entity
+     * @param array $data
+     *
+     * @return object
+     */
+    public function generateEntity($entity, array $data) {
+        return self::generate($entity, $data, $this);
+    }
+
+    /**
      * return the entity manager refrance
      *
      * @return object
@@ -313,7 +337,7 @@ class models implements plugin\singleton, \ArrayAccess {
      *
      * @return object
      */
-    public static function generate($class, array $data) {
+    public static function generate($class, array $data, \bolt\models $manager = null) {
         if (!class_exists($class, true)) {
             throw new \Exception("Unable to load class '$class'");
         }
@@ -330,6 +354,12 @@ class models implements plugin\singleton, \ArrayAccess {
             $prop->setAccessible(true);
             $prop->setValue($entity, $value);
         }
+
+        if ($manager) {
+            $entity->setManager($manager);
+        }
+
+        $entity->setLoaded(true);
 
         return $entity;
 

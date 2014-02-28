@@ -3,6 +3,9 @@
 namespace bolt\models;
 
 
+use Symfony\Component\PropertyAccess\PropertyAccess;
+
+
 /**
  *
  * @todo implement interface to make sure
@@ -25,6 +28,7 @@ abstract class entity {
      */
     private $_loaded = false;
 
+    private $_access;
 
     /**
      * set the models manager
@@ -103,6 +107,25 @@ abstract class entity {
         return method_exists($this, $func) ? $func : false;
     }
 
+    private function _getAccessor() {
+        if (!$this->_access) {
+            $this->_access = PropertyAccess::createPropertyAccessorBuilder()
+                    ->getPropertyAccessor();
+        }
+        return $this->_access;
+    }
+
+    public function getValue($var, $default = null) {
+        try {
+            return $this->_getAccessor()->getValue($this, $var, $default);
+        }
+        catch (\Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException $e) {
+            return $default;
+        }
+        catch (\Symfony\Component\PropertyAccess\PropertyAccessor\NoSuchPropertyException $e) {
+            return $default;
+        }
+    }
 
     /**
      * get an attribute value
@@ -113,7 +136,7 @@ abstract class entity {
         if (($op = $this->_hasOp('get', $name)) !== false) {
             return call_user_func([$this, $op]);
         }
-        return $this->{$name};
+        return property_exists($this, $name) ? $this->{$name} : null;
     }
 
 
