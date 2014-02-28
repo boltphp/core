@@ -82,8 +82,12 @@ class command extends SymfonyCommand {
 
     public function get($name) {
         switch($name) {
+            case 'progress':
+            case 'dialog':
+            case 'formatter':
             case 'table':
                 return $this->_cli->getConsole()->getHelperSet()->get($name);
+
         };
         return null;
     }
@@ -93,7 +97,7 @@ class command extends SymfonyCommand {
         return $this;
     }
 
-    public function setAliases(array $aliases) {
+    public function setAliases($aliases) {
         parent::setAliases(array_map(function($name){ return implode(":", [$this::$ns, $name]); }, $aliases));
         return $this;
     }

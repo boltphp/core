@@ -9,7 +9,6 @@ $app->plug('cli', 'bolt\cli');
 
 bolt\client::bind($app);
 
-
 $code = $app->run();
 
 exit($code);

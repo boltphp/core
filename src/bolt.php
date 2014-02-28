@@ -33,6 +33,11 @@ date_default_timezone_set('UTC');
 class bolt {
 
     /**
+     * @var string
+     */
+    const VERSION = '0.4.4';
+
+    /**
      * @var b
      */
     private static $_instance;

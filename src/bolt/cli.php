@@ -24,10 +24,14 @@ class cli extends plugin {
 
         $this->_app->on('run:cli', [$this, 'execute']);
 
+        if (!isset($config['argv'])) {
+            $config['argv'] = isset($_SERVER['argv']) ? $_SERVER['argv'] : [];
+        }
+
         // loop through each plugin and add it to
         $this->_console = new ConsoleApplication();
 
-        $this->_input = new ArgvInput();
+        $this->_input = new ArgvInput($config['argv']);
         $this->_output = new ConsoleOutput();
 
     }
