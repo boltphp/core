@@ -29,6 +29,16 @@ class application extends plugin {
     private $_autoload = [];
 
     /**
+     * @var array
+     */
+    private $_compiled = [];
+
+    /**
+     * @var bool
+     */
+    private $_useCompiled = true;
+
+    /**
      * construct a new application instance
      *
      * @param $config array config
@@ -41,6 +51,10 @@ class application extends plugin {
 
         // autoload
         $this->_autoload = b::param('autoload', [], $config);
+
+        if (isset($config['compiled'])) {
+            $this->loadCompiled($config['compiled']);
+        }
 
         // register
         spl_autoload_register([$this, 'autoload']);
@@ -70,6 +84,65 @@ class application extends plugin {
                 require_once($_);
             }
         }
+    }
+
+
+    /**
+     * load compiled
+     *
+     * @param mixed $what
+     *
+     * @return self
+     */
+    public function loadCompiled($what) {
+        if (is_string($what) AND is_dir($what) AND file_exists(b::path($what, "loader.php"))) {
+            $loader = require_once("{$what}/loader.php");
+            if (is_array($loader)) {
+                foreach ($loader as $name) {
+                    $this->loadCompiled(b::path($what, "{$name}.php"));
+                }
+            }
+            return $this;
+        }
+        else if (is_string($what) AND is_file($what)) {
+            $_ = require_once($what);
+            $_['dir'] = dirname($what);
+            $this->loadCompiled($_);
+            return $this;
+        }
+
+        // is array
+        if (is_array($what)) {
+            $this->_compiled[$what['name']] = $what;
+            return $this;
+        }
+
+    }
+
+    /**
+     * get compiled asset
+     *
+     * @param string $name
+     *
+     * @return array
+     */
+    public function getCompiled($name) {
+        if ($this->_useCompiled !== false AND array_key_exists($name, $this->_compiled)) {
+            return $this->_compiled[$name];
+        }
+        return [];
+    }
+
+    /**
+     * set use compiled setting
+     *
+     * @param bool $flag
+     *
+     * @return self
+     */
+    public function useCompiled($flag) {
+        $this->_useCompiled = $flag;
+        return $this;
     }
 
     /**
@@ -157,6 +230,26 @@ class application extends plugin {
 
     }
 
+
+    /**
+     * get composer file
+     */
+    public function getComposerFile() {
+        $composer = b::path($this->_root, "composer.json");
+
+        while(file_exists($composer) === false && $composer !== '/composer.json') {
+            $composer = b::path(realpath(dirname($composer)."/../"), 'composer.json');
+        }
+
+        if (file_exists($composer)) {
+            return [
+                'dir' => dirname($composer),
+                'file' => json_decode(file_get_contents($composer))
+            ];
+        }
+
+        return null;
+    }
 
     /**
      * run the application

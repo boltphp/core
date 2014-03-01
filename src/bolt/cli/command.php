@@ -128,6 +128,10 @@ class command extends SymfonyCommand {
         return $this;
     }
 
+    public function writeError($msg) {
+        return $this->writeln('<error>'.$msg.'</error>');
+    }
+
     public function arg($name) {
         return $this->_cli->getInput()->getArgument($name);
     }

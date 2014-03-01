@@ -13,18 +13,21 @@ class handlebars extends base {
     /**
      * @var Handlebars\Handlebars
      */
-    private static $_instance;
+    private $_instance;
 
+    public static function canCompile() {
+        return true;
+    }
 
     /**
      * Constructor
      */
-    public function __construct() {
-        if (!self::$_instance) {
-            self::$_instance = new HBR([
+    protected function getInstance() {
+        if (!$this->_instance) {
+            $this->_instance = new HBR([
                     'delimiters' => "<% %>",
                 ]);
-            self::$_instance->addHelper('=', function($template, $context, $args, $source) {
+            $this->_instance->addHelper('=', function($template, $context, $args, $source) {
                 $ctx = $context->get('context');
                 $func = function($args) {
                     return eval('return '.trim($args, '; ').';');
@@ -32,13 +35,23 @@ class handlebars extends base {
                 return call_user_func($func->bindto($ctx, $ctx), $args);
             });
         }
+        return $this->_instance;
     }
 
 
     /**
      * compile to freezable class
      */
-    public function compile() {}
+    public function compile($str) {
+        $i = $this->getInstance();
+        $tokens = $i->getTokenizer()->scan($str, '<% %>');
+        $tree = $i->getParser()->parse($tokens);
+
+        return [
+            'tokens' => $tokens,
+            'tree' => $tree
+        ];
+    }
 
 
     /**
@@ -50,7 +63,11 @@ class handlebars extends base {
      * @return string
      */
     public function render($str, $vars = []) {
-        return self::$_instance->render($str, $vars);
+        if (is_array($str)) {
+            var_dump($str); die;
+        }
+
+        return $this->getInstance()->render($str, $vars);
     }
 
 

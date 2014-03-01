@@ -8,12 +8,20 @@ namespace bolt\render;
  */
 abstract class base {
 
-    /**
-     * compile abstract
-     *
-     * @return string
-     */
-    abstract public function compile();
+    protected $manager = false;
+
+    public static function canCompile() {
+        return false;
+    }
+
+    final public function __construct(\bolt\render $manager) {
+        $this->manager = $manager;
+        $this->init();
+    }
+
+    protected function init() {
+
+    }
 
 
     /**

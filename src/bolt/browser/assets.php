@@ -6,7 +6,8 @@ use \b;
 
 use Assetic\Asset\FileAsset;
 use Assetic\Asset\HttpAsset;
-
+use Assetic\Asset\AssetCollection;
+use Assetic\Asset\GlobAsset;
 
 /**
  * asset manager
@@ -64,7 +65,12 @@ class assets implements \bolt\plugin\singleton {
         if (isset($config['globals'])) {
             $this->globals($config['globals']);
         }
+
+        // compile events
+        $browser->app->on("compile", [$this, 'compile']);
+
     }
+
 
 
     /**
@@ -104,7 +110,12 @@ class assets implements \bolt\plugin\singleton {
             }
             return $this;
         }
-
+        if (stripos($ext, ',') !== false) {
+            foreach (explode(',', $ext) as $_) {
+                call_user_func_array([$this, 'filter'], [$_, $class, $args]);
+            }
+            return $this;
+        }
         if (!array_key_exists($ext, $this->_filters)) { $this->_filters[$ext] = []; }
         $this->_filters[$ext][] = [
             'class' => $class,
@@ -112,6 +123,7 @@ class assets implements \bolt\plugin\singleton {
             'args' => $args,
             'ref' => b::getReflectionClass($class)
         ];
+
         return $this;
     }
 
@@ -164,6 +176,7 @@ class assets implements \bolt\plugin\singleton {
      * @return mixed
      */
     public function find($file) {
+
 
         foreach ($this->_dirs as $dir) {
             $path = $this->_browser->path($dir, $file);
@@ -241,8 +254,16 @@ class assets implements \bolt\plugin\singleton {
         }
 
         if (is_a($path, 'Assetic\Asset\FileAsset')) {
-            $path = $path->getSourcePath();
+            $path = b::path($path->getSourcePath());
         }
+
+        // compiled
+        $compiled = $this->_browser->app->getCompiled('assets');
+
+        if (isset($compiled['data']['map']) AND array_key_exists($path, $compiled['data']['map'])) {
+            $path = $compiled['data']['map'][$path]['name'];
+        }
+
 
         if (is_string($path)) {
             return str_replace('{path}', "{$path}", rtrim($this->_config['path'],'/'));
@@ -306,10 +327,18 @@ class assets implements \bolt\plugin\singleton {
      *
      * @return array
      */
-    public function getFilters($ext) {
+    public function getFilters($ext, $when = null) {
         $items = [];
         if (array_key_exists($ext, $this->_filters)) {
             foreach ($this->_filters[$ext] as $i => $filter) {
+
+                // make sure to only run when
+                if ($when AND isset($filter['args']['when'])) {
+                    if ( (is_string($filter['args']['when']) && $filter['args']['when'] !== $when) ||
+                        (is_array($filter['args']['when']) && !in_array($when, $filter['args']['when']))
+                    ) { continue; }
+                }
+
                 if (!$filter['instance']) {
                     $this->_filters[$ext][$i]['instance'] = $filter['instance'] = $filter['ref']->newInstanceArgs($filter['args']);
                 }
@@ -317,6 +346,82 @@ class assets implements \bolt\plugin\singleton {
             }
         }
         return $items;
+    }
+
+
+
+    /**
+     * compile assets into the compile directory
+     *
+     * @param bolt\events\event $e
+     *
+     * @return void
+     */
+    public function compile($e) {
+        $dir = $e->data['client']->makeDir('assets');
+
+        // compiled map holder
+        $map = [];
+        $files = [];
+
+        // loop through each of our dirs and
+        // find any file that matches our needs
+        foreach ($this->_dirs as $base) {
+            $root = $this->_browser->path($base);
+            $assets = b::fs('glob', "{$root}/**/*.*")->asArray();
+
+            foreach ($assets as $file) {
+                $rel = str_replace($root, "", $file);
+                $i = pathinfo($file);
+
+                //
+                $o = $this->compileFile($file);
+                $dump = $o->dump();
+                $id = md5($dump);
+                $name = "{$i['filename']}-{$id}.{$i['extension']}";
+                $map[$rel] = [
+                    'id' => $id,
+                    'name' => $name,
+                    'mtime' => filemtime($file)
+                ];
+                $files[] = $name;
+
+                // put our file in dir
+                file_put_contents("{$dir}/{$name}", $dump);
+
+            }
+
+        }
+
+        $e->data['client']->saveCompileLoader('assets', ['map' => $map, 'files' => $files]);
+
+
+    }
+
+    public function compileFile($file) {
+        $ext = pathinfo($file)['extension'];
+        $o = false;
+
+        if ($this->getGlobals($ext)) {
+
+            // fm
+            $fm = new AssetCollection([]);
+
+            foreach ($this->getGlobals($ext) as $path) {
+                if (is_string($path)) {
+                    $fm->add( stripos($path, '*') !== false ? new GlobAsset($path) : new FileAsset($path) );
+                }
+            }
+
+            $fm->add(new FileAsset($file));
+            $o = new StringAsset($fm->dump(), $this->getFilters($ext));
+        }
+        else {
+            $o = new FileAsset($file, $this->getFilters($ext));
+        }
+
+        return $o;
+
     }
 
 }

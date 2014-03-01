@@ -24,6 +24,7 @@
         "symfony/dom-crawler": "2.4.*",
         "symfony/css-selector": "2.4.*",
         "symfony/console": "2.4.*",
+        "symfony/filesystem": "2.4.*",
 
         "doctrine/orm": "2.3.*",
         "doctrine/dbal": "2.3.*",

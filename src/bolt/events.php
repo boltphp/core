@@ -121,7 +121,9 @@ trait events {
         return $this;
     }
 
-
+    public function executeListener(events\listener $listener, $data = []) {
+        return $listener->execute(new events\event($listener, $data));
+    }
 
 
 }

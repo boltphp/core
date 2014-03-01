@@ -13,15 +13,11 @@ class view implements face {
 
     private $_context;
 
-    private $_engine;
-
-    public function __construct(\bolt\browser\views $manager, $file, $engine, $config = []) {
+    public function __construct(\bolt\browser\views $manager, $file, $config = []) {
 
         $this->_manager = $manager;
 
         $this->_file = $file;
-
-        $this->_engine = $engine;
 
         $this->_vars = $config['vars'];
 
@@ -29,15 +25,9 @@ class view implements face {
 
     }
 
-    public function getEngine() {
-        return $this->_engine;
-    }
-
-
     public function render() {
-        $str = file_get_contents($this->_file);
         $this->_vars['context'] = $this->_context;
-        return $this->_engine->render($str, $this->_vars);
+        return $this->_manager->renderFile($this->_file, $this->_vars);
     }
 
     public function __invoke() {

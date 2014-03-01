@@ -45,6 +45,8 @@ class assets extends \bolt\browser\middleware {
         // content
         $content = [];
 
+        // compiled
+        $compiled = $this->browser->app->getCompiled('assets');
 
         // explode out the path
         foreach (explode('&', trim($matches[1], '&')) as $path) {
@@ -52,33 +54,22 @@ class assets extends \bolt\browser\middleware {
 
             if (!$info) {continue;}
 
-            // get our path
-            $dir = $info['dirname'];
-            $file = $info['basename'];
             $ext = strtolower($info['extension']);
 
+            if (isset($compiled['data']['files']) AND in_array($path, $compiled['data']['files'])) {
+                $content[] = file_get_contents(b::path($compiled['dir'], 'assets', $path));
+            }
+            else {
 
-            // loop through each path
-            if (($file = $this->_assets->find($path)) !== false) {
+                // get our path
+                $dir = $info['dirname'];
+                $file = $info['basename'];
 
-                if ($this->_assets->getGlobals($ext)) {
-
-                    // fm
-                    $fm = new AssetCollection([]);
-
-                    foreach ($this->_assets->getGlobals($ext) as $path) {
-                        if (is_string($path)) {
-                            $fm->add( stripos($path, '*') !== false ? new GlobAsset($path) : new FileAsset($path) );
-                        }
-                    }
-
-                    $fm->add(new FileAsset($file['path']));
-                    $last = new StringAsset($fm->dump(), $this->_assets->getFilters($ext));
+                // loop through each path
+                if (($file = $this->_assets->find($path)) !== false) {
+                    $content[] = $this->_assets->compileFile($file['path'], $file['rel'])->dump();
                 }
-                else {
-                    $last = new FileAsset($file['path'], $this->_assets->getFilters($ext));
-                }
-                $content[] = $last->dump();
+
             }
 
         }
