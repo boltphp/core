@@ -54,7 +54,8 @@ class viewsTest extends Test {
         $this->eq($this->v, $this->v->engine('html', 'viewsTest_Engine'));
         $this->eq(['html' => [
                 'class' => 'viewsTest_Engine',
-                'instance' => false
+                'instance' => false,
+                'canCompile' => false
             ]], $this->v->getEngines());
     }
 
@@ -109,14 +110,16 @@ class viewsTest extends Test {
         $e = $this->v->getEngines()['html']['instance'];
         $v = $this->v->create(TEST_ROOT."/mock/test.html");
 
-        $this->eq($e, $v->getEngine());
 
     }
 
 }
 
 
-class viewsTest_Engine {
+class viewsTest_Engine extends \bolt\render\base {
 
+    public function render($str, $vars = []) {
+
+    }
 
 }
