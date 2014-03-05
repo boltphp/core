@@ -30,6 +30,16 @@ abstract class entity {
 
     private $_access;
 
+
+    /**
+     * get the base app
+     *
+     * @return bolt\application
+     */
+    final public function getApp() {
+        return $this->_manager->getApp();
+    }
+
     /**
      * set the models manager
      *

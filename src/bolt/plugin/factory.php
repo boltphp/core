@@ -14,6 +14,6 @@ interface factory {
      *
      * @param array $config
      */
-    public static function factory($config = []);
+    public static function factory($parent, $config = []);
 
 }
