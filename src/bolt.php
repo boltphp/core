@@ -27,10 +27,13 @@ define('bStart', microtime(true));
 // default to utc
 date_default_timezone_set('UTC');
 
+
+
 /**
  *
  */
 class bolt {
+
 
     /**
      * @var string
