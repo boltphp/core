@@ -142,7 +142,7 @@ class pluginTest_TestWithConstructParams implements \bolt\plugin\singleton {
 
 class pluginTest_TestPluginFactory implements \bolt\plugin\factory {
 
-    public static function factory($config = []) {
+    public static function factory($parent, $config = []) {
         $c = new StdClass();
         return $c;
     }

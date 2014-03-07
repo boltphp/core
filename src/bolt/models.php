@@ -106,6 +106,16 @@ class models implements plugin\singleton, \ArrayAccess {
 
 
     /**
+     * return the base app
+     *
+     * @return \bolt\application
+     */
+    public function getApp() {
+        return $this->_app;
+    }
+
+
+    /**
      * get result object
      *
      * @param string $entity

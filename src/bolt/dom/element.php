@@ -5,7 +5,7 @@ use \b;
 
 use Symfony\Component\CssSelector\CssSelector;
 
-class element {
+class element implements \ArrayAccess {
 
     private $_guid;
     private $_dom;
@@ -183,6 +183,22 @@ class element {
 
     public function remove(){
         $this->_node->parentNode->removeChild($this->_node);
+    }
+
+    public function offsetExists($name) {
+        return $this->_dom->offsetExists("[data-domref='{$this->_guid}'] $name");
+    }
+
+    public function offsetGet($name) {
+        return $this->_dom->offsetGet("[data-domref='{$this->_guid}'] $name");
+    }
+
+    public function offsetSet($name, $value) {
+        return $this->_dom->offsetSet("[data-domref='{$this->_guid}'] $name", $value);
+    }
+
+    public function offsetUnset($name) {
+        return $this->_dom->offsetUnset("[data-domref='{$this->_guid}'] $name");
     }
 
 }

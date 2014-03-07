@@ -38,7 +38,7 @@ class bolt {
     /**
      * @var string
      */
-    const VERSION = '0.4.4';
+    const VERSION = '0.4.7';
 
     /**
      * @var b

@@ -39,7 +39,7 @@ class dom implements \ArrayAccess {
     public function __construct($html=false, $charset='UTF-8') {
 
         $this->_doc = new DOMDocument('1.0', $charset);
-        $this->_doc->validateOnParse = true;
+        $this->_doc->validateOnParse = false;
         $this->_doc->preserveWhiteSpace = false;
         $this->_doc->resolveExternals = false;
         $this->_doc->formatOutput = b::env() === 'dev';
@@ -231,7 +231,7 @@ class dom implements \ArrayAccess {
             $guid = b::guid("_x_dom");
 
             $_ = new \DOMDocument();
-            $_->loadHTML("<div id='{$guid}'>".$value."</div>");
+            @$_->loadHTML("<div id='{$guid}'>".$value."</div>");
 
             $children = $_->getElementById($guid)->childNodes;
 

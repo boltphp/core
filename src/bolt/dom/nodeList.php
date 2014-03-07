@@ -3,6 +3,7 @@
 namespace bolt\dom;
 
 
+
 class nodeList extends \SplObjectStorage {
 
     private $_dom;

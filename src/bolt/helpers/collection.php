@@ -8,6 +8,13 @@ class collection implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonS
 
     private $_items = [];
 
+    public function each(Closure $cb, $data = []) {
+        foreach ($this->_items as $key => $item) {
+            call_user_func($cb, $item, $key, $data);
+        }
+        return $this;
+    }
+
     public function first() {
         return count($this) > 0 ? reset($this->_items) : null;
     }
@@ -38,7 +45,7 @@ class collection implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonS
     }
 
     public function getIterator() {
-        return new ArrayIterator($this->_items);
+        return new \ArrayIterator($this->_items);
     }
 
     public function count() {

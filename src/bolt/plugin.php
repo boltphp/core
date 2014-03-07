@@ -103,7 +103,7 @@ abstract class plugin implements \ArrayAccess {
         // factory
         if ($plugin['type'] == 'factory') {
             $class = $plugin['ref']->name;
-            return $class::factory();
+            return $class::factory($this, $this->_plugins[$name]['config']);
         }
 
         // no instance

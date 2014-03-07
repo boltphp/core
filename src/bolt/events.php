@@ -111,6 +111,13 @@ trait events {
      *
      */
     public function fire($type, $data=[]) {
+        if (stripos($type, ',') !== false) {
+            foreach (explode(",", $type) as $type){
+                $this->fire($type, $data);
+            }
+            return $this;
+        }
+
         if (!array_key_exists($type, $this->_events)) { return false; }
 
         // event

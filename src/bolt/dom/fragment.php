@@ -17,7 +17,7 @@ class fragment implements \ArrayAccess {
 
         $this->_dom->doc()->loadHTML('<'.$tag.' data-fragmentref="'.$this->_guid.'"></'.$tag.'>');
 
-        $this->root = $this['[data-fragmentref="'.$this->_guid.'"]'];
+        $this->root = $this['[data-fragmentref="'.$this->_guid.'"]']->first();
 
 
     }
