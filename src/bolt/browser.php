@@ -31,6 +31,11 @@ class browser extends plugin {
      */
     private $_app;
 
+    /**
+     * @var Exception
+     */
+    public $exception = false;
+
 
     /**
      * start a new browser instance
@@ -296,6 +301,7 @@ class browser extends plugin {
 
             }
             catch (\Exception $e) {
+                $this->exception = $e;
                 $this->_request->is404(true);
             }
 
@@ -306,7 +312,12 @@ class browser extends plugin {
                 $this->runMiddleware('handle', ['controller' => $controller]);
 
                 // run the controller
-                $this->_response = $controller->run($params);
+                try {
+                    $this->_response = $controller->run($params);
+                }
+                catch (\Exception $e) {
+                    $this->exception = $e;
+                }
 
 
             }
@@ -318,6 +329,7 @@ class browser extends plugin {
         else {
             $this->runMiddleware('handle');
         }
+
 
         // if response is now a
         if ($this->response->isRedirection() || $this->response->isReadyToSend()) {

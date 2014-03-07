@@ -2,9 +2,7 @@
 
 namespace bolt\models;
 
-
 use Symfony\Component\PropertyAccess\PropertyAccess;
-
 
 /**
  *
@@ -13,6 +11,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  *          method
  */
 abstract class entity {
+    use \bolt\events;
 
     /**
      * models manager
@@ -37,7 +36,7 @@ abstract class entity {
      * @return bolt\application
      */
     final public function getApp() {
-        return $this->_manager->getApp();
+        return $this->_manager ? $this->_manager->getApp() : false;
     }
 
     /**
@@ -159,10 +158,23 @@ abstract class entity {
      * @return mixed
      */
     public function __set($name, $value) {
+        $cVal = $this->{$name}; $resp = $this;
+
         if (($op = $this->_hasOp('set', $name)) !== false) {
-            return call_user_func([$this, $op], $value);
+            $resp = call_user_func([$this, $op], $value);
         }
-        return $this->{$name} = $value;
+        else {
+            $this->{$name} = $value;
+        }
+
+        // fire any attached events
+        $this->fire("change,{$name}Change", [
+            'attr' => $name,
+            'prev' => $cVal,
+            'new' => $value
+        ]);
+
+        return $resp;
     }
 
 }
