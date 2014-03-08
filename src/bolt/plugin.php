@@ -78,11 +78,12 @@ abstract class plugin implements \ArrayAccess {
      * does plugin exist
      *
      * @param string $name name of plugin
+     * @param Closure $cb callback to execute if plugin exists
      *
      * @return bool value of plugin exists
      */
-    public function pluginExists($name) {
-        return array_key_exists($name, $this->_plugins);
+    public function pluginExists($name, \Closure $cb = null) {
+        return array_key_exists($name, $this->_plugins) ? ($cb ? call_user_func(\Closure::bind($cb, $this[$name]), $this) : true) : false;
     }
 
 

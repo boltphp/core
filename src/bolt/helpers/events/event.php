@@ -1,6 +1,6 @@
 <?php
 
-namespace bolt\events;
+namespace bolt\helpers\events;
 use \b;
 
 
@@ -15,7 +15,7 @@ class event {
     private $_data = [];
 
     /**
-     * @var bolt\events\listener
+     * @var bolt\helpers\events\listener
      */
     private $_listener;
 
@@ -23,10 +23,10 @@ class event {
     /**
      * Construct
      *
-     * @param bolt\events\listener $listener the execute listener
+     * @param bolt\helpers\events\listener $listener the execute listener
      * @param array $data data for event
      */
-    public function __construct(\bolt\events\listener $listener, $data = []) {
+    public function __construct(\bolt\helpers\events\listener $listener, $data = []) {
         $this->_listener = $listener;
         $this->_data = $data;
     }

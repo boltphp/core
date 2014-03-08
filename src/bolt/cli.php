@@ -7,7 +7,7 @@ use \Symfony\Component\Console\Application as ConsoleApplication,
     \Symfony\Component\Console\Output\ConsoleOutput;
 
 class cli extends plugin {
-    use events;
+    use helpers\events;
 
     private $_app;
 

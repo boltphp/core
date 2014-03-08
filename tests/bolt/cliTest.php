@@ -9,7 +9,7 @@ class cliTest extends Test {
 
     public function test_inherits() {
         $this->assertTrue(in_array('bolt\plugin', class_parents($this->c)));
-        $this->assertTrue(in_array('bolt\events', class_uses($this->c)));
+        $this->assertTrue(in_array('bolt\helpers\events', class_uses($this->c)));
     }
 
     public function test_attachEvent() {

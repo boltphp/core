@@ -25,6 +25,7 @@ class assets extends \bolt\browser\middleware {
 
     public function before() {
 
+
         // don't handle this
         if (!isset($this->config['path'])) {
             return;
@@ -33,6 +34,8 @@ class assets extends \bolt\browser\middleware {
         // check if we should handle this request
         $path = str_replace('{path}', '(.*)/?', $this->config['path']);
         $matches = [];
+
+
         if (!preg_match("#".$path."#i", $this->request->getPathInfo(), $matches)) {
             return;
         }
@@ -46,7 +49,7 @@ class assets extends \bolt\browser\middleware {
         $content = [];
 
         // compiled
-        $compiled = $this->browser->app->getCompiled('assets');
+        $compiled = [];
 
         // explode out the path
         foreach (explode('&', trim($matches[1], '&')) as $path) {
@@ -56,10 +59,6 @@ class assets extends \bolt\browser\middleware {
 
             $ext = strtolower($info['extension']);
 
-            if (isset($compiled['data']['files']) AND in_array($path, $compiled['data']['files'])) {
-                $content[] = file_get_contents(b::path($compiled['dir'], 'assets', $path));
-            }
-            else {
 
                 // get our path
                 $dir = $info['dirname'];
@@ -70,7 +69,6 @@ class assets extends \bolt\browser\middleware {
                     $content[] = $this->_assets->compileFile($file['path'], $file['rel'])->dump();
                 }
 
-            }
 
         }
 

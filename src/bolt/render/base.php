@@ -34,4 +34,12 @@ abstract class base {
      */
     abstract public function render($str, $vars = []);
 
+    final public function renderFile($file, $vars = []) {
+        return $this->render(file_get_contents($file), $vars);
+    }
+
+    public function renderCompiled($compiled, $vars = []) {
+        throw new \Exception("This renderer has not defined a 'renderCompiled' function.");
+    }
+
 }

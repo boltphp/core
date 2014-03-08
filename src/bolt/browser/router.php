@@ -167,7 +167,6 @@ class router {
     public function loadFromControllers(array $paths = []) {
         $routes = []; $files = [];
 
-
         //
         foreach ($paths as $path) {
             if (is_object($path) && method_exists($path, 'asArray')) {

@@ -211,7 +211,7 @@ class route extends browser\controller implements browser\router\face {
         if (is_string($resp)) {
             $this->response->setContent($resp);
         }
-        else if ($resp instanceof \bolt\browser\views\view) {
+        else if ($resp instanceof \bolt\browser\views\face) {
             $content = $resp->render();
         }
         else if (is_a($resp, 'bolt\browser\response') && $resp !== $this->response) {
@@ -244,7 +244,9 @@ class route extends browser\controller implements browser\router\face {
 
         // use the layout
         if ($this->getUseLayout() && $this->layout) {
-            $content = $this->browser['views']->layout($this->layout, ['yield' => $content], $this)->render();
+            $content = $this->browser['views']->create($this->layout, ['yield' => $content], $this)->render();
+
+            echo($content); die;
         }
 
         // set our content in the response

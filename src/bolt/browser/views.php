@@ -13,17 +13,12 @@ class views {
     /**
      * @var array
      */
-    private $_views = [];
-
-    /**
-     * @var array
-     */
-    private $_layouts = [];
+    private $_dirs = [];
 
     /**
      * @var string
      */
-    private $_class = 'bolt\browser\views\view';
+    private $_class = 'bolt\browser\views\file';
 
 
     /**
@@ -36,8 +31,7 @@ class views {
 
         $this->_browser = $browser;
 
-        $this->_views = isset($config['views']) ? (array)$config['views'] : [];
-        $this->_layouts = isset($config['layouts']) ? (array)$config['layouts'] : [];
+        $this->_dirs = b::param('dirs', [], $config);
 
         // make sure we have a render plugin
         if (!$browser->app->pluginExists('render')) {
@@ -63,14 +57,14 @@ class views {
      *
      * @return self
      */
-    public function dir($path, $type = 'views') {
+    public function dir($path) {
         if (is_array($path)) {
             foreach ($path as $item) {
-                $this->dir($item, $type);
+                $this->dir($item);
             }
             return $this;
         }
-        $type == 'layouts' ? $this->_layouts[] = $path : $this->_views[] = $path;
+        $this->_dirs[] = $path;
         return $this;
     }
 
@@ -89,18 +83,10 @@ class views {
      *
      * @return array
      */
-    public function getViewDirs() {
-        return $this->_views;
+    public function getDirs() {
+        return $this->_dirs;
     }
 
-    /**
-     * get layout directories
-     *
-     * @return array
-     */
-    public function getLayoutDirs() {
-        return $this->_layouts;
-    }
 
 
     /**
@@ -111,18 +97,9 @@ class views {
      *
      * @return string
      */
-    public function find($file, array $dirs = null) {
-        $dirs == null ? $dirs = $this->_views : [];
-
-        $compiled = $this->_browser->app->getCompiled('views');
-
-
-        foreach ($dirs as $dir) {
+    public function find($file) {
+        foreach ($this->_dirs as $dir) {
             $rel = b::path($dir, $file);
-            if (isset($compiled['data']['map']) AND array_key_exists($rel, $compiled['data']['map'])) {
-                $compiled['data']['map'][$rel]['content'] = require("{$compiled['dir']}/views/{$compiled['data']['map'][$rel]['name']}");
-                return $compiled['data']['map'][$rel];
-            }
             $_ = $this->_browser->path($rel);
             if (file_exists($_)){
                 return $_;
@@ -144,41 +121,6 @@ class views {
         return $this->find($file, $dirs) !== false;
     }
 
-    /**
-     * return a view of self::$class for given file
-     *
-     * @param string $file relative file path to $_dirs
-     * @param array $var
-     * @param mixed $context
-     *
-     * @return self::$_class
-     */
-    public function view($file, $vars = [], $context = false) {
-        return $this->create(
-                        $this->find($file, $this->_views),
-                        $vars,
-                        $context
-                    );
-    }
-
-
-    /**
-     * return a view of self::$class for layout file given
-     *
-     * @param string $file relative file path to $_layouts
-     * @param array $vars
-     * @param mixed $context
-     *
-     * @return self::$_class
-     */
-    public function layout($file, $vars = [], $context = false) {
-        return $this->create(
-                $this->find($file, $this->_layouts),
-                $vars,
-                $context
-            );
-    }
-
 
     /**
      * create a view of self::$_class
@@ -190,39 +132,41 @@ class views {
      * @return self::$_class
      */
     public function create($file, $vars = [], $context = false) {
+        $class = $this->_class;
+        $ext = false;
+        $data = [
+            'vars' => $vars,
+            'context' => $context,
+            'engine' => false
+        ];
 
-        if (!$file) {
+        // compiled?
+        if ($this->_browser->app->pluginExists('compiled') && ($v = $this->_browser->app['compiled']->get('views')) != false) {
+            foreach ($this->_dirs as $dir) {
+                $_ = b::path($dir, $file);
+                if (array_key_exists($_, $v['data']['map'])) {
+                    $class = 'bolt\browser\views\compiled';
+                    $data['compiled'] = require( $this->_browser->app['compiled']->getFilePath("views/{$v['data']['map'][$_]['name']}") );
+                    $data['engine'] = $this->_browser->app['render']->getEngine($v['data']['map'][$_]['ext']);
+                }
+            }
+        }
+        else if (!file_exists($file) && !($file = $this->find($file))) {
             throw new Exception("Unable to find view '$file'.");
         }
-
-        // ext
-        $ext = is_array($file) ? $file['ext'] : strtolower(pathinfo($file)['extension']);
+        else {
+            $data['file'] = $file;
+            $data['engine'] = $this->_browser->app['render']->getEngine(pathinfo($file)['extension']);
+        }
 
         // make sure we have an engine for this ext
-        if (!$this->_browser->app['render']->hasEngine($ext)) {
+        if (!$data['engine']) {
             throw new Exception("Unable to find render engine for '$ext'.");
         }
 
         // create our view
-        return new $this->_class($this, $file, ['vars' => $vars, 'context' => $context ]);
+        return new $class($this, $data);
 
-    }
-
-
-    public function renderFile($file, $vars = []) {
-        return $this->_browser->app['render']->file($file, $vars);
-    }
-
-    public function renderString($str, $vars = []) {
-        return $this->_browser->app['render']->string($str, $vars);
-    }
-
-    public function hasEngine($ext) {
-        return $this->_browser->app['render']->hasEngine($ext);
-    }
-
-    public function getEngine($ext, $mustCompile = false) {
-        return $this->_browser->app['render']->getEngine($ext, $mustCompile);
     }
 
     public function compile($e) {
@@ -234,7 +178,7 @@ class views {
 
         // loop through all directories and find
         // files that we can compile
-        foreach ($this->_views as $dir) {
+        foreach ($this->_dirs as $dir) {
             $root = $this->_browser->path($dir);
             $dirs[$dir] = array_merge(b::fs('glob', $root."/**/*.*")->asArray(), b::fs('glob', $root."/*.*")->asArray() );
         }
@@ -243,7 +187,7 @@ class views {
             foreach ($files as $file) {
                 $ext = pathinfo($file)['extension'];
                 $rel = str_replace($this->_browser->app->getRoot(), '', $file);
-                if ($this->hasEngine($ext, true)) {
+                if ($this->_browser->app['render']->hasEngine($ext, true)) {
                     $id = md5($rel);
                     $map[$rel] = [
                         'modified' => filemtime($file),
@@ -251,7 +195,7 @@ class views {
                         'name' => "{$id}.php",
                         'ext' => $ext
                     ];
-                    $var = $this->getEngine($ext)->compile( file_get_contents($file));
+                    $var = $this->_browser->app['render']->getEngine($ext)->compile( file_get_contents($file));
                     file_put_contents("{$vdir}/{$id}.php", '<?php return '.var_export($var, true).';');
                 }
             }

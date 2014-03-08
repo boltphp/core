@@ -1,6 +1,6 @@
 <?php
 
-namespace bolt\events;
+namespace bolt\helpers\events;
 use \b;
 
 use \Closure as cc;
@@ -56,10 +56,8 @@ class listener {
      *
      */
     public function __construct($parent, $callback, $type, $args = [], $context=false) {
-
-
-        if (!in_array('bolt\events', b::classUses($parent))) {
-            throw new \Exception('Parent must use bolt\events');
+        if (!in_array('bolt\helpers\events', b::classUses($parent))) {
+            throw new \Exception('Parent must use bolt\helpers\events');
         }
         $this->_guid = b::guid('event');
         $this->_parent = $parent;

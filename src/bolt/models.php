@@ -116,14 +116,14 @@ class models implements plugin\singleton, \ArrayAccess {
 
 
     /**
-     * get result object
+     * get a model collection object
      *
      * @param string $entity
      *
-     * @return bolt\models\result
+     * @return bolt\models\collection
      */
-    public function getResult($entity) {
-        return new \bolt\models\result($this, $entity);
+    public function getCollection($entity) {
+        return new \bolt\models\collection($this, $entity);
     }
 
 
@@ -196,10 +196,10 @@ class models implements plugin\singleton, \ArrayAccess {
      *
      * @param string $entity entity class name or alias
      *
-     * @return bolt\models\result
+     * @return bolt\models\collection
      */
     public function findAll($entity) {
-        return new models\result($this, $entity, $this->_getRepoForEntity($entity)->findAll());
+        return new models\collection($this, $entity, $this->_getRepoForEntity($entity)->findAll());
     }
 
 
@@ -212,10 +212,10 @@ class models implements plugin\singleton, \ArrayAccess {
      * @param int $limit
      * @param init $offset
      *
-     * @return bolt\models\result
+     * @return bolt\models\collection
      */
     public function findBy($entity, array $criteria, array $order = null, $limit = null, $offset = null) {
-        return new models\result($this, $entity, $this->_getRepoForEntity($entity)->findBy($criteria, $order, $limit, $offset));
+        return new models\collection($this, $entity, $this->_getRepoForEntity($entity)->findBy($criteria, $order, $limit, $offset));
     }
 
 

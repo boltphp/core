@@ -41,7 +41,7 @@ class applicationTest extends Test {
 
     public function test_inherits() {
         $this->assertTrue( in_array('bolt\plugin', class_parents($this->app)) );
-        $this->assertTrue( in_array('bolt\events', class_uses($this->app)) );
+        $this->assertTrue( in_array('bolt\helpers\events', class_uses($this->app)) );
     }
 
     public function test_root() {

@@ -1,13 +1,13 @@
 <?php
 
-class eventTest extends Test {
+class helpers_events_eventTest extends Test {
 
     public function setUp() {
-        $this->parent = new eventTest_Class();
+        $this->parent = new helpers_events_eventTest_Class();
         $this->args = ['test_arg' => 1];
-        $this->l = new bolt\events\listener($this->parent, function(){}, 'test', $this->args);
+        $this->l = new bolt\helpers\events\listener($this->parent, function(){}, 'test', $this->args);
         $this->data = ['test_data' => 1];
-        $this->e = new bolt\events\event($this->l, $this->data);
+        $this->e = new bolt\helpers\events\event($this->l, $this->data);
     }
 
     public function test_magicGet() {
@@ -40,7 +40,7 @@ class eventTest extends Test {
 
 
 
-class eventTest_Class {
-    use bolt\events;
+class helpers_events_eventTest_Class {
+    use \bolt\helpers\events;
 
 }

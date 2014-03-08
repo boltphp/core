@@ -10,7 +10,7 @@ use \b;
  *
  */
 class application extends plugin {
-    use events; /// use events class
+    use helpers\events; /// use events class
 
 
     /**
@@ -29,14 +29,9 @@ class application extends plugin {
     private $_autoload = [];
 
     /**
-     * @var array
+     * @var string
      */
-    private $_compiled = [];
-
-    /**
-     * @var bool
-     */
-    private $_useCompiled = true;
+    private $_bootstrapDir = false;
 
     /**
      * construct a new application instance
@@ -51,6 +46,11 @@ class application extends plugin {
 
         // autoload
         $this->_autoload = b::param('autoload', [], $config);
+
+        if (isset($config['bootstrap'])) {
+            $this->bootstrap($config['bootstrap']);
+            $this->_bootstrapDir = $this->path($config['bootstrap']);
+        }
 
         if (isset($config['compiled'])) {
             $this->loadCompiled($config['compiled']);
@@ -86,64 +86,53 @@ class application extends plugin {
         }
     }
 
+    /**
+     * getBootsrapDir
+     *
+     * @return string
+     */
+    public function getBootstrapDir() {
+        return $this->_bootstrapDir;
+    }
 
     /**
-     * load compiled
+     * load boostrap files
      *
-     * @param mixed $what
+     * @param string $what file or dir path, absolute or relative to $root
      *
      * @return self
      */
-    public function loadCompiled($what) {
-        if (is_string($what) AND is_dir($what) AND file_exists(b::path($what, "loader.php"))) {
-            $loader = require_once("{$what}/loader.php");
-            if (is_array($loader)) {
-                foreach ($loader as $name) {
-                    $this->loadCompiled(b::path($what, "{$name}.php"));
-                }
+    public function bootstrap($what) {
+        if (is_dir($what) || is_dir($this->path($what))) {
+            $path = is_dir($what) ? $what : $this->path($what);
+            foreach (b::getRegexFiles($path) as $file) {
+                $this->bootstrap($file);
             }
             return $this;
         }
-        else if (is_string($what) AND is_file($what)) {
-            $_ = require_once($what);
-            $_['dir'] = dirname($what);
-            $this->loadCompiled($_);
-            return $this;
+        else if (!is_file($what) && is_file($this->path($what))) {
+            $this->bootstrap($this->path($what));
+        }
+        else if (!is_file($what)) {
+            throw new \Exception("Unable to load bootstrap $what");
         }
 
-        // is array
-        if (is_array($what)) {
-            $this->_compiled[$what['name']] = $what;
-            return $this;
+        // load it
+        $resp = require_once($what);
+
+        if (is_callable($resp)) {
+            call_user_func($resp, $this);
+        }
+        else if (is_object($resp) && method_exists($resp, 'bootstrap')) {
+            call_user_func([$resp, 'bootstrap'], $this);
+        }
+        else if (is_string($resp) && class_exists($resp)) {
+            $o = new $resp($this);
         }
 
-    }
-
-    /**
-     * get compiled asset
-     *
-     * @param string $name
-     *
-     * @return array
-     */
-    public function getCompiled($name) {
-        if ($this->_useCompiled !== false AND array_key_exists($name, $this->_compiled)) {
-            return $this->_compiled[$name];
-        }
-        return [];
-    }
-
-    /**
-     * set use compiled setting
-     *
-     * @param bool $flag
-     *
-     * @return self
-     */
-    public function useCompiled($flag) {
-        $this->_useCompiled = $flag;
         return $this;
     }
+
 
     /**
      * return all autoload settings

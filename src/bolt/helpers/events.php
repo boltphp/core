@@ -1,6 +1,6 @@
 <?php
 
-namespace bolt;
+namespace bolt\helpers;
 use \b;
 
 /**
@@ -9,7 +9,7 @@ use \b;
 trait events {
 
     /**
-     * @var bolt\events\listener[$type][]
+     * @var bolt\helpers\events\listener[$type][]
      */
     private $_events = [];
 
@@ -21,7 +21,7 @@ trait events {
      * @param Closure $cb closure functin to execute
      * @param array $args arguments to pass back to event
      *
-     * @return bolt\events\listener
+     * @return bolt\helpers\events\listener
      */
     public function addListener($type, $cb, $args = []) {
         if (!array_key_exists($type, $this->_events)) {
@@ -34,7 +34,7 @@ trait events {
     /**
      * remove a listener from the object
      *
-     * @param bolt\events\listener $listener listener to remove
+     * @param bolt\helpers\events\listener $listener listener to remove
      *
      * @return self
      */
@@ -74,7 +74,7 @@ trait events {
      *
      * @see addListener
      *
-     * @return bolt\events\listener
+     * @return bolt\helpers\events\listener
      */
     public function once() {
         $l = call_user_func_array([$this, 'addListener'], func_get_args());

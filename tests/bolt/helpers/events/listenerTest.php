@@ -1,9 +1,9 @@
 <?php
 
-class listenerTest extends Test {
+class helpers_events_listenerTest extends Test {
 
     public function setUp() {
-        $this->parent = new listenerTest_Class();
+        $this->parent = new helpers_events_listenerTest_Class();
     }
 
     public function test_constructWithContext() {
@@ -11,7 +11,7 @@ class listenerTest extends Test {
         $args = ['text' => 1];
         $cb = function() { };
 
-        $l = new bolt\events\listener($this->parent, $cb, 'test', $args, $ctx);
+        $l = new bolt\helpers\events\listener($this->parent, $cb, 'test', $args, $ctx);
 
         $this->assertEquals($this->parent, $l->parent);
         $this->assertEquals($cb, $l->callback);
@@ -26,16 +26,16 @@ class listenerTest extends Test {
 
     public function test_constructBadParent() {
         $this->setExpectedException('Exception');
-        new bolt\events\listener(new StdClass, function(){}, 'test');
+        new bolt\helpers\events\listener(new StdClass, function(){}, 'test');
     }
 
     public function test_constructBadContext() {
-        $l = new bolt\events\listener($this->parent, function() {}, 'test', 'test');
+        $l = new bolt\helpers\events\listener($this->parent, function() {}, 'test', 'test');
         $this->assertEquals($this->parent, $l->parent);
     }
 
     public function test_once() {
-        $l = new bolt\events\listener($this->parent, function() {}, 'test', 'test');
+        $l = new bolt\helpers\events\listener($this->parent, function() {}, 'test', 'test');
         $this->assertFalse($l->once);
         $l->once(true);
         $this->assertTrue($l->once);
@@ -46,7 +46,7 @@ class listenerTest extends Test {
     public function test_context() {
         $ctx1 = new StdClass();
 
-        $l = new bolt\events\listener($this->parent, function() {}, 'test');
+        $l = new bolt\helpers\events\listener($this->parent, function() {}, 'test');
 
         $l->context($ctx1);
 
@@ -64,9 +64,9 @@ class listenerTest extends Test {
             $run = true;
         };
 
-        $l = new bolt\events\listener($this->parent, $cb, 'test');
+        $l = new bolt\helpers\events\listener($this->parent, $cb, 'test');
 
-        $e = new bolt\events\event($l, []);
+        $e = new bolt\helpers\events\event($l, []);
 
         $l->execute($e);
 
@@ -76,7 +76,7 @@ class listenerTest extends Test {
 
 }
 
-class listenerTest_Class {
-    use bolt\events;
+class helpers_events_listenerTest_Class {
+    use bolt\helpers\events;
 
 }

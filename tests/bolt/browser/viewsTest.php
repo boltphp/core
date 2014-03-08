@@ -17,30 +17,20 @@ class viewsTest extends Test {
         $this->eq('viewsTest_Engine', $v->getEngines()['html']['class']);
     }
 
-    public function test_getViewDirs() {
-        $this->eq([], $this->v->getViewDirs());
+    public function test_getDirs() {
+        $this->eq([], $this->v->getDirs());
         $this->v->dir('mock');
-        $this->eq(['mock'], $this->v->getViewDirs());
-        $this->v->dir("mock2", 'layouts');
-        $this->eq(['mock'], $this->v->getViewDirs());
-    }
-
-    public function test_getLayoutDirs() {
-        $this->eq([], $this->v->getLayoutDirs());
-        $this->v->dir('mock', 'layouts');
-        $this->eq(['mock'], $this->v->getLayoutDirs());
-        $this->v->dir("mock2");
-        $this->eq(['mock'], $this->v->getLayoutDirs());
+        $this->eq(['mock'], $this->v->getDirs());
     }
 
     public function test_dirString() {
         $this->eq($this->v, $this->v->dir('test'));
-        $this->eq(['test'], $this->v->getViewDirs());
+        $this->eq(['test'], $this->v->getDirs());
     }
 
     public function test_dirArray() {
         $this->eq($this->v, $this->v->dir(['test', 'test1']));
-        $this->eq(['test','test1'], $this->v->getViewDirs());
+        $this->eq(['test','test1'], $this->v->getDirs());
     }
 
 
@@ -60,7 +50,8 @@ class viewsTest extends Test {
     }
 
     public function test_findGood() {
-        $this->eq(TEST_ROOT."/mock/test.html", $this->v->find("test.html", ['mock']));
+        $this->v->dir('mock');
+        $this->eq(TEST_ROOT."/mock/test.html", $this->v->find("test.html"));
     }
 
     public function test_findBad() {
@@ -68,26 +59,16 @@ class viewsTest extends Test {
     }
 
     public function test_exists() {
-        $this->assertTrue($this->v->exists("test.html", ['mock']));
-        $this->assertFalse($this->v->exists("test.html", []));
-    }
-
-    public function test_view() {
         $this->v->dir('mock');
-        $this->v->engine('html', 'viewsTest_Engine');
-        $this->assertInstanceOf('bolt\browser\views\view', $this->v->view('test.html', [], false));
+        $this->assertTrue($this->v->exists("test.html"));
+        $this->assertFalse($this->v->exists("test_NOPE.html"));
     }
 
-    public function test_layout() {
-        $this->v->dir('mock', 'layouts');
-        $this->v->engine('html', 'viewsTest_Engine');
-        $this->assertInstanceOf('bolt\browser\views\view', $this->v->layout('test.html', [], false));
-    }
 
     public function test_createGood() {
         $this->v->dir('mock');
         $this->v->engine('html', 'viewsTest_Engine');
-        $this->assertInstanceOf('bolt\browser\views\view', $this->v->create(TEST_ROOT."/mock/test.html"));
+        $this->assertInstanceOf('bolt\browser\views\file', $this->v->create(TEST_ROOT."/mock/test.html"));
     }
 
     public function test_createNoFile() {
@@ -105,12 +86,10 @@ class viewsTest extends Test {
     public function test_createSingleEngineInstance() {
         $this->v->dir('mock');
         $this->v->engine('html', 'viewsTest_Engine');
-        $this->assertInstanceOf('bolt\browser\views\view', $this->v->create(TEST_ROOT."/mock/test.html"));
+        $this->assertInstanceOf('bolt\browser\views\file', $this->v->create(TEST_ROOT."/mock/test.html"));
 
         $e = $this->v->getEngines()['html']['instance'];
         $v = $this->v->create(TEST_ROOT."/mock/test.html");
-
-
     }
 
 }

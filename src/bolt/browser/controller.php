@@ -7,7 +7,7 @@ use \b;
  * base controller class
  */
 class controller {
-    use \bolt\events;
+    use \bolt\helpers\events;
 
     /**
      * @var string
@@ -152,7 +152,7 @@ class controller {
         if (!$this->browser['views']) {
             throw new \Exception('No view manager');
         }
-        return $this->browser['views']->view($file, $vars, $this);
+        return $this->browser['views']->create($file, $vars, $this);
     }
 
     /**

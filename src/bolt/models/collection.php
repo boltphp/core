@@ -4,9 +4,9 @@ namespace bolt\models;
 
 
 /**
- * model results
+ * model collection
  */
-class result extends \bolt\helpers\collection {
+class collection extends \bolt\helpers\collection {
 
     /**
      * model manager
@@ -34,6 +34,9 @@ class result extends \bolt\helpers\collection {
         $this->_manager = $manager;
         $this->_entity = $entity;
 
+        if (!class_exists($entity, true)) {
+            throw new \Exception("Entity class $entity does not exist");
+        }
 
         if (isset($items)) {
             foreach ($items as $item) {

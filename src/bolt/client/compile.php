@@ -21,8 +21,11 @@ class compile extends command {
 
     public function init() {
 
-        // don't use anything compield
-        $this->app->useCompiled(false);
+        // if we have a compiled plugin
+        // disable it
+        $this->app->pluginExists('compiled', function(){
+            $this->disable();
+        });
 
         // open our composer package
         $composer = $this->app->getComposerFile();
@@ -34,8 +37,14 @@ class compile extends command {
 
         $dir = b::path($composer['dir'], 'compiled');
 
+        // compile dir
         $this->_dir = $dir;
 
+        // make sure they've defied a bootstrap dir
+        // in their app config
+        if (!$this->app->getBootstrapDir()) {
+            return $this->writeError("You must a bootstrap directory defined in your app config.");
+        }
 
     }
 
@@ -67,7 +76,52 @@ class compile extends command {
 
         $prog->finish();
 
-        file_put_contents("{$this->_dir}/loader.php", '<?php return '.var_export($this->_loaders, true).';');
+        $uid = uniqid("BoltCompiled");
+
+        $config = [
+            'loaders' => $this->_loaders,
+            'dir' => $this->_dir
+        ];
+
+        $sub = '<'.'?php
+            class '.$uid.' implements \bolt\plugin\singleton {
+                private $_enabled = true;
+                private $_app = false;
+                private $_config = [];
+                public function __construct(\bolt\application $app, $config = []) {
+                    $this->_app = $app;
+                    $this->_config = $config;
+                }
+                public function enable() {
+                    $this->_enabled = true;
+                    return $this;
+                }
+                public function disable() {
+                    $this->_enabled = false;
+                    return $this;
+                }
+                public function exists($name) {
+                    return $this->_enabled ? array_key_exists($name, $this->_config["loaders"]) : false;
+                }
+                public function get($name, \Closure $cb = null) {
+                    if (!$this->_enabled || !$this->exists($name)) {return false;}
+                    return $cb ? call_user_func($cb, $this->_config["loaders"][$name]) : $this->_config["loaders"][$name];
+                }
+                public function getFile($path) {
+                    $path = b::path($this->_config["dir"], $path);
+                    return file_exists($path) ? file_get_contents($path) : null;
+                }
+                public function getFilePath($path) {
+                    return b::path($this->_config["dir"], $path);
+                }
+            }
+            return function($app) {
+                $app->plug("compiled", "'.$uid.'", '.var_export($config, true).');
+            };
+        ';
+
+
+        file_put_contents("{$this->app->getBootstrapDir()}/compiled.php", $sub);
 
         // done
         $this->writeln('Done');
@@ -79,8 +133,8 @@ class compile extends command {
         if (is_dir($this->_dir)) {
             b::fs('remove', $this->_dir);
         }
+        b::fs('remove', "{$this->app->getBootstrapDir()}/compiled.php");
         b::fs('mkdir', $this->_dir);
-
     }
 
 
@@ -91,13 +145,11 @@ class compile extends command {
         if ($name == 'loaders') {
             throw new \Exception("Loader name can not be 'loaders' ");
         }
-        $var = [
+        $this->_loaders[$name] = [
             'created' => time(),
             'name' => $name,
             'data' => $data
         ];
-        file_put_contents("{$this->_dir}/{$name}.php", '<?php return '.var_export($var, true).';');
-        $this->_loaders[] = $name;
     }
 
     public function makeDir($name) {

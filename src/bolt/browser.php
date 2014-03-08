@@ -9,7 +9,7 @@ use \Exception;
  * Base browser (http) handler
  */
 class browser extends plugin {
-    use events;
+    use helpers\events;
 
     /**
      * @var bolt\browser\request
@@ -268,6 +268,7 @@ class browser extends plugin {
      * @return void
      */
     public function execute() {
+
 
         // run before we have run any router
         $this->runMiddleware('before');

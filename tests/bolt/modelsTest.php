@@ -16,6 +16,19 @@ class modelTest extends Test {
         $this->assertTrue(in_array('ArrayAccess', $i));
     }
 
+    public function test_getApp() {
+        $this->assertInstanceOf('\bolt\application', $this->m->getApp());
+        $this->eq($this->a, $this->m->getApp());
+    }
+
+    public function test_getCollectionGood() {
+        $this->assertInstanceOf('bolt\models\collection', $this->m->getCollection('modelTest_entityNoAlias'));
+    }
+
+    public function test_generateEntity(){
+        $this->assertInstanceOf('modelTest_entityNoAlias', $this->m->generateEntity('modelTest_entityNoAlias', []));
+    }
+
     public function test_constructWithNoSource() {
         $this->setExpectedException('Exception');
         new bolt\models($this->a);
@@ -128,11 +141,11 @@ class modelTest extends Test {
     }
 
     public function test_findAll() {
-        $this->assertInstanceOf('bolt\models\result', $this->m->findAll('modelTest_entityAlias'));
+        $this->assertInstanceOf('bolt\models\collection', $this->m->findAll('modelTest_entityAlias'));
     }
 
     public function test_findBy() {
-        $this->assertInstanceOf('bolt\models\result', $this->m->findBy('modelTest_entityAlias', []));
+        $this->assertInstanceOf('bolt\models\collection', $this->m->findBy('modelTest_entityAlias', []));
     }
 
     public function test_findOneBy() {
@@ -155,9 +168,10 @@ class modelTest extends Test {
     }
 
     public function test_generate() {
-        $ref = bolt\models::generate('modelTest_entityNoAlias', ['test' => 9]);
+        $ref = bolt\models::generate('modelTest_entityNoAlias', ['test' => 9], $this->m);
         $this->assertInstanceOf('modelTest_entityNoAlias', $ref);
         $this->eq(9, $ref->test);
+        $this->eq($this->m, $ref->getManager());
     }
 
 }

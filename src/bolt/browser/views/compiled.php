@@ -3,21 +3,25 @@
 namespace bolt\browser\views;
 use \b;
 
-class view implements face {
+class compiled implements face {
 
     private $_manager;
 
-    private $_file;
+    private $_compiled;
 
     private $_vars;
 
+    private $_engine;
+
     private $_context;
 
-    public function __construct(\bolt\browser\views $manager, $file, $config = []) {
+    public function __construct(\bolt\browser\views $manager, $config = []) {
 
         $this->_manager = $manager;
 
-        $this->_file = $file;
+        $this->_compiled = $config['compiled'];
+
+        $this->_engine = $config['engine'];
 
         $this->_vars = $config['vars'];
 
@@ -27,7 +31,7 @@ class view implements face {
 
     public function render() {
         $this->_vars['context'] = $this->_context;
-        return $this->_manager->renderFile($this->_file, $this->_vars);
+        return $this->_engine->renderCompiled($this->_compiled, $this->_vars);
     }
 
     public function __invoke() {

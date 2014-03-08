@@ -3,7 +3,8 @@
 namespace bolt\render;
 use \b;
 
-use Handlebars\Handlebars as HBR;
+use Handlebars\Handlebars as HBR,
+    Handlebars\Template;
 
 /**
  * handlare renderer
@@ -63,12 +64,12 @@ class handlebars extends base {
      * @return string
      */
     public function render($str, $vars = []) {
-        if (is_array($str)) {
-            var_dump($str); die;
-        }
-
         return $this->getInstance()->render($str, $vars);
     }
 
+    public function renderCompiled($compiled, $vars = []) {
+        $t = new Template($this->getInstance(), $compiled['tree'], $compiled['tokens']);
+        return $t->render($vars);
+    }
 
 }

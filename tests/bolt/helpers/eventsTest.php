@@ -1,6 +1,6 @@
 <?php
 
-class eventsTest extends Test {
+class helpers_eventsTest extends Test {
 
     public function setUp(){
         $this->cb = function() {
@@ -12,7 +12,7 @@ class eventsTest extends Test {
     public function test_addListener() {
         $l = $this->c->addListener('test', $this->cb);
         $this->eq([$l], $this->c->getListeners('test'));
-        $this->assertInstanceOf('bolt\events\listener', $l);
+        $this->assertInstanceOf('bolt\helpers\events\listener', $l);
     }
 
     public function test_removeListener() {
@@ -42,7 +42,7 @@ class eventsTest extends Test {
     public function test_on() {
         $l = $this->c->on('test', $this->cb);
         $this->eq([$l], $this->c->getListeners('test'));
-        $this->assertInstanceOf('bolt\events\listener', $l);
+        $this->assertInstanceOf('bolt\helpers\events\listener', $l);
     }
 
     public function test_off() {
@@ -96,7 +96,7 @@ class eventsTest extends Test {
 }
 
 class eventsTest_testClass {
-    use bolt\events;
+    use bolt\helpers\events;
 
     public $event1Run = false;
     public $event2Run = false;

@@ -11,7 +11,7 @@ use Symfony\Component\PropertyAccess\PropertyAccess;
  *          method
  */
 abstract class entity {
-    use \bolt\events;
+    use \bolt\helpers\events;
 
     /**
      * models manager

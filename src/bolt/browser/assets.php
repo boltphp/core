@@ -257,14 +257,6 @@ class assets implements \bolt\plugin\singleton {
             $path = b::path($path->getSourcePath());
         }
 
-        // compiled
-        $compiled = $this->_browser->app->getCompiled('assets');
-
-        if (isset($compiled['data']['map']) AND array_key_exists($path, $compiled['data']['map'])) {
-            $path = $compiled['data']['map'][$path]['name'];
-        }
-
-
         if (is_string($path)) {
             return str_replace('{path}', "{$path}", rtrim($this->_config['path'],'/'));
         }

@@ -67,5 +67,4 @@ class render {
         return $this->string($ext, file_get_contents($file), $vars);
     }
 
-
 }

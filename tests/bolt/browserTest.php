@@ -8,7 +8,7 @@ class browserTest extends Test {
     }
 
     public function test_inherits() {
-        $this->assertTrue( in_array('bolt\events', class_uses($this->browser)) );
+        $this->assertTrue( in_array('bolt\helpers\events', class_uses($this->browser)) );
     }
 
     public function test_constructWithReqRes() {
