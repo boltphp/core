@@ -152,7 +152,25 @@ class controller {
         if (!$this->browser['views']) {
             throw new \Exception('No view manager');
         }
-        return $this->browser['views']->create($file, $vars, $this);
+
+        return $this->browser['views']->create($file, $this->getViewVars($vars), $this);
+    }
+
+
+    /**
+     * get a combined view vars
+     *
+     * @param array $vars
+     *
+     * @return array
+     */
+    protected function getViewVars(array $vars) {
+        foreach ($this->_parameters as $key => $value) {
+            if (!array_key_exists($key, $vars)) {
+                $vars[$key] = $value;
+            }
+        }
+        return $vars;
     }
 
     /**

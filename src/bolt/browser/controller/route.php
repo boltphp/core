@@ -244,9 +244,7 @@ class route extends browser\controller implements browser\router\face {
 
         // use the layout
         if ($this->getUseLayout() && $this->layout) {
-            $content = $this->browser['views']->create($this->layout, ['yield' => $content], $this)->render();
-
-            echo($content); die;
+            $content = $this->view($this->layout, ['yield' => $content], $this)->render();
         }
 
         // set our content in the response
