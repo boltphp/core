@@ -8,6 +8,7 @@ use Assetic\Asset\FileAsset;
 use Assetic\Asset\HttpAsset;
 use Assetic\Asset\AssetCollection;
 use Assetic\Asset\GlobAsset;
+use Assetic\Asset\StringAsset;
 
 /**
  * asset manager
@@ -256,9 +257,8 @@ class assets implements \bolt\plugin\singleton {
         if (is_a($path, 'Assetic\Asset\FileAsset')) {
             $path = b::path($path->getSourcePath());
         }
-
         if (is_string($path)) {
-            return str_replace('{path}', "{$path}", rtrim($this->_config['path'],'/'));
+            return str_replace('{path}', ltrim($path,'/'), rtrim($this->_config['path'],'/'));
         }
     }
 
@@ -333,6 +333,12 @@ class assets implements \bolt\plugin\singleton {
 
                 if (!$filter['instance']) {
                     $this->_filters[$ext][$i]['instance'] = $filter['instance'] = $filter['ref']->newInstanceArgs($filter['args']);
+
+                    //
+                    foreach ($this->_dirs as $dir) {
+                        $this->_filters[$ext][$i]['instance']->addLoadPath($this->_browser->path($dir));
+                    }
+
                 }
                 $items[] = $filter['instance'];
             }
@@ -406,7 +412,7 @@ class assets implements \bolt\plugin\singleton {
             }
 
             $fm->add(new FileAsset($file));
-            $o = new StringAsset($fm->dump(), $this->getFilters($ext));
+            $o = new StringAsset($fm->dump(), $this->getFilters($ext), dirname($file));
         }
         else {
             $o = new FileAsset($file, $this->getFilters($ext));

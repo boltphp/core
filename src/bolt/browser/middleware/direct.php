@@ -12,6 +12,7 @@ class direct extends \bolt\browser\middleware {
 
         $path = $this->request->getPathInfo();
 
+
         if (!preg_match("#^/".$dir."#i", $path)) {
             return;
         }

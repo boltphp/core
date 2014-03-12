@@ -18,7 +18,7 @@ class base {
      *
      * @return mixed
      */
-    public function param($key, $default = null, array $array, $filter = null) {
+    public function param($key, $default = null, $array, $filter = null) {
         if (!is_array($array)) {return $default;}
         $resp = array_key_exists($key, $array) ? $array[$key] : $default;
         if ($filter !== null) {

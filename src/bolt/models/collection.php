@@ -24,6 +24,14 @@ class collection extends \bolt\helpers\collection {
 
 
     /**
+     * paramaters that can be defined on collection
+     *
+     * @var array
+     */
+    private $_paramaters = [];
+
+
+    /**
      * Constructor
      *
      * @param bolt\models $manager
@@ -44,6 +52,33 @@ class collection extends \bolt\helpers\collection {
             }
         }
 
+    }
+
+    /**
+     * get a paramter
+     *
+     * @param string $name
+     *
+     * @return mixed
+     */
+    public function __get($name) {
+        if (array_key_exists($name, $this->_paramaters)) {
+            return $this->_paramaters[$name];
+        }
+        return null;
+    }
+
+
+    /**
+     * set a paramater
+     * @param string $name
+     * @param mixed $value
+     *
+     * @return self
+     */
+    public function __set($name, $value) {
+        $this->_paramaters[$name] = $value;
+        return $this;
     }
 
 
@@ -79,7 +114,6 @@ class collection extends \bolt\helpers\collection {
         parent::unshift($object);
         return $this;
     }
-
 
 
 }

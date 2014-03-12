@@ -57,6 +57,10 @@ class element implements \ArrayAccess {
     public function html() {
         $ref = clone $this->_dom->doc();
 
+        if (is_a($this->_node, '\DOMText')) {
+            return $this->_node->nodeValue;
+        }
+
         $xpath = new \DOMXPath($ref);
 
         $el = $xpath->query(CssSelector::toXPath('[data-domref="'.$this->_guid.'"]'))->item(0);
@@ -173,11 +177,13 @@ class element implements \ArrayAccess {
 
     public function children() {
         $nl = new \bolt\dom\nodeList($this->_dom);
+
         foreach ($this->_node->childNodes as $node) {
             if (trim($node->nodeValue) == "") {continue;}
-
             $nl->attach(new element($this->_dom, $node));
         }
+
+
         return $nl;
     }
 

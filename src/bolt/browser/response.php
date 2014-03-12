@@ -27,4 +27,9 @@ class response extends SymfonyResponse {
         return $ready === null ? $this->_readyToSend : $this->_readyToSend = $ready;
     }
 
+    public function readyToSend() {
+        $this->_readyToSend = true;
+        return $this;
+    }
+
 }

@@ -216,7 +216,7 @@ class browser extends plugin {
         else if (is_object($class)) {
             $inst = $class;
         }
-        else if (is_callable($name)) {
+        else if (is_a($name, 'Closure')) {
             $class = 'bolt\browser\middleware\closure';
             $inst = new $class($this, $config);
             $inst->setClosure($name);
