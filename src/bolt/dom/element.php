@@ -109,7 +109,7 @@ class element implements \ArrayAccess {
         if (is_array($name)) {
             foreach ($name as $n => $v) {
                 if (is_numeric($n)) {
-                    $this->_node->setAttribute($n);
+                    $this->_node->appendChild(new \DOMAttr($v));
                 }
                 else {
                     $this->_node->setAttribute($n, $v);

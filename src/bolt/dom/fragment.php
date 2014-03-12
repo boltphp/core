@@ -19,6 +19,8 @@ class fragment implements \ArrayAccess {
 
         $this->root = $this['[data-fragmentref="'.$this->_guid.'"]']->first();
 
+        $this->root->attr($attr);
+
 
     }
 

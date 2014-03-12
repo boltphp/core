@@ -119,6 +119,7 @@ abstract class entity {
     private function _getAccessor() {
         if (!$this->_access) {
             $this->_access = PropertyAccess::createPropertyAccessorBuilder()
+                    ->disableExceptionOnInvalidIndex()
                     ->getPropertyAccessor();
         }
         return $this->_access;

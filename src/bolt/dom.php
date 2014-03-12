@@ -45,7 +45,7 @@ class dom implements \ArrayAccess {
         $this->_doc->formatOutput = b::env() === 'dev';
 
         if ($html) {
-            @$this->_doc->loadHTML($html);
+            @$this->_doc->loadHTML($html, LIBXML_HTML_NOIMPLIED & LIBXML_NOERROR & LIBXML_ERR_NONE);
         }
 
         $this->_guid = b::guid('domref');
