@@ -13,12 +13,12 @@ class redirect extends \bolt\browser\response {
 
         // what code
         $this->setStatusCode($code);
+        $this->isRedirection(true);
 
         // header
         if ($url) {
             $this->setUrl($url);
         }
-
     }
 
     public function setUrl($url) {

@@ -59,6 +59,10 @@ class route extends browser\controller implements browser\router\face {
         return parent::__get($name);
     }
 
+    public function setResponse(\bolt\browser\response $resp) {
+        $this->_response = $resp;
+        return $this;
+    }
 
     /**
      * throw an exception
@@ -204,7 +208,6 @@ class route extends browser\controller implements browser\router\face {
         }
 
         $content = $this->response->getContent();
-
 
         // if it's an array,
         // we assume they have given formats

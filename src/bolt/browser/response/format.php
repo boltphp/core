@@ -41,6 +41,13 @@ abstract class format implements format\face {
         $this->headers = new ResponseHeaderBag();
     }
 
+    public function __call($name, $args) {
+        return call_user_func_array([$this->_parent, $name], $args);
+    }
+
+    public function __get($name) {
+        return $this->_parent->{$name};
+    }
 
     /**
      * set a header
@@ -98,7 +105,7 @@ abstract class format implements format\face {
 
         // if content is a closure
         while (is_callable($this->_content)) {
-            $this->_content = call_user_func($this->_content);
+            $this->_content = call_user_func(\Closure::bind($this->_content, $this));
         }
 
         // set any headers we have
@@ -113,8 +120,6 @@ abstract class format implements format\face {
         if (method_exists($this, 'format')) {
             $this->_content = $this->format($this->_content);
         }
-
-
 
         return $this->_content;
 

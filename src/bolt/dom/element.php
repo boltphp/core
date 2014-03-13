@@ -18,6 +18,10 @@ class element implements \ArrayAccess {
         $this->attr('data-domref', $this->_guid);
     }
 
+    public function dom(){
+        return $this->_dom;
+    }
+
     public function reset($dom, $node)  {
         $this->_dom = $dom;
         $this->_node = $node;
