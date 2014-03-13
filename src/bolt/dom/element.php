@@ -55,15 +55,19 @@ class element implements \ArrayAccess {
     }
 
     public function html() {
-        $ref = clone $this->_dom->doc();
-
-        if (is_a($this->_node, '\DOMText')) {
+        if (is_a($this->_node, '\DOMText') OR !$this->_node->hasChildNodes()) {
             return $this->_node->nodeValue;
         }
+
+        $ref = clone $this->_dom->doc();
 
         $xpath = new \DOMXPath($ref);
 
         $el = $xpath->query(CssSelector::toXPath('[data-domref="'.$this->_guid.'"]'))->item(0);
+
+        if (!$el) {
+            return $this->_node->nodeValue;
+        }
 
         foreach ($xpath->query(CssSelector::toXPath('*[data-domref]')) as $node) {
             $node->removeAttribute('data-domref');
@@ -71,6 +75,7 @@ class element implements \ArrayAccess {
         foreach ($xpath->query(CssSelector::toXPath('*[data-fragmentref]')) as $node) {
             $node->removeAttribute('data-fragmentref');
         }
+
 
         return $ref->saveHTML($el);
     }
@@ -85,12 +90,12 @@ class element implements \ArrayAccess {
         }
         else if (is_a($what, '\bolt\dom\fragment')) {
             $this->_dom->addRef($what);
-            $newNode = $this->_node->appendChild($this->_dom->importNode($what->root->node(), true));
+            $newNode = $this->_node->appendChild($this->_dom->import($what->root(), true));
             $what->reset($this->_dom, $newNode);
         }
         else if (is_a($what, '\bolt\dom\element')) {
             $this->_dom->addRef($what);
-            $newNode = $this->_node->appendChild($this->_dom->importNode($what->node(), true));
+            $newNode = $this->_node->appendChild($this->_dom->import($what, true));
             $what->reset($this->_dom, $newNode);
         }
         else if (is_a($what, '\bolt\dom\nodeList')) {
