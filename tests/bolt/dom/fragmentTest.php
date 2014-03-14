@@ -39,7 +39,7 @@ class dom_fragmentTest extends Test {
         $i = $this->f->find('i');
         $this->assertInstanceOf('bolt\dom\nodeList', $i);
         $this->eq(1, $i->count());
-        $this->eq($html, $i->first()->html());
+        $this->eq('test', $i->first()->html());
     }
 
     public function test_append() {

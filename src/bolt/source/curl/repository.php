@@ -121,7 +121,7 @@ class repository {
             $value = null;
 
             // target entity
-            if (isset($_['targetEntity'])) {
+            if (isset($_['targetEntity']) && isset($item[$name])) {
                 // reach back to curl to get a repo for this entity
                 $repo = $this->_curl->getRepository($_['targetEntity']);
                 $value = $repo->generateEntity($item[$name]);

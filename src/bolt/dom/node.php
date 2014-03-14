@@ -10,9 +10,11 @@ class node implements \ArrayAccess {
     private $_guid;
     private $_dom;
     private $_node;
+    private $_doc;
 
     public function __construct($dom, $node=false) {
         $this->_dom = $dom;
+        $this->_doc = $dom->doc();
         $this->_node = $node;
         $this->_guid = b::guid("domref");
         $this->attr('data-domref', $this->_guid);
@@ -58,30 +60,70 @@ class node implements \ArrayAccess {
         }
     }
 
-    public function html() {
-        if (is_a($this->_node, '\DOMText') OR !$this->_node->hasChildNodes()) {
-            return $this->_node->nodeValue;
+    public function html($html = null) {
+        if ($html) {
+            $this->clear();
+
+            $html = html_entity_decode($html, ENT_QUOTES, 'utf-8');
+
+            if (stripos($html, '<') !== false && stripos($html, '>') !== false) {
+                $guid = b::guid("_x_dom");
+
+                $_ = new \DOMDocument();
+                @$_->loadHTML("<div id='{$guid}'>".$html."</div>");
+
+                $children = $_->getElementById($guid)->childNodes;
+
+                foreach ($children as $child) {
+                    $this->_node->appendChild($this->_doc->importNode($child, true));
+                }
+
+            }
+            else {
+                $this->_node->appendChild(new \DOMText($html));
+            }
+
         }
+        else {
 
-        $ref = clone $this->_dom->doc();
 
-        $xpath = new \DOMXPath($ref);
+            if (is_a($this->_node, '\DOMText') OR !$this->_node->hasChildNodes()) {
+                return $this->_node->nodeValue;
+            }
 
-        $el = $xpath->query(CssSelector::toXPath('[data-domref="'.$this->_guid.'"]'))->item(0);
 
-        if (!$el) {
-            return $this->_node->nodeValue;
+            $ref = clone $this->_dom->doc();
+
+
+            $xpath = new \DOMXPath($ref);
+
+            $el = $xpath->query('//*[data-domref="'.$this->_guid.'"]')->item(0);
+
+            // var_dump($el, $this->_node->attributes->item(0)->value, $this->_guid); die;
+
+            if (!$el) {
+                return $this->_node->nodeValue;
+            }
+
+            foreach ($xpath->query(CssSelector::toXPath('*[data-domref]')) as $node) {
+                $node->removeAttribute('data-domref');
+            }
+            foreach ($xpath->query(CssSelector::toXPath('*[data-fragmentref]')) as $node) {
+                $node->removeAttribute('data-fragmentref');
+            }
+
+
+            return $ref->saveHTML($el);
         }
+    }
 
-        foreach ($xpath->query(CssSelector::toXPath('*[data-domref]')) as $node) {
-            $node->removeAttribute('data-domref');
+    public function clear() {
+        if ($this->_node->hasChildNodes()) {
+            foreach ($this->_node->childNodes as $node) {
+                $node->parentNode->removeChild($node);
+            }
         }
-        foreach ($xpath->query(CssSelector::toXPath('*[data-fragmentref]')) as $node) {
-            $node->removeAttribute('data-fragmentref');
-        }
-
-
-        return $ref->saveHTML($el);
+        return $this;
     }
 
     public function append($what) {
@@ -93,7 +135,7 @@ class node implements \ArrayAccess {
             }
         }
         else if (is_a($what, '\bolt\dom\fragment')) {
-            $this->append($what->root());
+            $this->append($what->children());
         }
         else if (is_a($what, '\bolt\dom\node')) {
             $this->_dom->addRef($what);

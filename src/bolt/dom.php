@@ -79,7 +79,7 @@ class dom implements \ArrayAccess {
             return $this;
         }
         else if (is_array($what, 'bolt\dom\fragement')) {
-            $this->append($what->root());
+            $this->append($what->children());
         }
 
         return $this;
