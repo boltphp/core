@@ -93,9 +93,7 @@ class element implements \ArrayAccess {
             }
         }
         else if (is_a($what, '\bolt\dom\fragment')) {
-            $this->_dom->addRef($what);
-            $newNode = $this->_node->appendChild($this->_dom->import($what->root(), true));
-            $what->reset($this->_dom, $newNode);
+            $this->append($what->root());
         }
         else if (is_a($what, '\bolt\dom\element')) {
             $this->_dom->addRef($what);

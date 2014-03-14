@@ -10,13 +10,15 @@ use \DOMXPath;
 
 class dom implements \ArrayAccess {
 
+    protected $hasRoot = false;
+
     private $_doc;
 
     private $_ref = [];
 
     private $_guid;
 
-    public function __construct($html = "", $charset = 'UTF-8') {
+    final public function __construct($html = "", $charset = 'UTF-8') {
         $this->_doc = new DOMDocument('1.0', $charset);
         $this->_doc->validateOnParse = false;
         $this->_doc->preserveWhiteSpace = false;
@@ -25,9 +27,14 @@ class dom implements \ArrayAccess {
 
         $this->_guid = b::guid('domref');
 
-
         $this->html($html);
+
+        $this->init();
+
     }
+
+
+    public function init() {}
 
 
     public function guid() {
@@ -40,7 +47,7 @@ class dom implements \ArrayAccess {
 
     public function html($html = null) {
         if ($html) {
-            $this->_doc->loadHTML($html);
+            @$this->_doc->loadHTML((string)$html, LIBXML_NOERROR + LIBXML_NONET + LIBXML_NOWARNING + LIBXML_NOXMLDECL);
             return $this;
         }
         else {
@@ -48,7 +55,7 @@ class dom implements \ArrayAccess {
         }
     }
 
-    public function addRef(dom\element $el) {
+    public function addRef($el) {
         $this->_ref[$el->guid()] = $el;
         return $this;
     }

@@ -28,7 +28,7 @@ class dom extends base {
      * @return bolt\dom
      */
     public function render($str, $vars = []) {
-        return new \bolt\dom($str);
+        return stripos($str, '<html') !== false ? new \bolt\dom($str) : new \bolt\dom\fragment($str);
     }
 
 
