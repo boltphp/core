@@ -61,7 +61,7 @@ class dom implements \ArrayAccess {
     }
 
     public function import($what, $deep = false) {
-        if (is_a($what, 'bolt\dom\element')) {
+        if (is_a($what, 'bolt\dom\node')) {
             $what = $what->node();
         }
 
@@ -69,7 +69,7 @@ class dom implements \ArrayAccess {
     }
 
     public function append($what) {
-        if (is_a($what, 'bolt\dom\element')) {
+        if (is_a($what, 'bolt\dom\node')) {
             $this->_doc->documentElement->appendChild($what->node());
         }
         else if (is_array($what, 'bolt\dom\nodeList')) {
@@ -87,7 +87,7 @@ class dom implements \ArrayAccess {
 
     public function create($tag, $value = null, $attr = []) {
         $el = $this->_doc->createElement($tag, html_entity_decode($value, ENT_QUOTES, 'utf-8'));
-        $_ = new dom\element($this, $el);
+        $_ = new dom\node($this, $el);
         $_->attr($attr);
         return $_;
     }
@@ -111,7 +111,7 @@ class dom implements \ArrayAccess {
                 $nl->push($this->_ref[$dr]);
             }
             else {
-                $nl->push(new dom\element($this, $node));
+                $nl->push(new dom\node($this, $node));
             }
         }
 
