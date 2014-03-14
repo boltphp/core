@@ -65,6 +65,15 @@ class dom implements \ArrayAccess {
         if (is_a($what, 'bolt\dom\element')) {
             $this->_doc->documentElement->appendChild($what->node());
         }
+        else if (is_array($what, 'bolt\dom\nodeList')) {
+            foreach ($what as $node) {
+                $this->append($node);
+            }
+            return $this;
+        }
+        else if (is_array($what, 'bolt\dom\fragement')) {
+            $this->append($what->root());
+        }
 
         return $this;
     }
