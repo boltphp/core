@@ -51,7 +51,13 @@ class driver implements MappingDriver {
      * @return array
      */
     public function getAllClassNames() {
-        return [];
+        $classes = [];
+
+        foreach (b::getSubClassOf('bolt\models\entity') as $class) {
+            $classes[] = $class->name;
+        }
+
+        return $classes;
     }
 
 

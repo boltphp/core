@@ -342,7 +342,7 @@ class browser extends plugin {
 
         if ($this->_request->is404() && $this->response->getContent() === "") {
             $this->response->setStatusCode(404);
-            $this->response->setContent("404 - Not Found");
+            $this->response->setContent("404 - Not Found (".$this->exception->getMessage().")");
         }
 
         // send

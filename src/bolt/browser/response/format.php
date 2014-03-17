@@ -105,7 +105,12 @@ abstract class format implements format\face {
 
         // if content is a closure
         while (is_callable($this->_content)) {
-            $this->_content = call_user_func(\Closure::bind($this->_content, $this));
+            if (is_a($this->_content, '\Closure')) {
+                $this->_content = call_user_func(\Closure::bind($this->_content, $this));
+            }
+            else {
+                $this->_content = call_user_func($this->_content);
+            }
         }
 
         // set any headers we have

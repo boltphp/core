@@ -34,6 +34,13 @@ class models implements plugin\singleton, \ArrayAccess {
     private $_alias = [];
 
     /**
+     * model entity diretories
+     *
+     * @var array
+     */
+    private $_dirs = [];
+
+    /**
      * entity manager
      *
      * @var object
@@ -95,6 +102,10 @@ class models implements plugin\singleton, \ArrayAccess {
 
         }
 
+        if (isset($config['dirs'])) {
+            $this->_dirs = (array)$config['dirs'];
+        }
+
         // find all aliases
         foreach (b::getSubClassOf('bolt\models\entity') as $entity) {
             if ($entity->hasConstant('ALIAS')) {
@@ -146,6 +157,14 @@ class models implements plugin\singleton, \ArrayAccess {
      */
     public function getEntityManager() {
         return $this->_em;
+    }
+
+    public function loadFromDirectories() {
+        foreach ($this->_dirs as $dir) {
+            $path = $this->_app->path($dir);
+            b::requireFromPath($path);
+        }
+        return $this;
     }
 
 

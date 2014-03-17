@@ -148,8 +148,18 @@ class command extends SymfonyCommand {
     public function execute(InputInterface $input, OutputInterface $output) {
         $method = 'call';
 
-        if ($input->hasArgument('cmd') && method_exists($this, $input->getArgument('cmd'))) {
+        if ($input->hasArgument('cmd')) {
             $method = $input->getArgument('cmd');
+
+            if (stripos($method, ':') !== false) {
+                $method = lcfirst(implode("", array_map(function($val){
+                    return ucfirst($val);
+                }, explode(":", $method))));
+            }
+        }
+
+        if (!method_exists($this, $method)) {
+            return false;
         }
 
         $ref = new \ReflectionMethod($this, $method);

@@ -1,6 +1,7 @@
 <?php
 
 namespace bolt\models;
+use \b;
 
 use Symfony\Component\PropertyAccess\PropertyAccess;
 
@@ -176,6 +177,21 @@ abstract class entity {
         ]);
 
         return $resp;
+    }
+
+    public function asArray() {
+        $ref = b::getReflectionClass(get_class($this));
+        $array = [];
+
+        foreach ($ref->getProperties() as $prop) {
+            if ($prop->isProtected()) {
+                $val = $this->{$prop->name};
+
+                $array[$prop->name] = $val;
+            }
+        }
+
+        return $array;
     }
 
 }

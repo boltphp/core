@@ -28,7 +28,16 @@ class models_driverTest extends Test {
     }
 
     public function test_getAllClassNames(){
-        $this->eq([], $this->d->getAllClassNames());
+        $c = [
+            'modelsTest_Collection_entity',
+            'modelTest_Driver_Entity',
+            'modelsTest_Entity',
+            'modelTest_Proxy_Entity',
+            'modelTest_entityNoAlias',
+            'modelTest_entityAlias'
+        ];
+
+        $this->eq($c, $this->d->getAllClassNames());
     }
 
     public function test_isTransient() {
