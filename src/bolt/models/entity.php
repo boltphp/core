@@ -194,4 +194,8 @@ abstract class entity {
         return $array;
     }
 
+    public function save() {
+        return $this->_manager->save($this);
+    }
+
 }

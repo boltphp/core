@@ -194,7 +194,11 @@ class models implements plugin\singleton, \ArrayAccess {
      * @return bolt\models\entity
      */
     public function find($entity, $id) {
-        $o = $this->_getRepoForEntity($entity)->find($id);
+        try {
+            $o = $this->_getRepoForEntity($entity)->find($id);
+        }
+        catch(\Exception $e) { $o = null; }
+
 
        if ($o && is_object($o)) {
            $o->setManager($this);
@@ -234,7 +238,14 @@ class models implements plugin\singleton, \ArrayAccess {
      * @return bolt\models\collection
      */
     public function findBy($entity, array $criteria, array $order = null, $limit = null, $offset = null) {
-        return new models\collection($this, $entity, $this->_getRepoForEntity($entity)->findBy($criteria, $order, $limit, $offset));
+        $items = [];
+
+        try {
+            $items = $this->_getRepoForEntity($entity)->findBy($criteria, $order, $limit, $offset);
+        }
+        catch (\Exception $e) {};
+
+        return new models\collection($this, $entity, $items);
     }
 
 
@@ -248,7 +259,13 @@ class models implements plugin\singleton, \ArrayAccess {
      * @return bolt\models\entity
      */
     public function findOneBy($entity, array $criteria, array $order = []) {
-        $o = $this->_getRepoForEntity($entity)->findOneBy($criteria, $order);
+
+        try {
+            $o = $this->_getRepoForEntity($entity)->findOneBy($criteria, $order);
+        }
+        catch (\Exception $e) {
+            $o = null;
+        }
 
         if ($o && is_object($o)) {
             $o->setManager($this);
@@ -264,6 +281,17 @@ class models implements plugin\singleton, \ArrayAccess {
 
     }
 
+    public function save($entity) {
+
+        try {
+            $this->getEntityManager()->persist($entity);
+            $this->getEntityManager()->flush();
+        }
+        catch (\Exception $e) {
+            echo($e->getMessage()); die;
+        }
+
+    }
 
     /**
      * return a repository for a give entity or alias

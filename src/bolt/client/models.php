@@ -44,8 +44,6 @@ class models extends command {
 
     public function schemaCreate() {
 
-        var_dump( $this->tool->getCreateSchemaSql($this->metadatas) ); die;
-
         $this->writeln("Creating Database Schema...");
         $this->tool->createSchema($this->metadatas);
         $this->writeln('Database schema created successfully');

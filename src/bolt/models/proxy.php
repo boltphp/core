@@ -23,6 +23,7 @@ class proxy {
     private $_class;
 
 
+
     /**
      * Constructor
      *
@@ -42,6 +43,7 @@ class proxy {
     public function getClassName() {
         return $this->_class;
     }
+
 
 
     /**
