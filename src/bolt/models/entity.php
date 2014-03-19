@@ -144,10 +144,21 @@ abstract class entity {
      * @return mixed
      */
     public function __get($name){
+        $resp = null;
+
         if (($op = $this->_hasOp('get', $name)) !== false) {
-            return call_user_func([$this, $op]);
+            $resp = call_user_func([$this, $op]);
         }
-        return property_exists($this, $name) ? $this->{$name} : null;
+        else {
+            $resp = property_exists($this, $name) ? $this->{$name} : null;
+        }
+
+        if (is_object($resp) && stripos('bolt\models\proxy', get_class($resp)) !== false) {
+            $resp->setManager($this->_manager);
+            $resp->setLoaded(true);
+        }
+
+        return $resp;
     }
 
 
