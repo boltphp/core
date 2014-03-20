@@ -187,19 +187,24 @@ class route extends browser\controller implements browser\router\face {
 
         $this->fire('beforeRun');
 
-        // run before
-        $this->before();
 
         // resp
         try {
+            // run before
+            $this->before();
+
+            // build
             $resp = $this->build($params);
+
+            // after
+            $this->after();
+
         }
         catch (\Exception $e) {
-            $this->request->is404(true);
+            $this->response->setException($e);
             return $this->response;
         }
 
-        $this->after();
 
         // if resp is a request
         // we can reset our request and be done
@@ -233,7 +238,8 @@ class route extends browser\controller implements browser\router\face {
             $content = $this->_formats[$params['_format']];
         }
         else if (array_key_exists('_format', $params)) {
-            throw new \ResourceNotFoundException("Unable to match response", 404);
+            $this->response->setException(new \Exception("Unable to match response", 404));
+            return $this->response;
         }
         else if (count($this->_formats) == 1) {
             $content = array_shift($this->_formats);

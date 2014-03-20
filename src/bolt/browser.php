@@ -275,6 +275,7 @@ class browser extends plugin {
 
         // redirect now
         if ($this->response->isRedirection() || $this->response->isReadyToSend()) {
+            $this->runMiddleware('after');
             return $this->send();
         }
 
@@ -302,8 +303,7 @@ class browser extends plugin {
 
             }
             catch (\Exception $e) {
-                $this->exception = $e;
-                $this->_request->is404(true);
+                $this->_response->setException(new \Exception($e->getMessage(), 404));
             }
 
             // controller
@@ -317,7 +317,7 @@ class browser extends plugin {
                     $this->_response = $controller->run($params);
                 }
                 catch (\Exception $e) {
-                    $this->exception = $e;
+                    $this->_response->setException($e);
                 }
 
 
@@ -332,17 +332,12 @@ class browser extends plugin {
         }
 
 
-        // if response is now a
-        if ($this->response->isRedirection() || $this->response->isReadyToSend()) {
-            return $this->send();
-        }
-
         // run before we have run any router
         $this->runMiddleware('after');
 
-        if ($this->_request->is404() && $this->response->getContent() === "") {
-            $this->response->setStatusCode(404);
-            $this->response->setContent("404 - Not Found (".$this->exception->getMessage().")");
+        // if response is now a
+        if ($this->response->isRedirection() || $this->response->isReadyToSend()) {
+            return $this->send();
         }
 
         // send

@@ -15,12 +15,31 @@ class response extends SymfonyResponse {
 
     private $_readyToSend = false;
 
+    private $_exception = null;
+
     /**
      * Constructor
      */
     public function __construct() {
         $this->_guid = b::guid('req');
         call_user_func_array([get_parent_class(), '__construct'], func_get_args());
+    }
+
+    public function setException(\Exception $e) {
+        $this->_exception = $e;
+        if (array_key_exists($e->getCode(), SymfonyResponse::$statusTexts)) {
+            $this->setStatusCode($e->getCode());
+        }
+        $this->readyToSend();
+        return $this;
+    }
+
+    public function hasException() {
+        return $this->_exception !== null;
+    }
+
+    public function getException() {
+        return $this->_exception;
     }
 
     public function isReadyToSend($ready = null) {

@@ -146,6 +146,7 @@ abstract class entity {
     public function __get($name){
         $resp = null;
 
+
         if (($op = $this->_hasOp('get', $name)) !== false) {
             $resp = call_user_func([$this, $op]);
         }
@@ -153,7 +154,7 @@ abstract class entity {
             $resp = property_exists($this, $name) ? $this->{$name} : null;
         }
 
-        if (is_object($resp) && stripos('bolt\models\proxy', get_class($resp)) !== false) {
+        if (is_object($resp) && stripos(get_class($resp), 'bolt\models\proxy') !== false) {
             $resp->setManager($this->_manager);
             $resp->setLoaded(true);
         }
