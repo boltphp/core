@@ -336,7 +336,9 @@ class assets implements \bolt\plugin\singleton {
 
                     //
                     foreach ($this->_dirs as $dir) {
-                        $this->_filters[$ext][$i]['instance']->addLoadPath($this->_browser->path($dir));
+                        if (method_exists($this->_filters[$ext][$i]['instance'], 'addLoadPath')) {
+                            $this->_filters[$ext][$i]['instance']->addLoadPath($this->_browser->path($dir));
+                        }
                     }
 
                 }

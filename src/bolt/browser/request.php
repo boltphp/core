@@ -12,10 +12,6 @@ use Symfony\Component\Routing\RequestContext as SymfonyRequestContext;
  */
 class request extends SymfonyRequest {
 
-    /**
-     * @var bool
-     */
-    private $_is404 = false;
 
     /**
      * Constructor.
@@ -35,16 +31,6 @@ class request extends SymfonyRequest {
         return $ctx;
     }
 
-    /**
-     * is the request currently in a 404 state
-     *
-     * @param bool $flag
-     *
-     * @return mixed
-     */
-    public function is404($flag = null) {
-        return $flag === null ? $this->_is404 : $this->_is404 = $flag;
-    }
 
 
 }
