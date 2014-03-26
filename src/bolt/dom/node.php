@@ -69,7 +69,7 @@ class node implements \ArrayAccess {
             if (stripos($html, '<') !== false && stripos($html, '>') !== false) {
                 $guid = b::guid("_x_dom");
 
-                $_ = new \DOMDocument();
+                $_ = new \DOMDocument(1.0, 'UTF-8');
                 @$_->loadHTML("<div id='{$guid}'>".$html."</div>");
 
                 $children = $_->getElementById($guid)->childNodes;
