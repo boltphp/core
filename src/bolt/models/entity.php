@@ -191,6 +191,10 @@ abstract class entity {
         return $resp;
     }
 
+    public function __isset($name) {
+        return property_exists($this, $name);
+    }
+
     public function asArray() {
         $ref = b::getReflectionClass(get_class($this));
         $array = [];
