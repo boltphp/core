@@ -311,6 +311,15 @@ class models implements plugin\singleton, \ArrayAccess {
         return $this->_em->getRepository($entity);
     }
 
+    public function create($entity) {
+        if (array_key_exists($entity, $this->_alias)) {
+            $entity = $this->_alias[$entity];
+        }
+        $e = new $entity();
+        $e->setManager($this);
+        return $e;
+    }
+
 
     /**
      * register an entity alias

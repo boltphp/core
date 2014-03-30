@@ -191,6 +191,10 @@ abstract class entity {
         return $resp;
     }
 
+    public function afterNormalize($array) {
+        return $array;
+    }
+
     public function asArray() {
         $ref = b::getReflectionClass(get_class($this));
         $array = [];
@@ -202,6 +206,8 @@ abstract class entity {
                 $array[$prop->name] = $val;
             }
         }
+
+        $array = $this->afterNormalize($array);
 
         return $array;
     }
