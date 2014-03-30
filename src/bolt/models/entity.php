@@ -191,8 +191,13 @@ abstract class entity {
         return $resp;
     }
 
+
     public function afterNormalize($array) {
         return $array;
+    }
+
+    public function __isset($name) {
+        return property_exists($this, $name);
     }
 
     public function asArray() {

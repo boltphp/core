@@ -27,7 +27,8 @@ define('bStart', microtime(true));
 // default to utc
 date_default_timezone_set('UTC');
 
-
+// utf8 bitches
+\Patchwork\Utf8\Bootup::initAll();
 
 /**
  *
