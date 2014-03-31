@@ -311,12 +311,16 @@ class models implements plugin\singleton, \ArrayAccess {
         return $this->_em->getRepository($entity);
     }
 
-    public function create($entity) {
+    public function create($entity, $data = [], $partial = false) {
+        if ($partial) {
+            return $this->_em->getPartialReference($entity, $data);
+        }
         if (array_key_exists($entity, $this->_alias)) {
             $entity = $this->_alias[$entity];
         }
         $e = new $entity();
         $e->setManager($this);
+        $e->set($data);
         return $e;
     }
 

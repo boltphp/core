@@ -191,6 +191,15 @@ abstract class entity {
         return $resp;
     }
 
+    public function set(array $data) {
+        foreach ($data as $key => $value) {
+            if (property_exists($key, $value)) {
+                $this->{$key} = $value;
+            }
+        }
+        return $this;
+    }
+
 
     public function afterNormalize($array) {
         return $array;
@@ -207,6 +216,10 @@ abstract class entity {
         foreach ($ref->getProperties() as $prop) {
             if ($prop->isProtected()) {
                 $val = $this->{$prop->name};
+
+                if (is_object($val) && method_exists($val, 'asArray')) {
+                    $val = $val->asArray();
+                }
 
                 $array[$prop->name] = $val;
             }
