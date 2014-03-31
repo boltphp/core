@@ -17,7 +17,7 @@ class fragment extends \bolt\dom {
 
     public function html($html = null) {
         if ($html !== null) {
-            @$this->doc()->loadHTML("<div id='{$this->rootId()}'>{$html}</div>", LIBXML_HTML_NOIMPLIED + LIBXML_HTML_NODEFDTD + LIBXML_NOERROR + LIBXML_NONET + LIBXML_NOWARNING + LIBXML_NOXMLDECL);
+            @$this->doc()->loadHTML("<div id='{$this->rootId()}'>{$html}</div>", LIBXML_HTML_NOIMPLIED + LIBXML_HTML_NODEFDTD + LIBXML_NOERROR + LIBXML_NOWARNING + LIBXML_NOXMLDECL);
             return $this;
         }
         else {
