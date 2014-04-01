@@ -234,4 +234,8 @@ abstract class entity {
         return $this->_manager->save($this);
     }
 
+    public function delete() {
+        return $this->_manager->delete($this);
+    }
+
 }

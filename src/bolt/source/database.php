@@ -42,4 +42,10 @@ class database implements face {
 
     }
 
+    public function __call($name, $args) {
+        if (method_exists($this->getHandle(), $name)) {
+            return call_user_func_array([$this->getHandle(), $name], $args);
+        }
+    }
+
 }

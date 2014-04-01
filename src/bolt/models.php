@@ -291,6 +291,20 @@ class models implements plugin\singleton, \ArrayAccess {
             echo($e->getMessage()); die;
         }
 
+        return $this;
+    }
+
+    public function delete($entity) {
+
+        try {
+            $this->getEntityManager()->remove($entity);
+            $this->getEntityManager()->flush();
+        }
+        catch (\Exception $e) {
+            echo($e->getMessage()); die;
+        }
+
+        return $this;
     }
 
     /**
