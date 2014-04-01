@@ -23,6 +23,7 @@ class dom implements \ArrayAccess {
         $this->_doc->validateOnParse = false;
         $this->_doc->preserveWhiteSpace = false;
         $this->_doc->resolveExternals = false;
+        $this->_doc->substituteEntities = false;
         $this->_doc->formatOutput = b::env() === 'dev';
 
         $this->_guid = b::guid('domref');
@@ -47,7 +48,7 @@ class dom implements \ArrayAccess {
 
     public function html($html = null) {
         if ($html) {
-            @$this->_doc->loadHTML((string)$html, LIBXML_NOERROR + LIBXML_NONET + LIBXML_NOWARNING + LIBXML_NOXMLDECL);
+            @$this->_doc->loadHTML((string)$html, LIBXML_NOERROR + LIBXML_NOWARNING + LIBXML_NOXMLDECL);
             return $this;
         }
         else {
@@ -86,9 +87,10 @@ class dom implements \ArrayAccess {
     }
 
     public function create($tag, $value = null, $attr = []) {
-        $el = $this->_doc->createElement($tag, html_entity_decode($value, ENT_QUOTES, 'utf-8'));
+        $el = $this->_doc->createElement($tag);
         $_ = new dom\node($this, $el);
         $_->attr($attr);
+        if ($value) {$_->html($value);}
         return $_;
     }
 

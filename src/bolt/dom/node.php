@@ -29,10 +29,11 @@ class node implements \ArrayAccess {
         $this->_node = $node;
     }
 
-    public function create($tag, $value="", $attr=[]) {
-        $el = $this->_dom->doc()->createElement($tag, $value);
+    public function create($tag, $value=null, $attr=[]) {
+        $el = $this->_dom->doc()->createElement($tag);
         $_ = new node($this->_dom, $el);
         $_->attr($attr);
+        if ($value) {$_->html($value);}
         return $_;
     }
 
@@ -64,13 +65,15 @@ class node implements \ArrayAccess {
         if ($html) {
             $this->clear();
 
-            $html = html_entity_decode($html, ENT_QUOTES, 'utf-8');
+            $html = html_entity_decode($html, ENT_NOQUOTES, 'utf-8');
 
             if (stripos($html, '<') !== false && stripos($html, '>') !== false) {
                 $guid = b::guid("_x_dom");
 
                 $_ = new \DOMDocument(1.0, 'UTF-8');
-                @$_->loadHTML("<div id='{$guid}'>".$html."</div>");
+                $_->substituteEntities = false;
+                $_->resolveExternals = false;
+                @$_->loadHTML("<div id='{$guid}'>".$html."</div>", LIBXML_NOERROR +  LIBXML_NOWARNING + LIBXML_NOXMLDECL + LIBXML_HTML_NODEFDTD);
 
                 $children = $_->getElementById($guid)->childNodes;
 
