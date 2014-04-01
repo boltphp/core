@@ -116,4 +116,12 @@ class collection extends \bolt\helpers\collection {
     }
 
 
+    public function asArray() {
+        $resp = [];
+        foreach ($this as $item) {
+            $resp[] = $item->asArray();
+        }
+        return $resp;
+    }
+
 }
