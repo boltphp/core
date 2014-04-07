@@ -12,11 +12,6 @@ use Symfony\Component\Routing\Exception\MethodNotAllowedException;
 class route extends http\controller implements http\router\face {
 
     /**
-     * @var bolt\http\response\format[]
-     */
-    private $_formats = [];
-
-    /**
      * @var bolt\http\response
      */
     protected $_response = false;
@@ -94,33 +89,7 @@ class route extends http\controller implements http\router\face {
      * @return bolt\http\response\format
      */
     public function format($format, $content=false) {
-        if (is_array($format)) {
-            array_walk($format, function($content, $format){
-                $this->format($format, $content);
-            });
-            return $this;
-        }
-
-        $class = $format;
-
-        if (!class_exists($class, true)) {
-            $class = 'bolt\http\response\format\\'.$format;
-        }
-
-        if (!class_exists($class, true)) {
-            throw new \Exception("Unknown format class $class");
-        }
-
-        $o = new $class($this->response);
-
-
-        if (!is_subclass_of($o, 'bolt\http\response\format\face')) {
-            throw new \Exception('Format class does not implement bolt\http\response\format\face');
-        }
-
-        $this->_formats[$format] = $o;
-        $this->_formats[$format]->setContent($content);
-        return $this->_formats[$format];
+        return $this->_response->format($format, $content);
     }
 
 
@@ -230,7 +199,7 @@ class route extends http\controller implements http\router\face {
         // we don't have any formats set
         // assume they set the default format
         if ($content !== "" && count($this->_formats) !== 0 && isset($params["_format"])) {
-            $this->_formats[$params["_format"]] = $this->response->getContent();
+            $this->format($params["_format"], $this->response->getContent()) ;
         }
 
         // if _format exists in response. no we return

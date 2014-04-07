@@ -252,9 +252,9 @@ class application extends plugin {
             $this->fire('run:cli');
         }
 
-        // else assume a browser
+        // else assume a http
         else {
-            $this->fire('run:browser');
+            $this->fire('run:http');
         }
 
 
