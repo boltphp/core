@@ -44,7 +44,7 @@
         "sami/sami": "*",
         "leafo/lessphp": "*",
         "leafo/scssphp": "*",
-        "natxet/cssmin": "*",
+        "natxet/cssmin": "*"
     },
     "autoload": {
         "psr-0": {
