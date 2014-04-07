@@ -32,6 +32,8 @@ class models_driverTest extends Test {
             'modelsTest_Collection_entity',
             'modelTest_Driver_Entity',
             'modelsTest_Entity',
+            'modelsTest_EnityGoodNormalize',
+            'modelsTest_EnityBadNormalize',
             'modelTest_Proxy_Entity',
             'modelTest_entityNoAlias',
             'modelTest_entityAlias'

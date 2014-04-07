@@ -47,6 +47,8 @@ class models implements plugin\singleton, \ArrayAccess {
      */
     private $_em;
 
+    private $_source;
+
     /**
      * custom type map
      *
@@ -78,6 +80,7 @@ class models implements plugin\singleton, \ArrayAccess {
         }
 
         // get the entity manager
+        $this->_source = $config['source'];
         $this->_em = $config['source']->getModelEntityManager($this, new models\driver($this));
 
         // add our custom types
@@ -115,6 +118,10 @@ class models implements plugin\singleton, \ArrayAccess {
 
     }
 
+
+    public function getSource() {
+        return $this->_source;
+    }
 
     /**
      * return the base app

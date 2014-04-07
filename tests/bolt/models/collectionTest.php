@@ -2,7 +2,6 @@
 
 class models_collectionTest extends Test {
 
-
     public function setUp() {
         $this->m = new bolt\models($this->getApp(), [
                 'source' => new modelTest_Collection_Source()
@@ -72,13 +71,31 @@ class models_collectionTest extends Test {
         $this->eq($e2, $this->p->last());
     }
 
+    public function test_magicGetSetParams() {
+        $this->eq(null, $this->p->nope);
+        $this->p->nope = 9;
+        $this->eq(9, $this->p->nope);
+    }
+
+    public function test_asArray() {
+        $e1 = new modelsTest_Collection_entity();
+        $e2 = new modelsTest_Collection_entity();
+        $this->p->push($e1)->push($e2);
+
+        $this->eq([
+                ['id' => $e1->id],
+                ['id' => $e2->id]
+            ],
+            $this->p->asArray());
+    }
+
 }
 
 class modelsTest_Collection_collection extends bolt\models\collection {}
 
 class modelsTest_Collection_entity extends \bolt\models\entity {
 
-    public $id = false;
+    protected $id = false;
 
     public function __construct() {
         $this->id = uniqid();

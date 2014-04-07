@@ -12,7 +12,7 @@ class database implements face {
 
     private $_config;
 
-    private $_handle;
+    private static $_handles = [];
 
     public function __construct(\bolt\application $app, $config = []) {
         $this->_app = $app;
@@ -20,10 +20,15 @@ class database implements face {
     }
 
     public function getHandle() {
-        if (!$this->_handle) {
-            $this->_handle = DriverManager::getConnection($this->_config, new Configuration());
+        $cid = md5(serialize(array_filter($this->_config, function($name) { return in_array($name, ['driver','dbname','host','username','password']); })));
+        if (!array_key_exists($cid, self::$_handles)) {
+            self::$_handles[$cid] = DriverManager::getConnection($this->_config, new Configuration());
         }
-        return $this->_handle;
+        return self::$_handles[$cid];
+    }
+
+    public function getConfig() {
+        return $this->_config;
     }
 
     public function getModelEntityManager(\bolt\models $manager, \bolt\models\driver $driver) {
