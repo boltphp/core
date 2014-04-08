@@ -130,8 +130,6 @@ class node implements \ArrayAccess {
     }
 
     public function append($what) {
-
-
         if (is_array($what)) {
             foreach ($what as $item) {
                 $this->append($item);
@@ -224,6 +222,17 @@ class node implements \ArrayAccess {
 
         $this->attr('style', implode(';', $_));
 
+        return $this;
+    }
+
+    public function insertBefore($node) {
+        if ($node->dom()->doc() !== $this->dom()->doc()) {
+            $this->_dom->addRef($node);
+            $newNode = $this->_dom->import($node, true);
+            $node->reset($this->_dom, $newNode);
+        }
+
+        $this->dom()->doc()->documentElement->insertBefore($node->node(), $this->_node);
         return $this;
     }
 

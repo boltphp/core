@@ -6,8 +6,13 @@ class element extends node {
 
     private $_dom;
 
-    public function __construct($tag, $value = "", $attr = []) {
+    public $tagName = 'div';
+
+    public function __construct($tag = null, $value = "", $attr = []) {
         $this->_dom = new \bolt\dom();
+
+        $tag = $tag ?: $this->tagName;
+
         $node = $this->_dom->doc()->createElement($tag);
         $this->_dom->doc()->appendChild($node);
 
@@ -16,6 +21,7 @@ class element extends node {
         $this->html($value);
         $this->attr($attr);
 
+        $this->init();
 
     }
 

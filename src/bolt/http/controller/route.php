@@ -153,12 +153,18 @@ class route extends http\controller implements http\router\face {
      */
     public function run($params) {
 
-
+        // before we do anything
         $this->fire('beforeRun');
 
+        // if we have a format from the
+        // route we need to make sure
+        if (array_key_exists('_format', $params)) {
+            $this->request->setRequestFormat($params['_format']);
+        }
 
         // resp
         try {
+
             // run before
             $this->before();
 
@@ -174,62 +180,28 @@ class route extends http\controller implements http\router\face {
             return $this->response;
         }
 
-
         // if resp is a request
         // we can reset our request and be done
         if (is_array($resp))  {
             $this->format($resp);
         }
-
-        $content = $this->response->getContent();
-
-        // if it's an array,
-        // we assume they have given formats
-        if (is_string($resp)) {
-            $this->response->setContent($resp);
-        }
-        else if ($resp instanceof \bolt\http\views\face) {
-            $content = $resp->render();
-        }
+        // is this a response object that
+        // isn't our response
         else if (is_a($resp, 'bolt\http\response') && $resp !== $this->response) {
             return $resp;
         }
 
-        // if the build function set content and
-        // we don't have any formats set
-        // assume they set the default format
-        if ($content !== "" && count($this->_formats) !== 0 && isset($params["_format"])) {
-            $this->format($params["_format"], $this->response->getContent()) ;
-        }
-
-        // if _format exists in response. no we return
-        if (array_key_exists('_format', $params) && array_key_exists($params['_format'], $this->_formats)) {
-            $content = $this->_formats[$params['_format']];
-        }
-        else if (array_key_exists('_format', $params)) {
-            $this->response->setException(new \Exception("Unable to match response", 404));
-            return $this->response;
-        }
-        else if (count($this->_formats) == 1) {
-            $content = array_shift($this->_formats);
-        }
-
-        // if our content is callable
-        // we want to do that now
-        while(is_callable($content)) {
-            $content = call_user_func($content);
-        }
-
         // use the layout
         if ($this->getUseLayout() && $this->layout) {
-            $content = $this->view($this->layout, ['yield' => $content], $this)->render();
+            $this->response->setLayout(function($content, $resp){
+               return $this->view($this->layout, ['yield' => $content], $this)->render();
+            });
         }
 
-        // set our content in the response
-        $this->response->setContent($content);
-
+        // fire our after event
         $this->fire('afterRun');
 
+        // give back the response to the http kernal
         return $this->response;
     }
 

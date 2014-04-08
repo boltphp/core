@@ -8,6 +8,7 @@ class collection implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonS
 
     private $_items = [];
 
+
     public function each(Closure $cb, $data = []) {
         foreach ($this->_items as $key => $item) {
             call_user_func($cb, $item, $key, $data);
@@ -28,6 +29,10 @@ class collection implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonS
         return $this;
     }
 
+    public function splice($offset, $length, $replace = []) {
+        array_splice($this->_items, $offset, $length, $replace);
+        return $this;
+    }
 
     public function push($item) {
         $this->_items[] = $item;

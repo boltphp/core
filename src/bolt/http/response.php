@@ -5,6 +5,7 @@ use \b;
 
 /// require symfony response
 use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
+use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
 
 /**
  * response object
@@ -32,13 +33,20 @@ class response extends SymfonyResponse {
      */
     private $_exception = null;
 
-
     /**
      * formats of this response
      *
      * @var array
      */
     private $_formats = [];
+
+    /**
+     * layout
+     *
+     * @var Closure
+     */
+    private $_layout = false;
+
 
     /**
      * Constructor
@@ -100,6 +108,14 @@ class response extends SymfonyResponse {
     }
 
 
+    public function setLayout($layout) {
+        $this->_layout = $layout;
+        return $this;
+    }
+
+    public function getLayout() {
+        return $this->_layout;
+    }
 
     /**
      * set a response exception
@@ -158,6 +174,44 @@ class response extends SymfonyResponse {
     public function readyToSend() {
         $this->_readyToSend = true;
         return $this;
+    }
+
+
+    public function prepare(SymfonyRequest $request) {
+        $content = $this->getContent();
+
+        // no format use the set
+        $format = $request->getRequestFormat();
+
+        // make sure we have this format
+        if (count($this->_formats) > 0 && !array_key_exists($format, $this->_formats)) {
+            $this->setException(new \Exception("Unable to match response", 404));
+            return $this;
+        }
+
+        // if format and we have this format
+        // override our content
+        if (array_key_exists($format, $this->_formats)) {
+            $content = $this->_formats[$format];
+        }
+
+        // if our content is callable
+        // we want to do that now
+        while(is_callable($content)) {
+            $content = call_user_func($content);
+        }
+
+        // if we have a layout and it's callable
+        if ($this->_layout && is_callable($this->_layout)) {
+            $content = call_user_func($this->_layout, $content, $this);
+        }
+
+        // set the contnet
+        $this->setContent($content);
+
+        // run our parent prepare
+        return parent::prepare($request);
+
     }
 
 }
