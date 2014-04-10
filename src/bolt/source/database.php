@@ -42,6 +42,25 @@ class database implements face {
         $cfg->setProxyDir("/tmp");
         $cfg->setProxyNamespace('bolt\models\proxy');
 
+
+        if (isset($this->_config['queryCache'])) {
+            $cfg->setQueryCacheImpl($this->_config['queryCache']);
+        }
+
+        if (isset($this->_config['metadataCache'])) {
+            $cfg->setMetadataCacheImpl($this->_config['metadataCache']);
+        }
+
+        if (isset($this->_config['resultsCache'])) {
+            $cfg->setResultCacheImpl($this->_config['resultsCache']);
+        }
+
+        $cfg->addCustomStringFunction('FIND_IN_SET', '\bolt\models\function\findInSet');
+        $cfg->addCustomStringFunction('FROM_UNIXTIME', '\bolt\models\function\fromUnixTime');
+
+        // handle
+        $this->getHandle()->getEventManager()->addEventSubscriber(new event($manager));
+
         // create our entity manager
         return \Doctrine\ORM\EntityManager::create($this->getHandle(), $cfg, $this->getHandle()->getEventManager());
 
@@ -53,4 +72,23 @@ class database implements face {
         }
     }
 
+}
+
+class event implements \Doctrine\Common\EventSubscriber {
+
+    private $_manager;
+
+    public function __construct(\bolt\models $manager) {
+        $this->_manager = $manager;
+    }
+
+    public function postLoad($e) {
+        $e->getEntity()
+            ->setLoaded(true)
+            ->setManager($this->_manager);
+    }
+
+    public function getSubscribedEvents() {
+        return ['postLoad'];
+    }
 }
