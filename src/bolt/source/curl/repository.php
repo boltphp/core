@@ -63,10 +63,10 @@ class repository {
         $map = $this->_map();
         switch($type) {
             case 'find':
-                return [$map->getTableName()."/{$args[0]}", [], []];
+                return [$map->getTableName()."/{$args[0]}.json", [], []];
 
             case 'findBy':
-                return [$map->getTableName(), [
+                return [$map->getTableName().".json", [
                         'query' => $args[0],
                         'order' => $args[1],
                         'limit' => $args[2],
@@ -87,7 +87,12 @@ class repository {
      * @return [items => array, total => int]
      */
     private function _getTransform($type, $data) {
-        return call_user_func([$this->_entity, 'curlTransform'], $type, $data);
+        if (method_exists($this->_entity, 'transform')) {
+            return call_user_func([$this->_entity, 'transform'], $type, $data);
+        }
+        else {
+            return $data;
+        }
     }
 
 
@@ -159,7 +164,6 @@ class repository {
 
         // get our return url
         list($url, $query, $headers) = $this->_getRequestUri('find', func_get_args());
-
 
         // make our request
         $resp = $this->_curl->get($url, $headers, ['query' => $query])->send();

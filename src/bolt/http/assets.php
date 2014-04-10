@@ -9,6 +9,8 @@ use Assetic\Asset\HttpAsset;
 use Assetic\Asset\AssetCollection;
 use Assetic\Asset\GlobAsset;
 use Assetic\Asset\StringAsset;
+use Assetic\Asset\AssetCache;
+use Assetic\Cache\FilesystemCache;
 
 /**
  * asset manager
@@ -414,7 +416,14 @@ class assets implements \bolt\plugin\singleton {
             }
 
             $fm->add(new FileAsset($file));
-            $o = new StringAsset($fm->dump(), $this->getFilters($ext), dirname($file));
+
+            $c = new AssetCache(
+                    $fm,
+                    new FilesystemCache("/tmp/a")
+                );
+
+            $o = new StringAsset($c->dump(), $this->getFilters($ext), dirname($file));
+
         }
         else {
             $o = new FileAsset($file, $this->getFilters($ext));
