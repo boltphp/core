@@ -417,12 +417,8 @@ class assets implements \bolt\plugin\singleton {
 
             $fm->add(new FileAsset($file));
 
-            $c = new AssetCache(
-                    $fm,
-                    new FilesystemCache("/tmp/a")
-                );
 
-            $o = new StringAsset($c->dump(), $this->getFilters($ext), dirname($file));
+            $o = new StringAsset($fm->dump(), $this->getFilters($ext), dirname($file));
 
         }
         else {
