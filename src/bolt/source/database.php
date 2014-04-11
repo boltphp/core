@@ -55,8 +55,8 @@ class database implements face {
             $cfg->setResultCacheImpl($this->_config['resultsCache']);
         }
 
-        $cfg->addCustomStringFunction('FIND_IN_SET', '\bolt\models\function\findInSet');
-        $cfg->addCustomStringFunction('FROM_UNIXTIME', '\bolt\models\function\fromUnixTime');
+        $cfg->addCustomStringFunction('FIND_IN_SET', '\bolt\models\functions\findInSet');
+        $cfg->addCustomStringFunction('FROM_UNIXTIME', '\bolt\models\functions\fromUnixTime');
 
         // handle
         $this->getHandle()->getEventManager()->addEventSubscriber(new event($manager));
