@@ -352,4 +352,9 @@ abstract class entity implements \JsonSerializable {
         return $this;
     }
 
+
+    public function getPrimaryKey() {
+
+    }
+
 }

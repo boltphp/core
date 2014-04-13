@@ -290,6 +290,7 @@ class models implements plugin\singleton, \ArrayAccess {
     }
 
     public function save($entity) {
+        $before = clone $entity;
 
         try {
             $this->getEntityManager()->persist($entity);
@@ -298,6 +299,12 @@ class models implements plugin\singleton, \ArrayAccess {
         catch (\Exception $e) {
             echo($e->getMessage()); die;
         }
+
+        // fire off a save
+        $this->_app->fire("models:save", [
+                'before' => $before,
+                'entity' => $entity
+            ]);
 
         return $this;
     }
