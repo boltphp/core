@@ -39,6 +39,9 @@ abstract class format implements format\face {
     public function __construct(\bolt\http\response $parent) {
         $this->_parent = $parent;
         $this->headers = new ResponseHeaderBag();
+
+        $this->headers->set('Content-Type', $this->contentType);
+
     }
 
     public function __call($name, $args) {
@@ -112,14 +115,6 @@ abstract class format implements format\face {
                 $this->_content = call_user_func($this->_content);
             }
         }
-
-        // set any headers we have
-        foreach ($this->headers->all() as $name => $value) {
-            $this->_parent->headers->set($name, $value);
-        }
-
-        // re
-        $this->_parent->headers->set('Content-Type', $this->contentType);
 
         // format
         if (method_exists($this, 'format')) {

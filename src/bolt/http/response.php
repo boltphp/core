@@ -75,23 +75,26 @@ class response extends SymfonyResponse {
 
         $class = $format;
 
-        if (!class_exists($class, true)) {
-            $class = 'bolt\http\response\format\\'.$format;
+        if (is_a($content,'bolt\http\response\format')) {
+            $this->_formats[$format] = $content;
+        }
+        else {
+            if (!class_exists($class, true)) {
+                $class = 'bolt\http\response\format\\'.$format;
+            }
+            if (!class_exists($class, true)) {
+                throw new \Exception("Unknown format class $class");
+            }
+            $this->_formats[$format] = new $class($this);
+            $this->_formats[$format]->setContent($content);
         }
 
-        if (!class_exists($class, true)) {
-            throw new \Exception("Unknown format class $class");
-        }
 
-        $o = new $class($this);
-
-
-        if (!is_subclass_of($o, 'bolt\http\response\format\face')) {
+        if (!is_subclass_of($this->_formats[$format], 'bolt\http\response\format\face')) {
             throw new \Exception('Format class does not implement bolt\http\response\format\face');
         }
 
-        $this->_formats[$format] = $o;
-        $this->_formats[$format]->setContent($content);
+
         return $this->_formats[$format];
     }
 
@@ -192,7 +195,15 @@ class response extends SymfonyResponse {
         // if format and we have this format
         // override our content
         if (array_key_exists($format, $this->_formats)) {
+
+            // set the contnet
             $content = $this->_formats[$format];
+
+            // set any headers we have
+            foreach ($content->headers->all() as $name => $value) {
+                $this->headers->set($name, $value);
+            }
+
         }
 
         // if our content is callable
