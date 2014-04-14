@@ -28,8 +28,7 @@ class formatTest extends Test {
         $this->f->headers->set('test', 'test');
         $this->f->setContent('test');
         $this->eq('test', $this->f->__invoke());
-        $this->eq('test', $this->resp->headers->get('test'));
-        $this->eq('text/plain', $this->resp->headers->get('Content-Type'));
+        $this->eq(null, $this->resp->headers->get('Content-Type'));
     }
 
     public function test_invokeWithFormat() {

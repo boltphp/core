@@ -65,7 +65,7 @@ class response extends SymfonyResponse {
      *
      * @return bolt\http\response\format
      */
-    public function format($format, $content=false) {
+    public function format($format, $content=null) {
         if (is_array($format)) {
             array_walk($format, function($content, $format){
                 $this->format($format, $content);
@@ -85,13 +85,17 @@ class response extends SymfonyResponse {
             if (!class_exists($class, true)) {
                 throw new \Exception("Unknown format class $class");
             }
+
             $this->_formats[$format] = new $class($this);
-            $this->_formats[$format]->setContent($content);
         }
 
 
         if (!is_subclass_of($this->_formats[$format], 'bolt\http\response\format\face')) {
             throw new \Exception('Format class does not implement bolt\http\response\format\face');
+        }
+
+        if ($content !== null) {
+            $this->_formats[$format]->setContent($content);
         }
 
 
