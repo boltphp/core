@@ -77,6 +77,7 @@ class response extends SymfonyResponse {
 
         if (is_a($content,'bolt\http\response\format')) {
             $this->_formats[$format] = $content;
+            $content = null;
         }
         else {
             if (!class_exists($class, true)) {
