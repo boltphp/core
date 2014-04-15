@@ -66,10 +66,8 @@ class assets extends \bolt\http\middleware {
 
                 // loop through each path
                 if (($file = $this->_assets->find($path)) !== false) {
-                    $content[] = $this->_assets->compileFile($file['path'], $file['rel'])->dump();
+                    $content[] = $this->_assets->compileFile($file['path'], $file['rel'], true)->dump();
                 }
-
-
         }
 
         // figureo ut

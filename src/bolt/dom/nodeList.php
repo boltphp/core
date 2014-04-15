@@ -3,7 +3,6 @@
 namespace bolt\dom;
 
 
-
 class nodeList extends \bolt\helpers\collection {
 
     private $_dom;

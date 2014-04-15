@@ -33,6 +33,11 @@ class collection implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonS
         return $this;
     }
 
+    public function map(Closure $cb) {
+        $this->items = array_map($cb, $this->items);
+        return $this;
+    }
+
     public function push($item) {
         $this->items[] = $item;
         return $this;

@@ -10,11 +10,9 @@ class node implements \ArrayAccess {
     private $_guid;
     private $_dom;
     private $_node;
-    private $_doc;
 
     public function __construct($dom, $node=false) {
         $this->_dom = $dom;
-        $this->_doc = $dom->doc();
         $this->_node = $node;
         $this->_guid = b::guid("domref");
         $this->attr('data-domref', $this->_guid);
@@ -22,6 +20,10 @@ class node implements \ArrayAccess {
 
     public function dom(){
         return $this->_dom;
+    }
+
+    public function doc() {
+        return $this->_dom->doc();
     }
 
     public function reset($dom, $node)  {
@@ -61,6 +63,10 @@ class node implements \ArrayAccess {
         }
     }
 
+    public function find($selector) {
+        return $this->_dom->find("*[data-domref='{$this->_guid}'] {$selector}");
+    }
+
     public function html($html = null) {
         if ($html) {
             $this->clear();
@@ -78,7 +84,7 @@ class node implements \ArrayAccess {
                 $children = $_->getElementById($guid)->childNodes;
 
                 foreach ($children as $child) {
-                    $this->_node->appendChild($this->_doc->importNode($child, true));
+                    $this->_node->appendChild($this->doc()->importNode($child, true));
                 }
 
             }
@@ -231,8 +237,7 @@ class node implements \ArrayAccess {
             $newNode = $this->_dom->import($node, true);
             $node->reset($this->_dom, $newNode);
         }
-
-        $this->dom()->doc()->documentElement->insertBefore($node->node(), $this->_node);
+        $this->_node->parentNode->insertBefore($node->node(), $this->_node);
         return $this;
     }
 

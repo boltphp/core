@@ -212,6 +212,13 @@ abstract class entity implements \JsonSerializable {
         return $resp;
     }
 
+    /**
+     * has
+     */
+    public function has($selector) {
+        return $this->getValue($selector, -1) !== -1;
+    }
+
 
     /**
      * check if a value isset for the property

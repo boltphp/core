@@ -119,7 +119,7 @@ class collection extends \bolt\helpers\collection {
     public function asArray() {
         $resp = [];
         foreach ($this as $item) {
-            $resp[] = $item->asArray();
+            $resp[] = is_array($item) ? $item : $item->asArray();
         }
         return $resp;
     }

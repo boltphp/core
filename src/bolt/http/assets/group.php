@@ -79,8 +79,8 @@ class group implements \IteratorAggregate {
 
     }
 
-    public function appendToDom($dom, $to, $combo=null, $attr = []) {
-        if ($combo === null) { $combo = b::env() !== 'dev'; }
+    public function appendToDom($dom, $to, $combo=true, $attr = []) {
+        // if ($combo === null) { $combo = b::env() !== 'dev'; }
 
         if ($this->_type == 'script') {
             if ($combo) {

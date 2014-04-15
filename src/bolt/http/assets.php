@@ -260,7 +260,7 @@ class assets implements \bolt\plugin\singleton {
             $path = b::path($path->getSourcePath());
         }
         if (is_string($path)) {
-            return str_replace('{path}', ltrim($path,'/'), rtrim($this->_config['path'],'/'));
+            return $this->_http->request->getUriForPath(str_replace('{path}', ltrim($path,'/'), rtrim($this->_config['path'],'/')));
         }
     }
 
@@ -400,7 +400,7 @@ class assets implements \bolt\plugin\singleton {
 
     }
 
-    public function compileFile($file) {
+    public function compileFile($file, $rel = null, $filters = true) {
         $ext = pathinfo($file)['extension'];
         $o = false;
 
@@ -415,8 +415,10 @@ class assets implements \bolt\plugin\singleton {
                 }
             }
 
-            $fm->add(new FileAsset($file));
 
+            $f = new FileAsset($file);
+
+            $fm->add($f);
 
             $o = new StringAsset($fm->dump(), $this->getFilters($ext), dirname($file));
 
