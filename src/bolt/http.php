@@ -337,6 +337,7 @@ class http extends plugin {
 
         // if response is now a
         if ($this->response->isRedirection() || $this->response->isReadyToSend()) {
+
             return $this->send();
         }
 

@@ -4,7 +4,8 @@ namespace bolt\models\types;
 
 use \Doctrine\DBAL\Types\Type,
     \Doctrine\DBAL\Platforms\AbstractPlatform,
-    \DateTime;
+    \DateTime,
+    \DateTimeZone;
 
 /**
  * Timestamp type
@@ -22,7 +23,7 @@ class timestamp extends Type {
         if ($value === null || $value instanceof DateTime) {
             return $value;
         }
-        $dt = new DateTime();
+        $dt = new DateTime(null, new DateTimeZone(date_default_timezone_get()));
         $dt->setTimestamp(intval($value));
         return $dt;
     }

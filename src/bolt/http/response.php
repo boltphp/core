@@ -188,6 +188,13 @@ class response extends SymfonyResponse {
     public function prepare(SymfonyRequest $request) {
         $content = $this->getContent();
 
+        // if this response is a redirect
+        // there's no point in doing anything
+        // below this line
+        if ($this->isRedirection()) {
+            return parent::prepare($request);
+        }
+
         // no format use the set
         $format = $request->getRequestFormat();
 

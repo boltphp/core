@@ -203,7 +203,8 @@ class models implements plugin\singleton, \ArrayAccess {
      */
     public function find($entity, $id) {
         try {
-            $o = $this->_getRepoForEntity($entity)->find($id);
+            $args = func_get_args(); array_shift($args);
+            $o = call_user_func_array([$this->_getRepoForEntity($entity), 'find'], $args);
         }
         catch(\Exception $e) { $o = null; }
 
