@@ -7,6 +7,9 @@ use Assetic\Asset\AssetCollection;
 use Assetic\Asset\FileAsset;
 use Assetic\Asset\GlobAsset;
 use Assetic\Asset\StringAsset;
+use Assetic\Asset\AssetCache;
+use Assetic\Cache\FilesystemCache;
+
 
 class assets extends \bolt\http\middleware {
 
@@ -45,32 +48,45 @@ class assets extends \bolt\http\middleware {
             return;
         }
 
+
         // content
         $content = [];
 
-        // compiled
-        $compiled = [];
+
+        $f = $this->_assets->getFilters();
 
         // explode out the path
         foreach (explode('&', trim($matches[1], '&')) as $path) {
             $info = pathinfo($path);
 
             if (!$info) {continue;}
-
             $ext = strtolower($info['extension']);
+            $parts = explode("/", trim($path, '/'));
 
-                // get our path
-                $dir = $info['dirname'];
-                $file = $info['basename'];
 
-                // loop through each path
-                if (($file = $this->_assets->find($path)) !== false) {
-                    $o = $this->_assets->compileFile($file['path'], $file['rel'], true);
+            if ($parts[0] === 'collection') {
+                $factory = $this->_assets->factory();
 
-                    $content[] = $o->dump();
+                $a = new AssetCache(
+                    $factory->createAsset(
+                        "@".str_replace(".{$ext}", '', $parts[1])
+                    ),
+                    new FilesystemCache('/tmp')
+                );
+
+                if (array_key_exists($ext, $f)) {
+                    $a = new StringAsset($a->dump(), $f[$ext], $this->_assets->getRoot());
                 }
-        }
 
+
+                $content[] = $a->dump();
+
+            }
+            else if (($a = $this->_assets->path($path)) != false && file_exists($a)) {
+                $content[] = file_get_contents($a);
+            }
+
+        }
 
 
 
