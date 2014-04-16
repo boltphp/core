@@ -415,12 +415,15 @@ class assets implements \bolt\plugin\singleton {
                 }
             }
 
+            $filter = new \bolt\http\assets\filters\cssRewrite($this);
 
-            $f = new FileAsset($file);
-
-            $fm->add($f);
+            $fm->add(new FileAsset($file));
 
             $o = new StringAsset($fm->dump(), $this->getFilters($ext), dirname($file));
+
+            $o->ensureFilter($filter);
+
+
 
         }
         else {

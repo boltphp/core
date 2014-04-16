@@ -59,16 +59,20 @@ class assets extends \bolt\http\middleware {
 
             $ext = strtolower($info['extension']);
 
-
                 // get our path
                 $dir = $info['dirname'];
                 $file = $info['basename'];
 
                 // loop through each path
                 if (($file = $this->_assets->find($path)) !== false) {
-                    $content[] = $this->_assets->compileFile($file['path'], $file['rel'], true)->dump();
+                    $o = $this->_assets->compileFile($file['path'], $file['rel'], true);
+
+                    $content[] = $o->dump();
                 }
         }
+
+
+
 
         // figureo ut
         $this->response->headers->set('Content-Type', $this->_mapContentTypeFromExt($ext));

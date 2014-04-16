@@ -82,6 +82,8 @@ class group implements \IteratorAggregate {
     public function appendToDom($dom, $to, $combo=true, $attr = []) {
         // if ($combo === null) { $combo = b::env() !== 'dev'; }
 
+        if ($this->count() == 0) {return;}
+
         if ($this->_type == 'script') {
             if ($combo) {
                 $attr['src'] = $this->getComboUrl();
