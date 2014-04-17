@@ -44,8 +44,11 @@ class collection implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonS
     }
 
     public function shift() {
-        array_shift($this->items);
-        return $this;
+        return array_shift($this->items);
+    }
+
+    public function pop(){
+        return array_pop($this->items);
     }
 
     public function unshift($item) {
