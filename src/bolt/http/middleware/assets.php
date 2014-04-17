@@ -67,19 +67,32 @@ class assets extends \bolt\http\middleware {
             if ($parts[0] === 'collection') {
                 $factory = $this->_assets->factory();
 
-                $a = new AssetCache(
-                    $factory->createAsset(
-                        "@".str_replace(".{$ext}", '', $parts[1])
-                    ),
-                    new FilesystemCache('/tmp')
-                );
+                $cname = "@".str_replace(".{$ext}", '', $parts[1]);
 
-                if (array_key_exists($ext, $f)) {
-                    $a = new StringAsset($a->dump(), $f[$ext], $this->_assets->getRoot());
+
+                if (($file = $this->_assets->getCompiledFile($cname)) !== null) {
+                    $content[] = $file;
                 }
+                else {
 
+                    $a = $factory->createAsset($cname);
 
-                $content[] = $a->dump();
+                    $ts = $a->getLastModified();
+
+                    if (array_key_exists($ext, $f)) {
+                        $a = new StringAsset($a->dump(), $f[$ext], $this->_assets->getRoot());
+                    }
+
+                    $cache = "/tmp/{$parts[1]}-{$ts}";
+
+                    if (file_exists($cache)) {
+                        $content[] = file_get_contents($cache);
+                    }
+                    else {
+                        file_put_contents($cache, $content[] = $a->dump());
+                    }
+
+                }
 
             }
             else if (($a = $this->_assets->path($path)) != false && file_exists($a)) {

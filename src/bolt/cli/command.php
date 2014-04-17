@@ -145,8 +145,15 @@ class command extends SymfonyCommand {
 
     }
 
+    public function setup() {
+
+    }
+
     public function execute(InputInterface $input, OutputInterface $output) {
         $method = 'call';
+
+        // stup
+        $this->setup();
 
         if ($input->hasArgument('cmd')) {
             $method = $input->getArgument('cmd');

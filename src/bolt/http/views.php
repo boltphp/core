@@ -45,7 +45,7 @@ class views {
         }
 
         // when compile
-        $http->app->on('compile', [$this, 'compile']);
+        // $http->app->on('compile', [$this, 'compile']);
 
     }
 

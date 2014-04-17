@@ -54,8 +54,6 @@ class cli extends plugin {
 
     public function execute() {
 
-
-
         foreach ($this->getPlugins() as $plug) {
             $i = $plug['instance'];
             $this->_console->add($i);

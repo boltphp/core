@@ -46,6 +46,8 @@ class assets implements \bolt\plugin\singleton {
 
     private $_filters = [];
 
+    private $_compile = [];
+
 
     /**
      * Constructor
@@ -72,7 +74,7 @@ class assets implements \bolt\plugin\singleton {
         // }
 
         // compile events
-        $http->app->on("compile", [$this, 'compile']);
+        $http->app->on("compile", [$this, 'onCompile']);
 
         $this->_manager = new AssetManager();
         $this->_filter = new FilterManager();
@@ -81,6 +83,15 @@ class assets implements \bolt\plugin\singleton {
             call_user_func($config['ready'], $this);
         }
 
+        // $this->_compiled = ($http->app['compiled'] ? $http->app['compiled']->get('assets') : []);
+
+    }
+
+    public function getCompiledFile($path) {
+        if (isset($this->_compiled['data']['map'][$path])) {
+            return $this->_http->app['compiled']->getFile("assets/{$this->_compiled['data']['map'][$path]['file']}");
+        }
+        return null;
     }
 
     /**
@@ -111,9 +122,9 @@ class assets implements \bolt\plugin\singleton {
         $this->_manager->set($name, $files);
     }
 
-    public function collection($collection, $filters = [], $root = null) {
+    public function collection($collection, $filters = [], $root = null, $vars = []) {
         $root = $root ?: $this->_root;
-        return new AssetCollection($collection, $filters, $root);
+        return new AssetCollection($collection, $filters, $root, $vars);
     }
 
     public function factory($root = null, $manager = null, $filter = null, $debug = null) {
@@ -154,330 +165,83 @@ class assets implements \bolt\plugin\singleton {
         return $this->_filters;
     }
 
+    public function compile($assets) {
+        $this->_compile = array_merge($this->_compile, $assets);
+        return $this;
+    }
 
-    // /**
-    //  * register files to append to specific file type (by file extension)
-    //  *
-    //  * @param string|array $ext string of file exenstion or array of globals
-    //  * @param string $path
-    //  *
-    //  * @return self
-    //  */
-    // public function globals($ext, $path = false) {
-    //     if (is_array($ext)) {
-    //         foreach ($ext as $item) {
-    //             call_user_func_array([$this, 'globals'], $item);
-    //         }
-    //         return $this;
-    //     }
-    //     if (!array_key_exists($ext, $this->_globals)) { $this->_globals[$ext] = []; }
-    //     $this->_globals[$ext][] = $this->_http->path($path);
-    //     return $this;
-    // }
+    /**
+     * compile assets into the compile directory
+     *
+     * @param bolt\events\event $e
+     *
+     * @return void
+     */
+    public function onCompile($e) {
+        $dir = $e->data['client']->makeDir('assets');
 
+        // loop through all the manager files
+        $names = $this->_manager->getNames();
 
-    // /**
-    //  * register a filter for a file type (by file extension)
-    //  *
-    //  * @param string|array $ext string of file extension or array of filters
-    //  * @param string $class
-    //  * @param array $args array of args passed to filter constuctor (via call_user_func_array)
-    //  *
-    //  * @return self
-    //  */
-    // public function filter($ext, $class=false, $args = []) {
-    //     if (is_array($ext)) {
-    //         foreach ($ext as $item) {
-    //             call_user_func_array([$this, 'filter'], $item);
-    //         }
-    //         return $this;
-    //     }
-    //     if (stripos($ext, ',') !== false) {
-    //         foreach (explode(',', $ext) as $_) {
-    //             call_user_func_array([$this, 'filter'], [$_, $class, $args]);
-    //         }
-    //         return $this;
-    //     }
-    //     if (!array_key_exists($ext, $this->_filters)) { $this->_filters[$ext] = []; }
-    //     $this->_filters[$ext][] = [
-    //         'class' => $class,
-    //         'instance' => false,
-    //         'args' => $args,
-    //         'ref' => b::getReflectionClass($class)
-    //     ];
+        $factory = $this->factory();
 
-    //     return $this;
-    // }
+        $map = [];
+        $files = [];
 
+        // all compileds request
+        foreach ($this->_compile as $asset) {
 
-    // /**
-    //  * add a new file to the manager
-    //  *
-    //  * @param string $type script or style
-    //  * @param string $name name of group
-    //  * @param array $files array of files
-    //  *
-    //  * @return self
-    //  */
-    // public function add($type, $name = false, $files = false) {
-    //     if (is_array($type)) {
-    //         foreach ($type as $item) {
-    //             call_user_func_array([$this, 'add'], $item);
-    //         }
-    //         return $this;
-    //     }
+            foreach ($asset->all() as $item) {
+                foreach ($asset->getFilters() as $filter) {
+                    $item->ensureFilter($filter);
+                }
+                $d = $item->dump();
+                $id = md5($d);
+                $parts = pathinfo(b::path($item->getSourceRoot(), $item->getSourcePath()));
+                $file = "{$parts['filename']}-{$id}.{$parts['extension']}";
+                $map[$item->getSourcePath()] = [
+                    'id' => $id,
+                    'mtime' => $item->getLastModified(),
+                    'file' => $file
+                ];
+                file_put_contents("{$dir}/{$file}", $d);
+            }
+        }
 
-    //     $_ = $this->_groupName($type, $name);
+        foreach ($names as $name) {
+            $asset = $this->_manager->get($name);
 
-    //     if (!array_key_exists($_, $this->_groups)) {
-    //         $this->_groups[$_] = new assets\group($this, $name, $type);
-    //     }
+            $a = $factory->createAsset(
+                    "@{$name}"
+                );
 
-    //     // add some files
-    //     $this->_groups[$_]->add($files);
+            $ext = $asset->getVars()['ext'];
+            $d = $a->dump();
+            $id = md5($a->dump());
+            $file = "{$name}-{$id}.{$ext}";
 
-    //     return $this;
-    // }
+            // filters
+            if (array_key_exists($ext, $this->_filters)) {
+                $d = (new StringAsset($d, $this->_filters[$ext], $this->getRoot()))->dump();
+            }
 
-    // public function createGroup($type, $name, $files = []) {
-    //     $_ = $this->_groupName($type, $name);
-    //     if (array_key_exists($_, $this->_groups)) { return $this->_groups[$_]; }
-    //     $this->_groups[$_] = new assets\group($this, $name, $type);
-    //     return $this->_groups[$_]->add($files);
-    // }
+            $map["@{$name}"] = [
+                'id' => $id,
+                'name' => $name,
+                'mtime' => $a->getLastModified(),
+                'file' => $file
+            ];
 
-    // private function _groupName($type, $name) {
-    //     return implode("_", [$type, $name]);
-    // }
+            file_put_contents("{$dir}/{$file}", $d);
 
-    // /**
-    //  * find a file in one of $dirs
-    //  *
-    //  * @param string $file relative file path
-    //  *
-    //  * @return mixed
-    //  */
-    // public function find($file) {
-
-
-    //     foreach ($this->_dirs as $dir) {
-    //         $path = $this->_http->path($dir, $file);
-    //         if (file_exists($path)) {
-    //             return [
-    //                 'path' => $path,
-    //                 'rel' => $this->_http->path($dir)
-    //             ];
-    //         }
-    //     }
-
-    //     return false;
-    // }
-
-
-    // /**
-    //  * find a files dir
-    //  *
-    //  * @param string file
-    //  *
-    //  * @return mixed
-    //  */
-    // public function findDir($path) {
-    //     $path = b::path($path);
-    //     foreach ($this->_dirs as $dir) {
-    //         $_ = $this->_http->path($dir);
-    //         if (preg_match("#^".preg_quote($_,'#')."#", $path)) {
-    //             return $_;
-    //         }
-    //     }
-    //     return false;
-    // }
-
-
-    // /**
-    //  * output a tag for give group
-    //  *
-    //  * @param string $type
-    //  * @param string $group
-    //  *
-    //  * @return string
-    //  */
-    // public function out($type, $name, $combo = false) {
-    //     $_ = $this->_groupName($type, $name);
-
-    //     // is there a group
-    //     if (!array_key_exists($_, $this->_groups)) {
-    //         return null;
-    //     }
-
-    //     $group = $this->_groups[$_];
-
-    //     $tags = [];
-
-    //     foreach ($group as $file) {
-    //         if($type == 'style') {
-    //             $tags[] = '<link rel="stylesheet" href="'.$this->url($file).'" type="text/css">';
-    //         }
-    //     }
-
-    //     return implode("", $tags);
-    // }
-
-
-    // /**
-    //  * url path
-    //  *
-    //  * @param mixed $path
-    //  *
-    //  * @return string
-    //  */
-    // public function url($path) {
-    //     if (is_a($path, 'Assetic\Asset\HttpAsset')) {
-    //         return $path->getSourceRoot()."/".$path->getSourcePath();
-    //     }
-
-    //     if (is_a($path, 'Assetic\Asset\FileAsset')) {
-    //         $path = b::path($path->getSourcePath());
-    //     }
-    //     if (is_string($path)) {
-    //         return $this->_http->request->getUriForPath(str_replace('{path}', ltrim($path,'/'), rtrim($this->_config['path'],'/')));
-    //     }
-    // }
-
-
-    // /**
-    //  * get all file objects in a group
-    //  *
-    //  * @param string $type
-    //  * @param string $group
-    //  *
-    //  * @return array
-    //  */
-    // public function getGroup($type, $name) {
-    //     $_ = $this->_groupName($type, $name);
-    //     return array_key_exists($_, $this->_groups) ? $this->_groups[$_] : null;
-    // }
-
-
-    // /**
-    //  * return a stylesheet tag
-    //  *
-    //  * @param array $leafs
-    //  *
-    //  * @return string
-    //  */
-    // public function stylesheet($leafs) {
-    //     if (is_string($leafs)) { $leafs = [$leafs]; }
-
-    //     $output = [];
-
-    //     foreach ($leafs as $leaf) {
-    //         $output[] = str_replace('{path}', "{$leaf}", rtrim($this->_config['path'],'/'));
-    //     }
-
-    //     return implode("\n", array_map(function($href) {
-    //         return '<link rel="stylesheet" href="'.$href.'" type="text/css">';
-    //     }, $output));
-
-    // }
-
-
-    // /**
-    //  * get all registered globals for an extension
-    //  *
-    //  * @param string $ext
-    //  *
-    //  * @return array
-    //  */
-    // public function getGlobals($ext) {
-    //     return array_key_exists($ext, $this->_globals) ? $this->_globals[$ext] : [];
-    // }
-
-
-    // /**
-    //  * get all registered filters for an extension
-    //  *
-    //  * @param string $ext
-    //  *
-    //  * @return array
-    //  */
-    // public function getFilters($ext, $when = null) {
-    //     $items = [];
-    //     if (array_key_exists($ext, $this->_filters)) {
-    //         foreach ($this->_filters[$ext] as $i => $filter) {
-
-    //             // make sure to only run when
-    //             if ($when AND isset($filter['args']['when'])) {
-    //                 if ( (is_string($filter['args']['when']) && $filter['args']['when'] !== $when) ||
-    //                     (is_array($filter['args']['when']) && !in_array($when, $filter['args']['when']))
-    //                 ) { continue; }
-    //             }
-
-    //             if (!$filter['instance']) {
-    //                 $this->_filters[$ext][$i]['instance'] = $filter['instance'] = $filter['ref']->newInstanceArgs($filter['args']);
-
-    //                 //
-    //                 foreach ($this->_dirs as $dir) {
-    //                     if (method_exists($this->_filters[$ext][$i]['instance'], 'addLoadPath')) {
-    //                         $this->_filters[$ext][$i]['instance']->addLoadPath($this->_http->path($dir));
-    //                     }
-    //                 }
-
-    //             }
-    //             $items[] = $filter['instance'];
-    //         }
-    //     }
-    //     return $items;
-    // }
+        }
 
 
 
-    // /**
-    //  * compile assets into the compile directory
-    //  *
-    //  * @param bolt\events\event $e
-    //  *
-    //  * @return void
-    //  */
-    // public function compile($e) {
-    //     $dir = $e->data['client']->makeDir('assets');
-
-    //     // compiled map holder
-    //     $map = [];
-    //     $files = [];
-
-    //     // loop through each of our dirs and
-    //     // find any file that matches our needs
-    //     foreach ($this->_dirs as $base) {
-    //         $root = $this->_http->path($base);
-    //         $assets = b::fs('glob', "{$root}/**/*.*")->asArray();
-
-    //         foreach ($assets as $file) {
-    //             $rel = str_replace($root, "", $file);
-    //             $i = pathinfo($file);
-
-    //             //
-    //             $o = $this->compileFile($file);
-    //             $dump = $o->dump();
-    //             $id = md5($dump);
-    //             $name = "{$i['filename']}-{$id}.{$i['extension']}";
-    //             $map[$rel] = [
-    //                 'id' => $id,
-    //                 'name' => $name,
-    //                 'mtime' => filemtime($file)
-    //             ];
-    //             $files[] = $name;
-
-    //             // put our file in dir
-    //             file_put_contents("{$dir}/{$name}", $dump);
-
-    //         }
-
-    //     }
-
-    //     $e->data['client']->saveCompileLoader('assets', ['map' => $map, 'files' => $files]);
+        $e->data['client']->saveCompileLoader('assets', ['map' => $map, 'files' => $files]);
 
 
-    // }
+    }
 
     // public function compileFile($file, $rel = null, $filters = true) {
     //     $ext = pathinfo($file)['extension'];

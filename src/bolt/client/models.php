@@ -21,21 +21,17 @@ class models extends command {
     private $_dir = false;
     private $_loaders = [];
 
-    public function init() {
+    public function setup() {
 
         if (!$this->app->pluginExists('models')) {
             $this->writeError("Models plugin does not exist");
         }
 
-
         $this->em = $this->app['models']->getEntityManager();
-
 
         $this->app['models']->loadFromDirectories();
 
-
         $this->metadatas = $this->em->getMetadataFactory()->getAllMetadata();
-
 
         // tool
         $this->tool = new SchemaTool($this->em);
