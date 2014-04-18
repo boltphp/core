@@ -145,6 +145,9 @@ class repository {
 
         }
 
+        $entity->setManager($this->_manager);
+        $entity->setLoaded(true);
+
         // method exists
         if (method_exists($entity, 'curlAfter')) {
             $entity->curlAfter($map);
