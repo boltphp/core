@@ -2,6 +2,7 @@
 
 namespace bolt\render\xml;
 
+use \DOMDocument, \DOMAttr, \DOMCDATASection;
 
 class generate {
 

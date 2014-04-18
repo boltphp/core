@@ -3,8 +3,6 @@
 namespace bolt\render;
 use \b;
 
-use \DOMDocument, \DOMAttr, \DOMCDATASection;
-
 /**
  * render a dom string
  */
