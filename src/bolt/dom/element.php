@@ -2,6 +2,9 @@
 
 namespace bolt\dom;
 
+
+use Symfony\Component\CssSelector\CssSelector;
+
 class element extends node {
 
     private $_dom;
@@ -23,6 +26,28 @@ class element extends node {
 
         $this->init();
 
+    }
+
+    public function html($html = null){
+        if ($html !== null) {
+            return parent::html($html);
+        }
+        else {
+
+            $ref = clone $this->_dom->doc();
+
+            $xpath = new \DOMXPath($ref);
+
+            foreach ($xpath->query(CssSelector::toXPath('*[data-domref]')) as $node) {
+                $node->removeAttribute('data-domref');
+            }
+            foreach ($xpath->query(CssSelector::toXPath('*[data-fragmentref]')) as $node) {
+                $node->removeAttribute('data-fragmentref');
+            }
+
+            return $ref->saveHTML();
+
+        }
     }
 
 }

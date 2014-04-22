@@ -195,7 +195,7 @@ class repository {
      *
      * @return array
      */
-    public function findBy($query, $order = [], $limit = false, $offset = 0) {
+    public function findBy($query, $order = [], $limit = false, $offset = 0, &$total = 0) {
 
         // get our return url
         list($url, $query, $headers) = $this->_getRequestUri('findBy', func_get_args());
@@ -213,6 +213,8 @@ class repository {
 
         // items holder
         $items = [];
+
+        $total = b::param('total', null, $data);
 
         // loop through and map our items
         foreach ($data['items'] as $item) {

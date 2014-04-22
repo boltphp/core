@@ -247,14 +247,20 @@ class models implements plugin\singleton, \ArrayAccess {
      * @return bolt\models\collection
      */
     public function findBy($entity, array $criteria, array $order = null, $limit = null, $offset = null) {
-        $items = [];
+        $items = []; $total = 0;
 
         try {
-            $items = $this->_getRepoForEntity($entity)->findBy($criteria, $order, $limit, $offset);
+            $items = $this->_getRepoForEntity($entity)->findBy($criteria, $order, $limit, $offset, $total);
         }
         catch (\Exception $e) {};
 
-        return new models\collection($this, $entity, $items);
+        return new models\collection($this, $entity, $items, [
+                'total' => $total,
+                'offset' => $offset,
+                'limit' => $limit,
+                'criteria' => $criteria,
+                'order' => $order
+            ]);
     }
 
 

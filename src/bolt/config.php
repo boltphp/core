@@ -123,6 +123,10 @@ class config implements \IteratorAggregate, \ArrayAccess {
     }
 
 
+    public function has($name) {
+        return $this->get($name, -99) !== -99;
+    }
+
     /**
      * get a value from a stored namespace
      *

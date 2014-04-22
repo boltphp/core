@@ -94,8 +94,6 @@ class node implements \ArrayAccess {
 
         }
         else {
-
-
             if (is_a($this->_node, '\DOMText') OR !$this->_node->hasChildNodes()) {
                 return $this->_node->nodeValue;
             }
@@ -107,8 +105,6 @@ class node implements \ArrayAccess {
             $xpath = new \DOMXPath($ref);
 
             $el = $xpath->query('//*[data-domref="'.$this->_guid.'"]')->item(0);
-
-            // var_dump($el, $this->_node->attributes->item(0)->value, $this->_guid); die;
 
             if (!$el) {
                 return $this->_node->nodeValue;
@@ -168,7 +164,7 @@ class node implements \ArrayAccess {
                     $this->_node->appendChild(new \DOMAttr($v));
                 }
                 else {
-                    $this->_node->setAttribute($n, $v);
+                    $this->_node->setAttribute($n, html_entity_decode($v, ENT_QUOTES, 'utf-8'));
                 }
             }
             return $this;
