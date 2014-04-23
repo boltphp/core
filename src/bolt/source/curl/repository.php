@@ -56,7 +56,7 @@ class repository {
      *
      * @return array[string $url, array $query, array $headers]
      */
-    private function _getRequestUri($type, $args) {
+    public function getRequestUri($type, $args) {
         if (method_exists($this->_entity, 'curlRequest')) {
             return call_user_func([$this->_entity, 'curlRequest'], $type, $args);
         }
@@ -166,7 +166,7 @@ class repository {
     public function find($id) {
 
         // get our return url
-        list($url, $query, $headers) = $this->_getRequestUri('find', func_get_args());
+        list($url, $query, $headers) = $this->getRequestUri('find', func_get_args());
 
         // make our request
         $resp = $this->_curl->get($url, $headers, ['query' => $query])->send();
@@ -198,7 +198,7 @@ class repository {
     public function findBy($query, $order = [], $limit = false, $offset = 0, &$total = 0) {
 
         // get our return url
-        list($url, $query, $headers) = $this->_getRequestUri('findBy', func_get_args());
+        list($url, $query, $headers) = $this->getRequestUri('findBy', func_get_args());
 
         // make our request
         $resp = $this->_curl->get($url, $headers, ['query' => $query])->send();
@@ -237,7 +237,7 @@ class repository {
     public function findOneBy($query, $order = []) {
 
         // get our return url
-        list($url, $query, $headers) = $this->_getRequestUri('findOneBy', func_get_args());
+        list($url, $query, $headers) = $this->getRequestUri('findOneBy', func_get_args());
 
         // make our request
         $resp = $this->_curl->get($url, $headers, ['query' => $query])->send();

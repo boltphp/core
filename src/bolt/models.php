@@ -204,7 +204,7 @@ class models implements plugin\singleton, \ArrayAccess {
     public function find($entity, $id) {
         try {
             $args = func_get_args(); array_shift($args);
-            $o = call_user_func_array([$this->_getRepoForEntity($entity), 'find'], $args);
+            $o = call_user_func_array([$this->getRepoForEntity($entity), 'find'], $args);
         }
         catch(\Exception $e) { $o = null; }
 
@@ -231,7 +231,7 @@ class models implements plugin\singleton, \ArrayAccess {
      * @return bolt\models\collection
      */
     public function findAll($entity) {
-        return new models\collection($this, $entity, $this->_getRepoForEntity($entity)->findAll());
+        return new models\collection($this, $entity, $this->getRepoForEntity($entity)->findAll());
     }
 
 
@@ -250,7 +250,7 @@ class models implements plugin\singleton, \ArrayAccess {
         $items = []; $total = 0;
 
         try {
-            $items = $this->_getRepoForEntity($entity)->findBy($criteria, $order, $limit, $offset, $total);
+            $items = $this->getRepoForEntity($entity)->findBy($criteria, $order, $limit, $offset, $total);
         }
         catch (\Exception $e) {};
 
@@ -276,7 +276,7 @@ class models implements plugin\singleton, \ArrayAccess {
     public function findOneBy($entity, array $criteria, array $order = []) {
 
         try {
-            $o = $this->_getRepoForEntity($entity)->findOneBy($criteria, $order);
+            $o = $this->getRepoForEntity($entity)->findOneBy($criteria, $order);
         }
         catch (\Exception $e) {
             $o = null;
@@ -336,7 +336,7 @@ class models implements plugin\singleton, \ArrayAccess {
      *
      * @return object
      */
-    protected function _getRepoForEntity($entity) {
+    public function getRepoForEntity($entity) {
         if (array_key_exists($entity, $this->_alias)) {
             $entity = $this->_alias[$entity];
         }
