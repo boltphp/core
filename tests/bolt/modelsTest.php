@@ -190,7 +190,7 @@ class modelTest_Source implements bolt\source\face {
 class modelTest_testModel extends bolt\models {
 
     public function test_getRepository() {
-        return call_user_func_array([$this, '_getRepoForEntity'], func_get_args());
+        return call_user_func_array([$this, 'getRepoForEntity'], func_get_args());
     }
 
 }
