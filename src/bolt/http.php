@@ -322,7 +322,6 @@ class http extends plugin {
                     $this->_response->setException($e);
                 }
 
-
             }
             else {
                 $this->runMiddleware('handle');
@@ -333,15 +332,8 @@ class http extends plugin {
             $this->runMiddleware('handle');
         }
 
-
         // run before we have run any router
         $this->runMiddleware('after');
-
-        // if response is now a
-        if ($this->response->isRedirection() || $this->response->isReadyToSend()) {
-
-            return $this->send();
-        }
 
         // send
         $this->send();

@@ -48,10 +48,8 @@ class assets extends \bolt\http\middleware {
             return;
         }
 
-
         // content
         $content = [];
-
 
         $f = $this->_assets->getFilters();
 
