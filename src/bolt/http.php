@@ -41,8 +41,10 @@ class http extends plugin {
      * start a new http instance
      */
     public static function start($config = []) {
+        $plugin = isset($config['http.plugins']) ? $config['http.plugins'] : null;
         $app = b::init($config);
         $app->plug('http', 'bolt\http');
+        if (is_array($plugins)) { $app['http']->plug($plugins); }
         return $app['http'];
     }
 
