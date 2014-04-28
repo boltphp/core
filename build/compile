@@ -24,6 +24,10 @@ class compiler {
 
         $composer = Composer\Factory::create(new Composer\IO\NullIO(), "{$src}/../composer.json");
 
+        // get installed
+        $installed = json_decode(file_get_contents("{$vendor}/composer/installed.json"), true);
+
+
         $phar = new \Phar($pharFile, 0, 'bolt.phar');
         $phar->setSignatureAlgorithm(\Phar::SHA1);
 
@@ -43,19 +47,36 @@ class compiler {
             $this->addFile($phar, "/src$path", $file);
         }
 
+        $dirs = [];
+
         foreach ($composer->getPackage()->getRequires() as $req) {
             $target = $req->getTarget();
-
             if ($target == 'php') {continue;}
 
-            echo "adding $target\n";
+            $dirs[] = $target;
+
+            foreach ($installed as $pkg) {
+                if ($pkg['name'] == $target && isset($pkg['require'])) {
+                    foreach ($pkg['require'] as $name => $rp) {
+                        if ($name == 'php') {continue;}
+                        $dirs[] = $name;
+                    }
+                }
+            }
+
+        }
+
+        foreach (array_unique($dirs) as $dir) {
+            if (!is_dir("$vendor/$dir")) {continue;}
+
+            echo "adding $dir\n";
 
             $finder = new Finder();
             $finder->files()
                 ->ignoreVCS(true)
                 ->name('*.php')
                 ->exclude('Tests')
-                ->in("$vendor/$target")
+                ->in("$vendor/$dir")
             ;
 
             foreach ($finder as $file) {
