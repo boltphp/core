@@ -24,7 +24,8 @@ class dom implements \ArrayAccess {
         $this->_doc->preserveWhiteSpace = false;
         $this->_doc->resolveExternals = false;
         $this->_doc->substituteEntities = false;
-        $this->_doc->formatOutput = b::env() === 'dev';
+        $this->_doc->formatOutput = false;
+        $this->_doc->strictErrorChecking = false;
 
         $this->_guid = b::guid('domref');
 
@@ -48,7 +49,7 @@ class dom implements \ArrayAccess {
 
     public function html($html = null) {
         if ($html) {
-            @$this->_doc->loadHTML((string)$html, LIBXML_NOERROR + LIBXML_NOWARNING + LIBXML_NOXMLDECL);
+            @$this->_doc->loadHTML((string)$html, LIBXML_COMPACT + LIBXML_NOERROR + LIBXML_NOWARNING + LIBXML_NOXMLDECL);
             return $this;
         }
         else {

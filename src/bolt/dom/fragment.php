@@ -21,6 +21,7 @@ class fragment extends \bolt\dom {
             return $this;
         }
         else {
+
             $ref = $this->cleanDomNodes();
             $root = $ref->getElementById($this->rootId());
             $parts = [];

@@ -73,7 +73,11 @@ class node implements \ArrayAccess {
 
             $html = html_entity_decode($html, ENT_NOQUOTES, 'utf-8');
 
-            if (stripos($html, '<') !== false && stripos($html, '>') !== false) {
+
+            if ($this->_node->tagName == 'script') {
+                $this->_node->appendChild(new \DOMCdataSection($html));
+            }
+            else if (stripos($html, '<') !== false && stripos($html, '>') !== false) {
                 $guid = b::guid("_x_dom");
 
                 $_ = new \DOMDocument(1.0, 'UTF-8');
@@ -98,9 +102,7 @@ class node implements \ArrayAccess {
                 return $this->_node->nodeValue;
             }
 
-
             $ref = clone $this->_dom->doc();
-
 
             $xpath = new \DOMXPath($ref);
 
