@@ -1,0 +1,161 @@
+#!/usr/bin/php
+<?php
+
+$vendor = realpath(__DIR__."/../vendor");
+$src = realpath(__DIR__."/../src");
+
+date_default_timezone_set("UTC");
+
+require "{$vendor}/autoload.php";
+
+use Symfony\Component\Finder\Finder;
+use Symfony\Component\Process\Process;
+
+
+class compiler {
+
+    public function compile($src, $vendor) {
+        $pharFile = 'bolt.phar';
+
+        if (file_exists($pharFile)) {
+            unlink($pharFile);
+        }
+
+        $composer = Composer\Factory::create(new Composer\IO\NullIO(), "{$src}/../composer.json");
+
+        $phar = new \Phar($pharFile, 0, 'bolt.phar');
+        $phar->setSignatureAlgorithm(\Phar::SHA1);
+
+        $phar->startBuffering();
+
+        echo "adding $src\n";
+
+        $finder = new Finder();
+        $finder->files()
+            ->ignoreVCS(true)
+            ->name('*.php')
+            ->in($src)
+        ;
+
+        foreach ($finder as $file) {
+            $path = str_replace($src, "", $file->getRealPath());
+            $this->addFile($phar, "/src$path", $file);
+        }
+
+        foreach ($composer->getPackage()->getRequires() as $req) {
+            $target = $req->getTarget();
+
+            if ($target == 'php') {continue;}
+
+            echo "adding $target\n";
+
+            $finder = new Finder();
+            $finder->files()
+                ->ignoreVCS(true)
+                ->name('*.php')
+                ->exclude('Tests')
+                ->in("$vendor/$target")
+            ;
+
+            foreach ($finder as $file) {
+                $path = str_replace($vendor, "", $file->getRealPath());
+                $this->addFile($phar, "/vendor$path", $file);
+            }
+
+        }
+
+        echo "adding $vendor/composer\n";
+
+        $finder = new Finder();
+        $finder->files()
+            ->ignoreVCS(true)
+            ->name('*.*')
+            ->depth('== 0')
+            ->in("{$vendor}/composer")
+        ;
+
+        foreach ($finder as $file) {
+            $path = str_replace($vendor, "", $file->getRealPath());
+            $this->addFile($phar, "/vendor$path", $file);
+        }
+
+        echo "adding $vendor/autoload.php\n";
+
+        $phar->addFromString("/vendor/autoload.php", file_get_contents("{$vendor}/autoload.php"));
+
+        // Stubs
+        $phar->setStub(file_get_contents("./phar-stub.php"));
+
+        $phar->stopBuffering();
+
+        unset($phar);
+
+        rename($pharFile, "../$pharFile");
+
+        echo "done\n\n";
+
+    }
+
+    /*
+     * (c) Nils Adermann <naderman@naderman.de>
+     *     Jordi Boggiano <j.boggiano@seld.be>
+     */
+    private function addFile($phar, $path, $file, $strip = true){
+
+        $content = file_get_contents($file->getRealPath());
+        if ($strip) {
+            $content = $this->stripWhitespace($content);
+        }
+
+        $phar->addFromString($path, $content);
+    }
+
+    private function addComposerBin($phar)
+    {
+        $content = file_get_contents(__DIR__.'/../../bin/composer');
+        $content = preg_replace('{^#!/usr/bin/env php\s*}', '', $content);
+        $phar->addFromString('bin/composer', $content);
+    }
+
+    /**
+     *
+     * (c) Nils Adermann <naderman@naderman.de>
+     *     Jordi Boggiano <j.boggiano@seld.be>
+     *
+     * Removes whitespace from a PHP source string while preserving line numbers.
+     *
+     * @param  string $source A PHP string
+     * @return string The PHP string with the whitespace removed
+     */
+    private function stripWhitespace($source)
+    {
+        if (!function_exists('token_get_all')) {
+            return $source;
+        }
+
+        $output = '';
+        foreach (token_get_all($source) as $token) {
+            if (is_string($token)) {
+                $output .= $token;
+            } elseif (in_array($token[0], array(T_COMMENT, T_DOC_COMMENT))) {
+                $output .= str_repeat("\n", substr_count($token[1], "\n"));
+            } elseif (T_WHITESPACE === $token[0]) {
+                // reduce wide spaces
+                $whitespace = preg_replace('{[ \t]+}', ' ', $token[1]);
+                // normalize newlines to \n
+                $whitespace = preg_replace('{(?:\r\n|\r|\n)}', "\n", $whitespace);
+                // trim leading spaces
+                $whitespace = preg_replace('{\n +}', "\n", $whitespace);
+                $output .= $whitespace;
+            } else {
+                $output .= $token[1];
+            }
+        }
+
+        return $output;
+    }
+
+}
+
+$c = new compiler();
+$c->compile($src, $vendor);

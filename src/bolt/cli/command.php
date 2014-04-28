@@ -39,8 +39,17 @@ class command extends SymfonyCommand {
 
         $this->setApplication($cli->getConsole());
 
+        $config = [];
+
         if (property_exists($this, 'configure')) {
-            foreach ($this::$configure as $name => $value) {
+            $config = $this::$configure;
+        }
+        else if (method_exists($this, 'getConfigure')) {
+            $config = static::getConfigure();
+        }
+
+        if (count($config) > 0) {
+            foreach ($config as $name => $value) {
                 switch($name) {
                     case 'description': $this->setDescription($value); break;
                     case 'options':

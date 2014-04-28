@@ -86,7 +86,7 @@ class repository {
      *
      * @return [items => array, total => int]
      */
-    private function _getTransform($type, $data) {
+    public function getTransform($type, $data) {
         if (method_exists($this->_entity, 'transform')) {
             return call_user_func([$this->_entity, 'transform'], $type, $data);
         }
@@ -177,7 +177,7 @@ class repository {
         }
 
         // see if the enity wants to transform
-        $data = $this->_getTransform('find', $resp->json());
+        $data = $this->getTransform('find', $resp->json());
 
         // generate an entity
         return $this->generateEntity($data);
@@ -209,7 +209,7 @@ class repository {
         }
 
         // see if the enity wants to transform
-        $data = $this->_getTransform('findBy', $resp->json());
+        $data = $this->getTransform('findBy', $resp->json());
 
         // items holder
         $items = [];
@@ -248,7 +248,7 @@ class repository {
         }
 
         // see if the enity wants to transform
-        $data = $this->_getTransform('findOneBy', $resp->json());
+        $data = $this->getTransform('findOneBy', $resp->json());
 
 
         return $this->generateEntity($data);
