@@ -41,8 +41,10 @@ class http extends plugin {
      * start a new http instance
      */
     public static function start($config = []) {
+        $plugin = isset($config['http.plugins']) ? $config['http.plugins'] : null;
         $app = b::init($config);
         $app->plug('http', 'bolt\http');
+        if (is_array($plugins)) { $app['http']->plug($plugins); }
         return $app['http'];
     }
 
@@ -320,7 +322,6 @@ class http extends plugin {
                     $this->_response->setException($e);
                 }
 
-
             }
             else {
                 $this->runMiddleware('handle');
@@ -331,15 +332,8 @@ class http extends plugin {
             $this->runMiddleware('handle');
         }
 
-
         // run before we have run any router
         $this->runMiddleware('after');
-
-        // if response is now a
-        if ($this->response->isRedirection() || $this->response->isReadyToSend()) {
-
-            return $this->send();
-        }
 
         // send
         $this->send();

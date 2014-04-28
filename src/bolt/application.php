@@ -7,31 +7,38 @@ use \b;
 
 /**
  * Base bolt applicatin class
- *
  */
 class application extends plugin {
     use helpers\events; /// use events class
 
-
     /**
+     * root application path
+     *
      * @var string
      */
     private $_root = false;
 
     /**
+     * has this application run yet
+     *
      * @var bool
      */
     private $_hasRun = false;
 
     /**
+     * classname based autoloading
+     *
      * @var array
      */
     private $_autoload = [];
 
     /**
+     * root directory of bootstrap files
+     *
      * @var string
      */
     private $_bootstrapDir = false;
+
 
     /**
      * construct a new application instance
@@ -41,7 +48,6 @@ class application extends plugin {
      * @return self
      */
     public function __construct($config=[]) {
-
         $this->_root = b::path(isset($config['root']) ? realpath($config['root']) : getcwd());
 
         // autoload
@@ -54,6 +60,10 @@ class application extends plugin {
 
         if (isset($config['compiled'])) {
             $this->loadCompiled($config['compiled']);
+        }
+
+        if (isset($config['plugins'])) {
+            $this->plug($config['plugins']);
         }
 
         // register
