@@ -39,6 +39,7 @@ class compiler {
         $finder->files()
             ->ignoreVCS(true)
             ->name('*.php')
+            ->name('*.pem')
             ->in($src)
         ;
 

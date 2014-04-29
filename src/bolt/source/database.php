@@ -20,7 +20,7 @@ class database implements face {
     }
 
     public function getHandle() {
-        $cid = md5(serialize(array_filter($this->_config, function($name) { return in_array($name, ['driver','dbname','host','username','password']); })));
+        $cid = md5(serialize(array_filter($this->_config, function($name) { return in_array($name, ['driver','dbname','host','user','password']); })));
         if (!array_key_exists($cid, self::$_handles)) {
             self::$_handles[$cid] = DriverManager::getConnection($this->_config, new Configuration());
         }
