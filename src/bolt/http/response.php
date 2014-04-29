@@ -56,6 +56,10 @@ class response extends SymfonyResponse {
         call_user_func_array([get_parent_class(), '__construct'], func_get_args());
     }
 
+    public function guid() {
+        return $this->_guid;
+    }
+
 
     /**
      * add a response format
@@ -213,6 +217,7 @@ class response extends SymfonyResponse {
 
             // set any headers we have
             foreach ($content->headers->all() as $name => $value) {
+                if ($name == 'cache-control') {continue;}
                 $this->headers->set($name, $value);
             }
 
@@ -231,6 +236,7 @@ class response extends SymfonyResponse {
 
         // set the contnet
         $this->setContent($content);
+
 
         // run our parent prepare
         return parent::prepare($request);

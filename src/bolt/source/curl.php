@@ -22,7 +22,7 @@ class curl implements face {
         $this->_app = $app;
         $this->_config = $config;
 
-        $this->_client = new Client();
+        $this->_client = new Client(null, ['ssl.certificate_authority' => false]);
 
         if (isset($config['baseUrl'])) {
             $this->_client->setBaseUrl($config['baseUrl']);

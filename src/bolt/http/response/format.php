@@ -39,7 +39,6 @@ abstract class format implements format\face {
     public function __construct(\bolt\http\response $parent) {
         $this->_parent = $parent;
         $this->headers = new ResponseHeaderBag();
-
         $this->headers->set('Content-Type', $this->contentType);
 
     }

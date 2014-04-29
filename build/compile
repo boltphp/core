@@ -39,7 +39,6 @@ class compiler {
         $finder->files()
             ->ignoreVCS(true)
             ->name('*.php')
-            ->name('*.pem')
             ->in($src)
         ;
 
@@ -76,11 +75,14 @@ class compiler {
             $finder->files()
                 ->ignoreVCS(true)
                 ->name('*.php')
+                ->name('*.pem')
                 ->exclude('Tests')
                 ->in("$vendor/$dir")
             ;
 
             foreach ($finder as $file) {
+                echo $file->getRealPath()."\n";
+
                 $path = str_replace($vendor, "", $file->getRealPath());
                 $this->addFile($phar, "/vendor$path", $file);
             }
