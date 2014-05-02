@@ -53,6 +53,9 @@ class application extends plugin {
         // autoload
         $this->_autoload = b::param('autoload', [], $config);
 
+        // register
+        spl_autoload_register([$this, 'autoload']);
+
         if (isset($config['bootstrap'])) {
             $this->bootstrap($config['bootstrap']);
             $this->_bootstrapDir = $this->path($config['bootstrap']);
@@ -66,8 +69,6 @@ class application extends plugin {
             $this->plug($config['plugins']);
         }
 
-        // register
-        spl_autoload_register([$this, 'autoload']);
 
     }
 

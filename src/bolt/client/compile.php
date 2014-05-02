@@ -105,7 +105,8 @@ class compile extends command {
                     return $this->_enabled ? array_key_exists($name, $this->_config["loaders"]) : false;
                 }
                 public function get($name, \Closure $cb = null) {
-                    if (!$this->_enabled || !$this->exists($name)) {return false;}
+                    if (!$this->_enabled) {return false;}
+                    if (!$this->exists($name)) {return false;}
                     return $cb ? call_user_func($cb, $this->_config["loaders"][$name]) : $this->_config["loaders"][$name];
                 }
                 public function getFile($path) {

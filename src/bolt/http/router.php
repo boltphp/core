@@ -66,6 +66,8 @@ class router {
 
         if (count($dirs) == 0) {return false;}
 
+        $this->_collection = new router\collection();
+
         foreach ($dirs as $dir) {
             b::requireFromPath($this->_http->path($dir));
         }
