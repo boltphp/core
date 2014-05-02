@@ -62,6 +62,7 @@ class compile extends command {
 
         $prog->start($this->output, count($listeners));
 
+
         foreach ($listeners as $item) {
             $prog->clear();
 
@@ -80,7 +81,7 @@ class compile extends command {
 
         $config = [
             'loaders' => $this->_loaders,
-            'dir' => $this->_dir
+            'dir' => "../compiled/"
         ];
 
         $sub = '<'.'?php
@@ -108,11 +109,11 @@ class compile extends command {
                     return $cb ? call_user_func($cb, $this->_config["loaders"][$name]) : $this->_config["loaders"][$name];
                 }
                 public function getFile($path) {
-                    $path = b::path($this->_config["dir"], $path);
+                    $path = b::path($this->_app->path($this->_config["dir"]), $path);
                     return file_exists($path) ? file_get_contents($path) : null;
                 }
                 public function getFilePath($path) {
-                    return b::path($this->_config["dir"], $path);
+                    return b::path($this->_app->path($this->_config["dir"]), $path);
                 }
             }
             return function($app) {

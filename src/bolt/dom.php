@@ -35,7 +35,6 @@ class dom implements \ArrayAccess {
 
     }
 
-
     public function init() {}
 
 

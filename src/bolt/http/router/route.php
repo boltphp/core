@@ -40,6 +40,10 @@ class route extends sRoute implements face {
         return $r;
     }
 
+    public static function __set_state($state) {
+        return static::create($state);
+    }
+
 
     /**
      * set the route name

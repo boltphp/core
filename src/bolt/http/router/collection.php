@@ -24,5 +24,12 @@ class collection extends RouteCollection {
         return $c;
     }
 
+    public static function __set_state($state) {
+        $c = new collection();
+        foreach ($state['routes'] as $name => $route) {
+            $c->add($name, $route);
+        }
+        return $c;
+    }
 
 }

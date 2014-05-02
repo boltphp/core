@@ -27,6 +27,10 @@ class config implements \IteratorAggregate, \ArrayAccess {
     private $_access = [];
 
 
+    private $_config = [];
+
+    private $_compiled = [];
+
     /**
      * Constructor
      *
@@ -39,9 +43,47 @@ class config implements \IteratorAggregate, \ArrayAccess {
         $this->_access = PropertyAccess::createPropertyAccessorBuilder()
                 ->disableExceptionOnInvalidIndex()
                 ->getPropertyAccessor();
+
+
+        $this->_config = $config;
+
+        // check for compiled files
+        $this->_compiled = $app->getCompiled('config');
+
+
         if (isset($config['register'])) {
             $this->register($config['register']);
         }
+
+        $app->on("compile", [$this, 'onCompile']);
+
+    }
+
+    public function onCompile($e) {
+        $dirs = isset($this->_config['dirs']) ? $this->_config['dirs'] : [];
+
+        if (count($dirs) == 0) {return false;}
+
+        $map = [];
+
+        foreach ($dirs as $dir) {
+            $path = $this->_app->path($dir);
+
+            // find any files that we a
+            $files = array_merge(iterator_to_array(b::fs("glob", "{$path}/*.json")), iterator_to_array(b::fs("glob", "{$path}/**/*.json")));
+
+            foreach ($files as $file) {
+                $rel = b::path(str_replace($path, $dir, $file->getRealPath()));
+                $map[$rel] = $this->_readFile($file->getRealPath());
+            }
+
+        }
+
+        if (count($map) == 0) {return;}
+
+        // write to compiled
+        $e->data['client']->saveCompileLoader('config', $map);
+
     }
 
 
@@ -61,7 +103,10 @@ class config implements \IteratorAggregate, \ArrayAccess {
             return $this;
         }
 
-        if (is_string($data)) {
+        if (is_string($data) && isset($this->_compiled['data'][b::path($data)])) {
+            $data = $this->_compiled['data'][b::path($data)];
+        }
+        else if (is_string($data)) {
             $data = $this->_readFile($this->_app->path($data));
         }
 

@@ -71,8 +71,8 @@ class command extends SymfonyCommand {
             }
         }
 
-
         $this->init();
+
     }
 
     public function __get($name) {
@@ -163,6 +163,9 @@ class command extends SymfonyCommand {
 
         // stup
         $this->setup();
+
+        $args = $input->getArguments();
+
 
         if ($input->hasArgument('cmd')) {
             $method = $input->getArgument('cmd');

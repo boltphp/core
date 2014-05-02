@@ -38,6 +38,43 @@ class router {
         $this->_http = $http;
         $this->_collection = new router\collection();
         $this->_config = $config;
+
+        // do we have compiled controllers
+        $compiled = $http->app->getCompiled('router');
+
+        if ($compiled) {
+            $this->_collection = $compiled['data']['collection'];
+        }
+        else if (isset($config['autoload']) && $config['autoload'] === true) {
+            if (!isset($config['dirs'])) {
+                throw new \Exception("Called autoload with no directories");
+            }
+            foreach ($config['dirs'] as $dir) {
+                b::requireFromPath($this->_http->path($dir));
+            }
+            $this->loadFromControllers();
+        }
+
+
+        // compile
+        $http->app->on('compile', [$this, 'onCompile']);
+
+    }
+
+    public function onCompile($e) {
+        $dirs = $this->_config['dirs'];
+
+        if (count($dirs) == 0) {return false;}
+
+        foreach ($dirs as $dir) {
+            b::requireFromPath($this->_http->path($dir));
+        }
+
+        $this->loadFromControllers();
+
+        //
+        $e->data['client']->saveCompileLoader('router', ['collection' => $this->_collection]);
+
     }
 
 

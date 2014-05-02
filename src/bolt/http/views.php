@@ -45,7 +45,7 @@ class views {
         }
 
         // when compile
-        // $http->app->on('compile', [$this, 'compile']);
+        $http->app->on('compile', [$this, 'onCompile']);
 
     }
 
@@ -169,7 +169,7 @@ class views {
 
     }
 
-    public function compile($e) {
+    public function onCompile($e) {
         $vdir = $e->data['client']->makeDir("views");
 
         $map = [];
@@ -183,11 +183,12 @@ class views {
             $dirs[$dir] = array_merge(b::fs('glob', $root."/**/*.*")->asArray(), b::fs('glob', $root."/*.*")->asArray() );
         }
 
+
         foreach ($dirs as $root => $files) {
             foreach ($files as $file) {
                 $ext = pathinfo($file)['extension'];
                 $rel = str_replace($this->_http->app->getRoot(), '', $file);
-                if ($this->_http->app['render']->hasEngine($ext, true)) {
+                if ($this->_http->app['render']->getEngine($ext, true)) {
                     $id = md5($rel);
                     $map[$rel] = [
                         'modified' => filemtime($file),

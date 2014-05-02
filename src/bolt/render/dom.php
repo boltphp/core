@@ -13,9 +13,8 @@ class dom extends base {
     /**
      * compile the dom doc to serializeable object
      */
-    public function compile() {
-
-
+    public function compile($str) {
+        return $str;
     }
 
 
@@ -31,5 +30,8 @@ class dom extends base {
         return stripos($str, '<html') !== false ? new \bolt\dom($str) : new \bolt\dom\fragment($str);
     }
 
+    public function renderCompiled($compiled, $vars = []) {
+        return $this->render($compiled, $vars);
+    }
 
 }

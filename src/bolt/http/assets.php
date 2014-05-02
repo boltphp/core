@@ -74,7 +74,7 @@ class assets implements \bolt\plugin\singleton {
         // }
 
         // compile events
-        $http->app->on("compile", [$this, 'onCompile']);
+        // $http->app->on("compile", [$this, 'onCompile']);
 
         $this->_manager = new AssetManager();
         $this->_filter = new FilterManager();

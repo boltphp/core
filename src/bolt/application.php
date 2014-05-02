@@ -145,6 +145,18 @@ class application extends plugin {
 
 
     /**
+     * get a compiled object is the compiled
+     * plugin exists
+     *
+     * @param  string $name
+     *
+     * @return array
+     */
+    public function getCompiled($name) {
+        return $this->pluginExists('compiled') ? $this['compiled']->get($name) : [];
+    }
+
+    /**
      * return all autoload settings
      *
      * @return array
