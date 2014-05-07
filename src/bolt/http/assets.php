@@ -48,6 +48,7 @@ class assets implements \bolt\plugin\singleton {
 
     private $_compile = [];
 
+    private $_cache = false;
 
     /**
      * Constructor
@@ -66,6 +67,11 @@ class assets implements \bolt\plugin\singleton {
         if (isset($config['path'])) {
             $http->bind('assets', 'bolt\http\middleware\assets', $config);
         }
+
+        if (isset($config['cache']['driver'])) {
+            $this->setCache($config['cache']);
+        }
+
         // if (isset($config['filters'])) {
         //     $this->filter($config['filters']);
         // }
@@ -85,6 +91,14 @@ class assets implements \bolt\plugin\singleton {
 
         // $this->_compiled = ($http->app['compiled'] ? $http->app['compiled']->get('assets') : []);
 
+    }
+
+    public function setCache(array $cache) {
+        if (!isset($cache['driver']) || (isset($cache['drive']) && !is_subclass_of($cache['drive'], 'Doctrine\Common\Cache\Cache'))) {
+            throw new \Exception("Cache driver must implment 'Doctrine\Common\Cache\Cache'.");
+        }
+        $this->_cache = $cache;
+        return $this;
     }
 
     public function getCompiledFile($path) {
