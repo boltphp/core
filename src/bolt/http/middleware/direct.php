@@ -17,7 +17,6 @@ class direct extends \bolt\http\middleware {
             return;
         }
 
-
         $file = $this->http->path($path);
 
         if (!file_exists($file)) {
