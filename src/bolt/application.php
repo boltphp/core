@@ -56,6 +56,10 @@ class application extends plugin {
         // register
         spl_autoload_register([$this, 'autoload']);
 
+        if (isset($config['plugins'])) {
+            $this->plug($config['plugins']);
+        }
+
         if (isset($config['bootstrap'])) {
             $this->bootstrap($config['bootstrap']);
             $this->_bootstrapDir = $this->path($config['bootstrap']);
@@ -64,11 +68,6 @@ class application extends plugin {
         if (isset($config['compiled'])) {
             $this->loadCompiled($config['compiled']);
         }
-
-        if (isset($config['plugins'])) {
-            $this->plug($config['plugins']);
-        }
-
 
     }
 
