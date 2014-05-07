@@ -225,6 +225,7 @@ class http extends plugin {
             $name = 'closure'.microtime();
         }
 
+
         // get the reflection class
         $ref = b::getReflectionClass($class);
 
