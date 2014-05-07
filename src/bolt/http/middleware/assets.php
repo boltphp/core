@@ -53,6 +53,8 @@ class assets extends \bolt\http\middleware {
 
         $f = $this->_assets->getFilters();
 
+        $cache = $this->_assets->getCache();
+
         // explode out the path
         foreach (explode('&', trim($matches[1], '&')) as $path) {
             $info = pathinfo($path);
@@ -81,13 +83,19 @@ class assets extends \bolt\http\middleware {
                         $a = new StringAsset($a->dump(), $f[$ext], $this->_assets->getRoot());
                     }
 
-                    $cache = "/tmp/{$parts[1]}-{$ts}";
 
-                    if (file_exists($cache)) {
-                        $content[] = file_get_contents($cache);
+                    $cid = "{$parts[1]}-{$ts}";
+
+                    if ($cache && ($cached = $cache['driver']->fetch($cid)) != null) {
+                        $content[] = $cached;
+                    }
+                    else if ($cache) {
+                        $dump = $a->dump();
+                        $r = $cache['driver']->save($cid, $dump, 0);
+                        $content[] = $dump;
                     }
                     else {
-                        file_put_contents($cache, $content[] = $a->dump());
+                        $content[] = $a->dump();
                     }
 
                 }
