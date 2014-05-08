@@ -68,7 +68,7 @@ class handlebars extends base {
      *
      * @return string
      */
-    public function render($str, $vars = []) {
+    public function render($str, array $vars = []) {
         return $this->getInstance()->render($str, $vars);
     }
 
@@ -81,7 +81,7 @@ class handlebars extends base {
      * 
      * @return string
      */
-    public function renderCompiled(array $compiled, array $vars = []) {
+    public function renderCompiled($compiled, array $vars = []) {
         $t = new Template($this->getInstance(), $compiled['tree'], $compiled['tokens']);
         return $t->render($vars);
     }

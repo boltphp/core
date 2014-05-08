@@ -74,7 +74,7 @@ abstract class base implements renderInterface {
      * 
      * @return string
      */
-    public function renderCompiled($compiled, $vars = []) {
+    public function renderCompiled($compiled, array $vars = []) {
         throw new \Exception("This renderer has not defined a 'renderCompiled' function.");
     }
 
