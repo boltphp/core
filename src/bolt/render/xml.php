@@ -8,16 +8,6 @@ use \b;
  */
 class xml extends base {
 
-
-    /**
-     * compile the dom doc to serializeable object
-     */
-    public function compile() {
-
-
-    }
-
-
     /**
      * render an html string into a dom doc
      *

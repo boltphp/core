@@ -16,9 +16,14 @@ class handlebars extends base {
      */
     private $_instance;
 
+
+    /**
+     * @see  bolt\render\base::canCompile
+     */
     public static function canCompile() {
         return true;
     }
+
 
     /**
      * Constructor
@@ -67,7 +72,16 @@ class handlebars extends base {
         return $this->getInstance()->render($str, $vars);
     }
 
-    public function renderCompiled($compiled, $vars = []) {
+
+    /**
+     * render a compiled template
+     * 
+     * @param  array $compiled
+     * @param  array $vars
+     * 
+     * @return string
+     */
+    public function renderCompiled(array $compiled, array $vars = []) {
         $t = new Template($this->getInstance(), $compiled['tree'], $compiled['tokens']);
         return $t->render($vars);
     }

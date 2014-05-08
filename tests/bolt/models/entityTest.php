@@ -181,7 +181,7 @@ class modelsTest_EnityBadNormalize extends modelsTest_Entity {
     }
 }
 
-class modelTest_Entity_Source implements bolt\source\face {
+class modelTest_Entity_Source implements bolt\source\sourceInterface {
 
 
     public function getModelEntityManager() {
@@ -195,11 +195,11 @@ class modelTest_Entity_Mananger extends \bolt\models {
     public $saved = false;
     public $deleted = false;
 
-    public function save($entity) {
+    public function save(\bolt\models\entity $entity) {
         $this->saved = true;
     }
 
-    public function delete($entity) {
+    public function delete(\bolt\models\entity $entity) {
         $this->deleted = true;
     }
 

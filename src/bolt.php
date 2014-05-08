@@ -31,16 +31,12 @@ date_default_timezone_set(defined("bTimeZone") ? bTimeZone : 'UTC');
 // utf8 bitches
 \Patchwork\Utf8\Bootup::initAll();
 
-/**
- *
- */
 class bolt {
-
 
     /**
      * @var string
      */
-    const VERSION = '0.6.5';
+    const VERSION = '0.6.6';
 
     /**
      * @var b

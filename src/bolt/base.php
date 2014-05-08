@@ -33,6 +33,7 @@ class base {
         if (count($helpers)) { $this->helpers($helpers); }
     }
 
+
     /**
      * app
      */
@@ -47,6 +48,7 @@ class base {
         }
         return new application($config);
     }
+
 
     /**
      * set the env
@@ -123,10 +125,26 @@ class base {
         return $this;
     }
 
+
+    /**
+     * return all helpers
+     * 
+     * @return array
+     */
     public function getHelpers() {
         return $this->_helpers;
     }
 
+
+    /**
+     * throw an exception class
+     * 
+     * @param  string $class
+     * @param  string $message
+     * @param  int $code
+     *  
+     * @return \Exception class
+     */
     public function exepction($class, $message = null, $code = null) {
         $cn = '\bolt\exceptions\\'.$class;
         throw new $cn($message, $code);

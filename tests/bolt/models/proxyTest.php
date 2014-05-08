@@ -26,7 +26,7 @@ class models_proxyTest extends Test {
 }
 
 
-class modelTest_Proxy_Source implements bolt\source\face {
+class modelTest_Proxy_Source implements bolt\source\sourceInterface {
 
     public function getModelEntityManager() {
         return new modelTest_Proxy_EntityManager();

@@ -97,7 +97,7 @@ class viewsTest extends Test {
 
 class viewsTest_Engine extends \bolt\render\base {
 
-    public function render($str, $vars = []) {
+    public function render($str, array $vars = []) {
 
     }
 

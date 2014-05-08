@@ -105,7 +105,7 @@ class modelsTest_Collection_entity extends \bolt\models\entity {
 
 
 
-class modelTest_Collection_Source implements bolt\source\face {
+class modelTest_Collection_Source implements bolt\source\sourceInterface {
 
     public function getModelEntityManager() {
 

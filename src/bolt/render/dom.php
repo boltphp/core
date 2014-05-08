@@ -26,10 +26,16 @@ class dom extends base {
      *
      * @return bolt\dom
      */
-    public function render($str, $vars = []) {
+    public function render($str, array $vars = []) {
         return stripos($str, '<html') !== false ? new \bolt\dom($str) : new \bolt\dom\fragment($str);
     }
 
+
+    /**
+     * render a compiled string
+     * 
+     * @see  bolt\render\base::renderCompiled
+     */
     public function renderCompiled($compiled, $vars = []) {
         return $this->render($compiled, $vars);
     }

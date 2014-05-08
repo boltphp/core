@@ -47,7 +47,14 @@ class models implements plugin\singleton, \ArrayAccess {
      */
     private $_em;
 
+
+    /**
+     * source holder
+     * 
+     * @var \bolt\source\face
+     */
     private $_source;
+
 
     /**
      * custom type map
@@ -72,6 +79,10 @@ class models implements plugin\singleton, \ArrayAccess {
 
         if (!isset($config['source'])) {
             throw new \Exception("Source instance must be provided in config");
+        }
+
+        if (!is_a($config['source'], '\bolt\source\sourceInterface')) {
+            throw new \Exception("Source must be an interface of bolt\source\sourceInterface");
         }
 
         // make sure it can implement a model handler
@@ -120,9 +131,15 @@ class models implements plugin\singleton, \ArrayAccess {
     }
 
 
+    /**
+     * return the source driver
+     * 
+     * @return bolt\source\face
+     */
     public function getSource() {
         return $this->_source;
     }
+
 
     /**
      * return the base app
@@ -158,6 +175,7 @@ class models implements plugin\singleton, \ArrayAccess {
         return self::generate($entity, $data, $this);
     }
 
+
     /**
      * return the entity manager refrance
      *
@@ -167,6 +185,12 @@ class models implements plugin\singleton, \ArrayAccess {
         return $this->_em;
     }
 
+
+    /**
+     * load all models in the config directories
+     * 
+     * @return self
+     */
     public function loadFromDirectories() {
         foreach ($this->_dirs as $dir) {
             $path = $this->_app->path($dir);
@@ -192,6 +216,7 @@ class models implements plugin\singleton, \ArrayAccess {
         }
         throw new \Exception("No entity class '$name' found");
     }
+
 
     /**
      * find an entity by primary key
@@ -296,7 +321,14 @@ class models implements plugin\singleton, \ArrayAccess {
 
     }
 
-    public function save($entity) {
+    /**
+     * save an entity using the entity manager
+     * 
+     * @param  bolt\models\entity $entity
+     * 
+     * @return self
+     */
+    public function save(models\entity $entity) {
         $before = clone $entity;
 
         try {
@@ -316,7 +348,15 @@ class models implements plugin\singleton, \ArrayAccess {
         return $this;
     }
 
-    public function delete($entity) {
+
+    /**
+     * delete an entity using the entity manager
+     * 
+     * @param  \bolt\models\entity $entity
+     * 
+     * @return self
+     */
+    public function delete(models\entity $entity) {
 
         try {
             $this->getEntityManager()->remove($entity);
@@ -328,6 +368,7 @@ class models implements plugin\singleton, \ArrayAccess {
 
         return $this;
     }
+
 
     /**
      * return a repository for a give entity or alias
@@ -347,6 +388,16 @@ class models implements plugin\singleton, \ArrayAccess {
         return $this->_em->getRepository($entity);
     }
 
+
+    /**
+     * created an entity object
+     * 
+     * @param  string  $entity
+     * @param  array  $data
+     * @param  boolean $partial
+     * 
+     * @return \bolt\models\entity
+     */
     public function create($entity, $data = [], $partial = false) {
         if ($partial) {
             return $this->_em->getPartialReference($entity, $data);
@@ -401,6 +452,7 @@ class models implements plugin\singleton, \ArrayAccess {
         $this->alias($name, $class);
     }
 
+
     /**
      * check to see if a registered alias exists
      *
@@ -411,6 +463,7 @@ class models implements plugin\singleton, \ArrayAccess {
     public function offsetExists($name) {
         return array_key_exists($name, $this->_alias);
     }
+
 
     /**
      * remove an alias
@@ -423,6 +476,7 @@ class models implements plugin\singleton, \ArrayAccess {
         unset($this->_alias[$name]);
     }
 
+
     /**
      * create a new model from given alias or entity class
      *
@@ -434,6 +488,7 @@ class models implements plugin\singleton, \ArrayAccess {
     public function offsetGet($name) {
         return $this->get($name);
     }
+
 
     /**
      * generate an model

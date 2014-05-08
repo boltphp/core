@@ -159,9 +159,18 @@ class http extends plugin {
      *
      * @return self
      */
-    public function setResponse(\bolt\http\response $resp) {
-        foreach ($this->_response->headers->getCookies() as $c) {
-            $resp->headers->setCookie($c);
+    public function setResponse(\bolt\http\response $resp, $mergeCookies = true, $mergeHeaders = false) {
+        if ($mergeCookies !== false) {
+            foreach ($this->_response->headers->getCookies() as $c) {
+                $resp->headers->setCookie($c);
+            }
+        }
+        if ($mergeHeaders !== false) {
+            foreach ($this->_response->headers as $name => $value) {
+                if (!$resp->headers->has($name)) {
+                    $resp->headers->set($name, $value);
+                }
+            }
         }
         $this->_response = $resp;
         return $this;
@@ -179,6 +188,7 @@ class http extends plugin {
         return call_user_func_array([$this->_app, 'path'], func_get_args());
     }
 
+
     /**
      * load passthrough to app
      *
@@ -190,6 +200,7 @@ class http extends plugin {
         call_user_func_array([$this->_app, 'load'], func_get_args());
         return $this;
     }
+
 
     /**
      * bind middleware to this request and response
@@ -327,15 +338,15 @@ class http extends plugin {
                     $this->_response->setException($e);
                 }
 
-            }
+            }            
             else {
                 $this->runMiddleware('handle');
             }
 
-        }
+        }    
         else {
             $this->runMiddleware('handle');
-        }
+        }    
 
         // run before we have run any router
         $this->runMiddleware('after');

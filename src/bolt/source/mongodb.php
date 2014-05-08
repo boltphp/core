@@ -7,7 +7,7 @@ use Doctrine\MongoDB\Connection,
     Doctrine\ODM\MongoDB\Configuration,
     Doctrine\ODM\MongoDB\DocumentManager;
 
-class mongodb implements face {
+class mongodb implements sourceInterface {
 
     private $_app;
 

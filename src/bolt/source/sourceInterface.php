@@ -2,6 +2,6 @@
 
 namespace bolt\source;
 
-interface face {
-
+interface sourceInterface {
+	
 }

@@ -1,6 +1,16 @@
 #!/usr/bin/php
 <?php
 
+if (ini_get('phar.readonly') == '1') {
+    exit(
+        "\nPHAR READONLY ENABLED\n".
+        str_repeat("-", 50)."\n".
+        wordwrap("You must disable init setting 'phar.readonly' to compile".
+        "bolt.phar. You can (probably) modify this file in '".php_ini_loaded_file()."'.\n", 50).
+        str_repeat("-", 50)."\n\n"
+    );
+}
+
 $vendor = realpath(__DIR__."/../vendor");
 $src = realpath(__DIR__."/../src");
 

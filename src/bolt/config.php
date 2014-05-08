@@ -3,7 +3,8 @@
 namespace bolt;
 use \b;
 
-use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\PropertyAccess\PropertyAccess,
+    Symfony\Component\Yaml\Yaml;
 
 
 /**
@@ -26,10 +27,21 @@ class config implements \IteratorAggregate, \ArrayAccess {
      */
     private $_access = [];
 
-
+    /**
+     * config config
+     * 
+     * @var array
+     */
     private $_config = [];
 
+
+    /**
+     * compiled config files
+     * 
+     * @var array
+     */
     private $_compiled = [];
+
 
     /**
      * Constructor
@@ -50,7 +62,6 @@ class config implements \IteratorAggregate, \ArrayAccess {
         // check for compiled files
         $this->_compiled = $app->getCompiled('config');
 
-
         if (isset($config['register'])) {
             $this->register($config['register']);
         }
@@ -59,6 +70,13 @@ class config implements \IteratorAggregate, \ArrayAccess {
 
     }
 
+
+    /**
+     * compile any config files
+     * @param  \bolt\helpers\events\event $e
+     * 
+     * @return void
+     */
     public function onCompile($e) {
         $dirs = isset($this->_config['dirs']) ? $this->_config['dirs'] : [];
 
@@ -148,6 +166,10 @@ class config implements \IteratorAggregate, \ArrayAccess {
         switch($ext) {
             case 'json':
                 return json_decode(file_get_contents($path), true);
+            case 'yaml':                
+                return Yaml::parse(file_get_contents($path));
+            case 'php';
+                return include_once($path);
 
         };
 
@@ -168,9 +190,32 @@ class config implements \IteratorAggregate, \ArrayAccess {
     }
 
 
+    /**
+     * check if an attribute exists
+     * 
+     * @param  string $name
+     * 
+     * @return boolean
+     */
     public function has($name) {
         return $this->get($name, -99) !== -99;
     }
+
+
+    /**
+     * return all attributes for a registered bag
+     *
+     * @param string $name
+     *
+     * @return array
+     */
+    public function all($name) {
+        if (!isset($this->_storage[$name])) {
+            throw new \Exception("No bag storage named {$name}");
+        }
+        return $this->_storage[$name];
+    }
+
 
     /**
      * get a value from a stored namespace

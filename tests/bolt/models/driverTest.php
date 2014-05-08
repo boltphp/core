@@ -50,7 +50,7 @@ class models_driverTest extends Test {
 }
 
 
-class modelTest_Driver_Source implements bolt\source\face {
+class modelTest_Driver_Source implements bolt\source\sourceInterface {
 
     public $getEmCalled = false;
 

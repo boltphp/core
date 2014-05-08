@@ -176,7 +176,7 @@ class modelTest extends Test {
 
 }
 
-class modelTest_Source implements bolt\source\face {
+class modelTest_Source implements bolt\source\sourceInterface {
 
     public $getEmCalled = false;
 

@@ -52,8 +52,6 @@ class application extends plugin {
 
         // autoload
         $this->_autoload = b::param('autoload', [], $config);
-
-        // register
         spl_autoload_register([$this, 'autoload']);
 
         if (isset($config['plugins'])) {
@@ -96,14 +94,16 @@ class application extends plugin {
         }
     }
 
+
     /**
-     * getBootsrapDir
+     * return the bootstrap directory
      *
      * @return string
      */
     public function getBootstrapDir() {
         return $this->_bootstrapDir;
     }
+
 
     /**
      * load boostrap files
@@ -156,6 +156,7 @@ class application extends plugin {
         return $this->pluginExists('compiled') ? $this['compiled']->get($name) : [];
     }
 
+
     /**
      * return all autoload settings
      *
@@ -190,6 +191,7 @@ class application extends plugin {
     public function hasRun() {
         return $this->_hasRun;
     }
+
 
     /**
      * get the root path
@@ -278,7 +280,6 @@ class application extends plugin {
         else {
             $this->fire('run:http');
         }
-
 
         $this->_hasRun = true;
 
