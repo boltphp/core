@@ -36,7 +36,7 @@ class dom extends base {
      * 
      * @see  bolt\render\base::renderCompiled
      */
-    public function renderCompiled($compiled, $vars = []) {
+    public function renderCompiled($compiled, array $vars = []) {
         return $this->render($compiled, $vars);
     }
 
