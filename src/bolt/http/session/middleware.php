@@ -1,9 +1,9 @@
 <?php
 
-namespace bolt\http\middleware;
+namespace bolt\http\session;
 use \b;
 
-class session extends \bolt\http\middleware {
+class middleware extends \bolt\http\middleware {
 
     public function before() {
         if (!$this->http->pluginExists('session')) {return;}
@@ -12,6 +12,9 @@ class session extends \bolt\http\middleware {
 
         if (!$this->request->cookies->has($name)) {return;}
 
+        $id = $this->request->cookies->get($name);
+
+        $this->http['session']->setId($id);
         $this->http['session']->start();
 
     }

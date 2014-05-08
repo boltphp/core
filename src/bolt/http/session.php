@@ -8,6 +8,9 @@ use Symfony\Component\HttpFoundation\Session\Session as SymfonySession,
     Symfony\Component\HttpFoundation\Session\Storage\Handler\MemcachedSessionHandler
     ;
 
+use Symfony\Component\HttpFoundation\Cookie;
+
+
 class session implements \bolt\plugin\singleton, \ArrayAccess {
 
     private $_http;
@@ -20,8 +23,12 @@ class session implements \bolt\plugin\singleton, \ArrayAccess {
 
     private $_driver;
 
+    private $_lifetime = null;
+
     public function __construct(\bolt\http $http, array $config = []) {
         $driver = null;
+
+        $this->_http = $http;
 
         // storage
         $s = b::param('storage', null, $config);
@@ -32,7 +39,10 @@ class session implements \bolt\plugin\singleton, \ArrayAccess {
 
         $this->_name = b::param('name', 'b', $config);
 
-        // $this->_session = new SymfonySession(new session\store($this, $this->_name, $driver));
+        $this->_lifetime = b::param('lifetime', null, $config);
+
+        $this->_session = new SymfonySession(new session\store($this, $this->_name, $this->_driver));
+
 
     }
 
@@ -40,21 +50,39 @@ class session implements \bolt\plugin\singleton, \ArrayAccess {
         return $this->_name;
     }
 
+    public function setSessionCookie($lifetime = null, $path = '/', $domain = null, $secure = false, $httpOnly = true) {
+        $_id = $this->_http->request->cookies->get($this->_name);
+        if ($this->getId() === $_id) {return $this;}
+        $lifetime = $lifetime ?: $this->_lifetime;
+        $c = new Cookie($this->_name, $this->_session->getId(), $lifetime, $path, $domain, $secure, $httpOnly);
+        $this->_http->response->headers->setCookie($c);
+        return $this;
+    }
+
     public function start() {
         $this->_session->start();
+        $this->setSessionCookie();
+        return $this;
+    }
+
+    public function set($name, $value) {
+        if (!$this->isStarted()) {
+            $this->start();
+        }
+        $this->_session->set($name, $value);
         return $this;
     }
 
     public function __get($name) {
-        return $this->_session->get($name);
+        return $this->get($name);
     }
 
     public function __set($name, $value) {
-        return $this->_session->set($name, $value);
+        return $this->set($name, $value);
     }
 
     public function __isset($name) {
-        return $this->_session->has($name);
+        return $this->has($name);
     }
 
     public function __call($name, $args) {
@@ -65,19 +93,19 @@ class session implements \bolt\plugin\singleton, \ArrayAccess {
     }
 
     public function offsetGet($name) {
-        return $this->_session->get($name);
+        return $this->get($name);
     }
 
     public function offsetSet($name, $value)  {
-        return $this->_session->set($name, $value);
+        return $this->set($name, $value);
     }
 
     public function offsetUnset($name) {
-        return $this->_session->remove($name);
+        return $this->remove($name);
     }
 
     public function offsetExists($name) {
-        return $this->_session->has($name);
+        return $this->has($name);
     }
 
 }

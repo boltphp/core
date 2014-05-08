@@ -155,10 +155,14 @@ class http extends plugin {
      * set the response object
      *
      * @param bolt\http\response $resp new response object
+     * @param bool merge merge with current repsonse object
      *
      * @return self
      */
     public function setResponse(\bolt\http\response $resp) {
+        foreach ($this->_response->headers->getCookies() as $c) {
+            $resp->headers->setCookie($c);
+        }
         $this->_response = $resp;
         return $this;
     }
@@ -317,7 +321,7 @@ class http extends plugin {
 
                 // run the controller
                 try {
-                    $this->_response = $controller->run($params);
+                    $this->setResponse($controller->run($params));
                 }
                 catch (\Exception $e) {
                     $this->_response->setException($e);
@@ -365,6 +369,7 @@ class http extends plugin {
         foreach ($this->_middleware as $ware) {
             if (!in_array($method, $ware['methods'])) {continue;}
             $this->runMiddlewareByName($ware['name'], $method, $params);
+            if ($this->response->isReadyToSend()) {break;}
         }
         return $this;
     }

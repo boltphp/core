@@ -28,7 +28,6 @@ class assets extends \bolt\http\middleware {
 
     public function before() {
 
-
         // don't handle this
         if (!isset($this->config['path'])) {
             return;
