@@ -271,4 +271,8 @@ class node implements \ArrayAccess {
         return $this->_dom->offsetUnset("[data-domref='{$this->_guid}'] $name");
     }
 
+    public function __toString() {
+        return $this->_dom->html();
+    }
+
 }

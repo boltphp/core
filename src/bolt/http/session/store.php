@@ -88,18 +88,25 @@ class store implements SessionStorageInterface {
         $this->_id = $this->generateId();
         $this->started = true;
         $this->closed = false;
+        return $this;
     }
 
     public function generateId() {
         return hash('sha256', uniqid(mt_rand()));
     }
 
+    public function destroy() {
+        $this->_driver->destroy($this->_id);        
+        $this->closed = true;
+        return $this;
+    }
+
     public function save() {
         $data = [];
         foreach ($this->_bags as $bag) {
             $data[$bag->getName()] = $bag->all();
-        }
-        $this->_driver->write($this->_id, $data);
+        }        
+        $r = $this->_driver->write($this->_id, $data);
         $this->_closed = true;
         $this->_started = false;
         return $this;

@@ -19,4 +19,8 @@ class middleware extends \bolt\http\middleware {
 
     }
 
+    public function after() {
+    	$this->http['session']->save();
+    }
+
 }

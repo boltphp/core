@@ -25,6 +25,8 @@ class session implements \bolt\plugin\singleton, \ArrayAccess {
 
     private $_lifetime = null;
 
+    private $_store;
+
     public function __construct(\bolt\http $http, array $config = []) {
         $driver = null;
 
@@ -41,7 +43,8 @@ class session implements \bolt\plugin\singleton, \ArrayAccess {
 
         $this->_lifetime = b::param('lifetime', null, $config);
 
-        $this->_session = new SymfonySession(new session\store($this, $this->_name, $this->_driver));
+        $this->_store = new session\store($this, $this->_name, $this->_driver);
+        $this->_session = new SymfonySession($this->_store);
 
 
     }
@@ -62,6 +65,13 @@ class session implements \bolt\plugin\singleton, \ArrayAccess {
     public function start() {
         $this->_session->start();
         $this->setSessionCookie();
+        return $this;
+    }
+
+    public function destroy() {
+        $this->_session->clear();
+        $this->_store->destroy();
+        $this->_http->response->headers->clearCookie($this->_name);   
         return $this;
     }
 

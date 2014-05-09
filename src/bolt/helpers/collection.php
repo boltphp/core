@@ -8,6 +8,10 @@ class collection implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonS
 
     protected $items = [];
 
+    public function __construct(array $items = []) {
+        $this->items = $items;
+    }
+
     public function each(Closure $cb, $data = []) {
         foreach ($this->items as $key => $item) {
             call_user_func($cb, $item, $key, $data);
