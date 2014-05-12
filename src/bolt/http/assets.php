@@ -97,6 +97,10 @@ class assets implements \bolt\plugin\singleton {
 
     }
 
+    public function getConfig() {
+        return $this->_config;
+    }
+
     public function setCache(array $cache) {
         if (!isset($cache['driver']) || (isset($cache['drive']) && !is_subclass_of($cache['drive'], 'Doctrine\Common\Cache\Cache'))) {
             throw new \Exception("Cache driver must implment 'Doctrine\Common\Cache\Cache'.");
