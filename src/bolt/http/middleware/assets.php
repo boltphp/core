@@ -34,9 +34,8 @@ class assets extends \bolt\http\middleware {
         }
 
         // check if we should handle this request
-        $path = str_replace('{path}', '(.*)/?', $this->config['path']);
+        $path = str_replace('{path}', '(.*)/?', $this->config['path']['file']);
         $matches = [];
-
 
         if (!preg_match("#".$path."#i", $this->request->getPathInfo(), $matches)) {
             return;

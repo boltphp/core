@@ -22,8 +22,7 @@ class client {
         }
 
         $app['cli']->plug([
-
-                ['build', 'bolt\client\build'],
+                
                 ['compile', 'bolt\client\compile'],
                 ['models', 'bolt\client\models']
 

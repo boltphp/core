@@ -23,11 +23,11 @@ class cssRewrite extends \Assetic\Filter\BaseCssFilter {
         $content = $this->filterReferences($asset->getContent(), function($matches) use ($asset) {
             $url = $matches['url'];
 
-            if (empty($url) || stripos($url, 'http') !== false || substr($url,0,2) === '//' || stripos($url, 'data:') !== false) { return $matches[0]; }
+            if ($this->_http['assets']->isCompiling() || empty($url) || stripos($url, 'http') !== false || substr($url,0,2) === '//' || stripos($url, 'data:') !== false) { return $matches[0]; }
 
             $root = $asset->getSourceRoot();
 
-            if ($url{0} == '/') {
+            if ($url{0} == '/' ) {
                 $url = $this->_http['assets']->url($url);
             }
             else {

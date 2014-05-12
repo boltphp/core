@@ -16,6 +16,9 @@ use Assetic\Asset\FileAsset,
     Assetic\Factory\Worker\CacheBustingWorker,
     Assetic\Factory\AssetFactory;
 
+use Symfony\Component\Finder\Finder;
+
+
 /**
  * asset manager
  */
@@ -36,6 +39,7 @@ class assets implements \bolt\plugin\singleton {
      */
     private $_root = [];
 
+    private $_path = [];
 
     /**
      * @var Assetic\AssetManager
@@ -49,6 +53,8 @@ class assets implements \bolt\plugin\singleton {
     private $_compile = [];
 
     private $_cache = false;
+
+    private $_isCompiling = false;
 
     /**
      * Constructor
@@ -64,8 +70,8 @@ class assets implements \bolt\plugin\singleton {
 
         $this->_filters = b::param('filters', [], $config);
 
-        if (isset($config['path'])) {
-            $http->bind('assets', 'bolt\http\middleware\assets', $config);
+        if (isset($config['path'])) {            
+            $this->_path = $config['path'];
         }
 
         if (isset($config['cache']['driver'])) {
@@ -80,7 +86,7 @@ class assets implements \bolt\plugin\singleton {
         // }
 
         // compile events
-        // $http->app->on("compile", [$this, 'onCompile']);
+        $http->app->on("compile", [$this, 'onCompile']);
 
         $this->_manager = new AssetManager();
         $this->_filter = new FilterManager();
@@ -88,8 +94,6 @@ class assets implements \bolt\plugin\singleton {
         if (isset($config['ready'])) {
             call_user_func($config['ready'], $this);
         }
-
-        // $this->_compiled = ($http->app['compiled'] ? $http->app['compiled']->get('assets') : []);
 
     }
 
@@ -105,9 +109,18 @@ class assets implements \bolt\plugin\singleton {
         return $this->_cache;
     }
 
+    public function getCompiledFileInfo($path) {
+        $compiled = isset($this->_http->app['compiled']) ? $this->_http->app['compiled']->get('assets') : [];
+        if (isset($compiled['data']['map'][$path])) {
+            return $compiled['data']['map'][$path];
+        }
+        return null;
+    }
+
     public function getCompiledFile($path) {
-        if (isset($this->_compiled['data']['map'][$path])) {
-            return $this->_http->app['compiled']->getFile("assets/{$this->_compiled['data']['map'][$path]['file']}");
+        $compiled = isset($this->_http->app['compiled']) ? $this->_http->app['compiled']->get('assets') : [];
+        if (isset($compiled['data']['map'][$path])) {
+            return $this->_http->app['compiled']->getFile("assets/{$compiled['data']['map'][$path]['file']}");
         }
         return null;
     }
@@ -155,11 +168,24 @@ class assets implements \bolt\plugin\singleton {
     }
 
 
-    public function url($path) {
-        if (is_string($path) && $path{0} === '@') {
-            $path = "collection/".substr($path,1);
+    public function url($path) {                
+        if (($info = $this->getCompiledFileInfo($path)) !== null) {
+            $path = $info['file'];
         }
-        return $this->_http->request->getUriForPath(str_replace('{path}', ltrim($path,'/'), rtrim($this->_config['path'],'/')));
+
+        if ($path{0} == '@') {
+            $rel = str_replace("{name}", substr($path,1), $this->_path['collection']);
+        }
+        else {
+            $rel = str_replace("{path}", $path, $this->_path['file']);
+        }
+
+        if (isset($this->_path['root'])) {
+            return $this->_path['root'] . ltrim($rel, '/');
+        }
+        else {
+            return $this->_http->request->getUriForPath($rel);
+        }
     }
 
 
@@ -188,6 +214,10 @@ class assets implements \bolt\plugin\singleton {
         return $this;
     }
 
+    public function isCompiling() {
+        return $this->_isCompiling;
+    }
+
     /**
      * compile assets into the compile directory
      *
@@ -197,6 +227,8 @@ class assets implements \bolt\plugin\singleton {
      */
     public function onCompile($e) {
         $dir = $e->data['client']->makeDir('assets');
+
+        $this->_isCompiling = true;
 
         // loop through all the manager files
         $names = $this->_manager->getNames();
@@ -237,13 +269,18 @@ class assets implements \bolt\plugin\singleton {
             $d = $a->dump();
             $id = md5($a->dump());
             $file = "{$name}-{$id}.{$ext}";
+            $filters = isset($this->_filters[$ext]) ? $this->_filters[$ext] : [];
 
-            // filters
-            if (array_key_exists($ext, $this->_filters)) {
-                $d = (new StringAsset($d, $this->_filters[$ext], $this->getRoot()))->dump();
+            if (isset($this->_filters['compile'][$ext])) {
+                $filters = array_merge($filters, $this->_filters['compile'][$ext]);
             }
 
-            $map["@{$name}"] = [
+            // filters
+            if (count($filters) > 0) {
+                $d = (new StringAsset($d, $filters, $this->getRoot()))->dump();
+            }
+
+            $map["@{$name}.{$ext}"] = [
                 'id' => $id,
                 'name' => $name,
                 'mtime' => $a->getLastModified(),
@@ -254,45 +291,32 @@ class assets implements \bolt\plugin\singleton {
 
         }
 
+        $finder = new Finder();
+        $finder->files()
+            ->ignoreVCS(true)
+            ->name('*.css')        
+            ->in("$dir")
+        ;
+
+        // now loop through all compiled files and 
+        // rewrite any url paths
+        foreach ($finder as $file) {
+            $path = $file->getRealPath();
+            $content = \Assetic\Util\CssUtils::filterUrls(file_get_contents($path), function($matches) use ($map) {
+                $url = $matches['url'];
+                if (empty($url) || stripos($url, 'http') !== false || substr($url,0,2) === '//' || stripos($url, 'data:') !== false) { return $matches[0]; }
+                $rel = ltrim($matches[2], '/');
+                if (isset($map[$rel])) {
+                    return str_replace($matches['url'], $map[$rel]['file'], $matches[0]);
+                }
+            });
+            file_put_contents($path, $content);
+        }
 
 
         $e->data['client']->saveCompileLoader('assets', ['map' => $map, 'files' => $files]);
 
 
     }
-
-    // public function compileFile($file, $rel = null, $filters = true) {
-    //     $ext = pathinfo($file)['extension'];
-    //     $o = false;
-
-    //     if ($this->getGlobals($ext)) {
-
-    //         // fm
-    //         $fm = new AssetCollection([]);
-
-    //         foreach ($this->getGlobals($ext) as $path) {
-    //             if (is_string($path)) {
-    //                 $fm->add( stripos($path, '*') !== false ? new GlobAsset($path) : new FileAsset($path) );
-    //             }
-    //         }
-
-    //         $filter = new \bolt\http\assets\filters\cssRewrite($this);
-
-    //         $fm->add(new FileAsset($file));
-
-    //         $o = new StringAsset($fm->dump(), $this->getFilters($ext), dirname($file));
-
-    //         $o->ensureFilter($filter);
-
-
-
-    //     }
-    //     else {
-    //         $o = new FileAsset($file, $this->getFilters($ext));
-    //     }
-
-    //     return $o;
-
-    // }
 
 }
