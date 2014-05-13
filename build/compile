@@ -87,6 +87,7 @@ class compiler {
                 ->name('*.php')
                 ->name('*.pem')
                 ->exclude('Tests')
+                ->exclude('tests')
                 ->in("$vendor/$dir")
             ;
 
@@ -99,24 +100,24 @@ class compiler {
 
         }
 
-        echo "adding $vendor/composer\n";
+        // echo "adding $vendor/composer\n";
 
-        $finder = new Finder();
-        $finder->files()
-            ->ignoreVCS(true)
-            ->name('*.*')
-            ->depth('== 0')
-            ->in("{$vendor}/composer")
-        ;
+        // $finder = new Finder();
+        // $finder->files()
+        //     ->ignoreVCS(true)
+        //     ->name('*.*')
+        //     ->depth('== 0')
+        //     ->in("{$vendor}/composer")
+        // ;
 
-        foreach ($finder as $file) {
-            $path = str_replace($vendor, "", $file->getRealPath());
-            $this->addFile($phar, "/vendor$path", $file);
-        }
+        // foreach ($finder as $file) {
+        //     $path = str_replace($vendor, "", $file->getRealPath());
+        //     $this->addFile($phar, "/vendor$path", $file);
+        // }
 
-        echo "adding $vendor/autoload.php\n";
+        // echo "adding $vendor/autoload.php\n";
 
-        $phar->addFromString("/vendor/autoload.php", file_get_contents("{$vendor}/autoload.php"));
+        // $phar->addFromString("/vendor/autoload.php", file_get_contents("{$vendor}/autoload.php"));
 
         // Stubs
         $phar->setStub(file_get_contents("./phar-stub.php"));
