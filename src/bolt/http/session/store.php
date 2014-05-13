@@ -27,6 +27,8 @@ class store implements SessionStorageInterface {
 
     private $_metadataBag;
 
+    private $_data = [];
+
 
     public function __construct(\bolt\http\session $manager, $name, \SessionHandlerInterface $driver) {
         $this->setName($name);
@@ -43,8 +45,11 @@ class store implements SessionStorageInterface {
         }
 
         if ($this->_id && ($data = $this->_driver->read($this->_id)) != null) {
-            foreach ($data as $bagName => $values) {
-                $this->_bags[$bagName]->initialize($values);
+            $this->_data = $data;
+            foreach (array_merge($this->_bags, [$this->_metadataBag]) as $bag) {
+                $key = $bag->getStorageKey();
+                $this->_data[$key] = isset($data[$key]) ? $data[$key] : [];
+                $bag->initialize($this->_data[$key]);
             }
         }
 
@@ -96,16 +101,26 @@ class store implements SessionStorageInterface {
     }
 
     public function destroy() {
-        $this->_driver->destroy($this->_id);        
+        $this->_driver->destroy($this->_id);
         $this->closed = true;
         return $this;
     }
 
     public function save() {
         $data = [];
+
         foreach ($this->_bags as $bag) {
-            $data[$bag->getName()] = $bag->all();
-        }        
+            $data[$bag->getStorageKey()] = $bag->all();
+        }
+
+        $meta = $this->getMetadataBag();
+
+        $data[$meta->getStorageKey()] = [
+            $meta::CREATED => $meta->getCreated(),
+            $meta::UPDATED => $meta->getLastUsed(),
+            $meta::LIFETIME => $meta->getLifetime()
+        ];
+
         $r = $this->_driver->write($this->_id, $data);
         $this->_closed = true;
         $this->_started = false;
@@ -135,7 +150,7 @@ class store implements SessionStorageInterface {
         if ($bag === null) {
             $bag = new MetadataBag();
         }
-        $this->_metadataBag = $bat;
+        $this->_metadataBag = $bag;
         return $this;
     }
 
