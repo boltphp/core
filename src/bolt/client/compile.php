@@ -8,13 +8,20 @@ class compile extends command {
 
     public static $name = "compile";
 
-    public static $configure = [
-        'arguments' => [
-            'cmd' => [
-                'mode' => self::REQUIRED
+    public static function getConfigure() {
+        return [
+            'arguments' => [
+                'cmd' => [
+                    'mode' => self::REQUIRED
+                ]
+            ],
+            'options' => [
+                'plugins' => [
+                    'mode' => self::VALUE_IS_ARRAY | self::VALUE_REQUIRED
+                ]
             ]
-        ]
-    ];
+        ];
+    }
 
     private $_dir = false;
     private $_loaders = [];
@@ -50,6 +57,7 @@ class compile extends command {
 
     // build
     public function generate() {
+        $plugins = $this->opt('plugins');
 
         $this->clean();
 
@@ -66,10 +74,22 @@ class compile extends command {
         foreach ($listeners as $item) {
             $prog->clear();
 
-            $this->app->executeListener($item, [
-                    'dir' => $dir,
-                    'client' => $this
-                ]);
+            $class = get_class($item->callback[0]);
+
+            if ($plugins && !in_array($class, $plugins)) {
+                $this->writeln("Skipped {$class}");
+                continue;
+            }
+
+            try {
+                $this->app->executeListener($item, [
+                        'dir' => $dir,
+                        'client' => $this
+                    ]);
+            }
+            catch (\Exception $e) {
+                throw new \Exception("Unable to run compile command (Error: {$e->getMessage()}).");
+            }
 
             $prog->display();
             $prog->advance();
