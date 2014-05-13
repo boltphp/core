@@ -81,10 +81,15 @@ class compile extends command {
                 continue;
             }
 
-            $this->app->executeListener($item, [
-                    'dir' => $dir,
-                    'client' => $this
-                ]);
+            try {
+                $this->app->executeListener($item, [
+                        'dir' => $dir,
+                        'client' => $this
+                    ]);
+            }
+            catch (\Exception $e) {
+                throw new \Exception("Unable to run compile command (Error: {$e->getMessage()}).");
+            }
 
             $prog->display();
             $prog->advance();
