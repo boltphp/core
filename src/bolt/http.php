@@ -338,15 +338,15 @@ class http extends plugin {
                     $this->_response->setException($e);
                 }
 
-            }            
+            }
             else {
                 $this->runMiddleware('handle');
             }
 
-        }    
+        }
         else {
             $this->runMiddleware('handle');
-        }    
+        }
 
         // run before we have run any router
         $this->runMiddleware('after');

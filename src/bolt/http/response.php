@@ -141,7 +141,6 @@ class response extends SymfonyResponse {
         if (array_key_exists($e->getCode(), SymfonyResponse::$statusTexts)) {
             $this->setStatusCode($e->getCode());
         }
-        $this->readyToSend();
         return $this;
     }
 
