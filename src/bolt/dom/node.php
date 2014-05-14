@@ -73,7 +73,6 @@ class node implements \ArrayAccess {
 
             $html = html_entity_decode($html, ENT_NOQUOTES, 'utf-8');
 
-
             if ($this->_node->tagName == 'script') {
                 $this->_node->appendChild(new \DOMCdataSection($html));
             }
@@ -226,6 +225,11 @@ class node implements \ArrayAccess {
 
         $this->attr('style', implode(';', $_));
 
+        return $this;
+    }
+
+    public function replace(node $with) {
+        $this->_node->parentNode->replaceChild($with->node(), $this->_node);
         return $this;
     }
 
