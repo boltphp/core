@@ -29,12 +29,15 @@ class assets extends \bolt\http\middleware {
     public function before() {
 
         // don't handle this
-        if (!isset($this->config['path'])) {
+        if (!isset($this->http['assets']->getConfig()['path'])) {
             return;
         }
 
+                $path = $this->http['assets']->getConfig()['path'];
+
+
         // check if we should handle this request
-        $path = str_replace('{path}', '(.*)/?', $this->config['path']['file']);
+        $path = str_replace('{path}', '(.*)/?', $path['file']);
         $matches = [];
 
         if (!preg_match("#".$path."#i", $this->request->getPathInfo(), $matches)) {
