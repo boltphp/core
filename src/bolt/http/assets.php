@@ -281,7 +281,12 @@ class assets implements \bolt\plugin\singleton {
 
             // filters
             if (count($filters) > 0) {
-                $d = (new StringAsset($d, $filters, $this->getRoot()))->dump();
+                try {
+                    $d = (new StringAsset($d, $filters, $this->getRoot()))->dump();
+                }
+                catch (\Exception $e) {
+                    throw new \Exception("Unable to process filters {$e->getMessage()}");
+                }
             }
 
             $map["@{$name}.{$ext}"] = [
@@ -295,7 +300,6 @@ class assets implements \bolt\plugin\singleton {
 
         }
 
-        var_dump('x');
 
         $finder = new Finder();
         $finder->files()
