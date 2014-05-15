@@ -70,7 +70,7 @@ class assets implements \bolt\plugin\singleton {
 
         $this->_filters = b::param('filters', [], $config);
 
-        if (isset($config['path'])) {            
+        if (isset($config['path'])) {
             $this->_path = $config['path'];
         }
 
@@ -172,7 +172,7 @@ class assets implements \bolt\plugin\singleton {
     }
 
 
-    public function url($path) {                
+    public function url($path) {
         if (($info = $this->getCompiledFileInfo($path)) !== null) {
             $path = $info['file'];
         }
@@ -295,14 +295,16 @@ class assets implements \bolt\plugin\singleton {
 
         }
 
+        var_dump('x');
+
         $finder = new Finder();
         $finder->files()
             ->ignoreVCS(true)
-            ->name('*.css')        
+            ->name('*.css')
             ->in("$dir")
         ;
 
-        // now loop through all compiled files and 
+        // now loop through all compiled files and
         // rewrite any url paths
         foreach ($finder as $file) {
             $path = $file->getRealPath();
