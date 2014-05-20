@@ -114,7 +114,7 @@ class application extends plugin {
      */
     public function bootstrap($what) {
         if (is_dir($what) || is_dir($this->path($what))) {
-            $path = is_dir($what) ? $what : $this->path($what);
+            $path = is_dir($what) ? $what : $this->path($what);        
             foreach (b::getRegexFiles($path) as $file) {
                 $this->bootstrap($file);
             }
@@ -237,10 +237,7 @@ class application extends plugin {
      * @return self
      */
     public function load($ns, $path) {
-
         b::requireFromPath( $this->path($path) );
-
-
     }
 
 

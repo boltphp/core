@@ -155,7 +155,7 @@ class compile extends command {
         if (is_dir($this->_dir)) {
             b::fs('remove', $this->_dir);
         }
-        b::fs('remove', "{$this->app->getBootstrapDir()}/compiled.php");
+        b::fs('remove', "{$this->app->getBootstrapDir()}/compiled.php");        
         b::fs('mkdir', $this->_dir);
     }
 

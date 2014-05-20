@@ -4,6 +4,8 @@ namespace bolt\helpers;
 use \b;
 
 use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\Finder\Finder;
+
 
 class fs {
 
@@ -16,44 +18,32 @@ class fs {
         return $sep.ltrim(implode($sep, array_map(function($val) use ($sep){ return trim($val, $sep); }, func_get_args())), $sep);
     }
 
-    public function getRegexFiles($path, $regex="^.+\.php$") {
+    public function getRegexFiles($path, $regex="/^.+\.php$/") {
         $files = [];
 
         if (!is_dir($path)) {return [];}
 
-        $findFiles = function($path, &$files, $findFiles) use ($regex) {
-            $dirs = [];
+        $finder = new Finder();
+        $finder
+            ->ignoreVCS(true)
+            ->followLinks()
+            ->files()
+            ->name($regex)
+            ->in($path)
+        ;
 
-            foreach (new \DirectoryIterator($path) as $file) {
-                if ($file->isDot()) {continue;}
-
-                if ($file->isFile() && preg_match('#'.$regex.'#i', $file->getPathname())) {
-                    $files[] = $file->getRealPath();
-                }
-                else if ($file->isDir()) {
-                    $dirs[] = $file->getPathname();
-                }
-            }
-            foreach ($dirs as $dir) {
-                $findFiles($dir, $files, $findFiles);
-            }
-
-        };
-
-        $findFiles(realpath($path), $files, $findFiles);
+        foreach($finder as $file) {
+            $files[] = $file->getRealPath();
+        }
 
         return $files;
     }
 
-    public function requireFromPath($path, $regex="^.+\.php$") {
+    public function requireFromPath($path, $regex="/^.+\.php$/") {
         $paths = $this->getRegexFiles($path, $regex);
 
-
-        foreach ($paths as $path) {
-            if (!in_array($path, $this->_required)) {
-                $this->_required[] = $path;
-                require_once($path);
-            }
+        foreach ($paths as $path) {                        
+            require_once($path);            
         }
         return $this;
     }
