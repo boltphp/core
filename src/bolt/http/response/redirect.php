@@ -22,7 +22,7 @@ class redirect extends \bolt\http\response {
     }
 
     public function setUrl($url) {
-        $this->headers->set('Location', $url);
+        $this->headers->set('Location', $url);        
         return $this;
     }
 
