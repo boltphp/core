@@ -152,6 +152,7 @@ class route extends http\controller implements http\router\face {
      * @return bolt\http\response
      */
     public function run($params) {
+        $resp = false;
 
         // before we do anything
         $this->fire('beforeRun');
