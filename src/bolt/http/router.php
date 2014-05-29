@@ -66,16 +66,23 @@ class router {
 
         if (count($dirs) == 0) {return false;}
 
-        $this->_collection = new router\collection();
+        $collection = new router\collection();
 
         foreach ($dirs as $dir) {
-            b::requireFromPath($this->_http->path($dir));
+            foreach (b::getRegexFiles($this->_http->path($dir)) as $file) {
+                require_once $file;
+            }
         }
 
-        $this->loadFromControllers();
+        $classes = $this->loadFromControllers($collection);
 
         //
-        $e->data['client']->saveCompileLoader('router', ['collection' => $this->_collection]);
+        $e->data['client']->saveCompileLoader('router', [
+            'collection' => $collection,
+            'controllers' => array_map(function($class){
+                return $class->name;
+            }, $classes)
+        ]);
 
     }
 
@@ -203,28 +210,9 @@ class router {
      *
      * @return void
      */
-    public function loadFromControllers(array $paths = []) {
-        $routes = []; $files = [];
-
-        //
-        foreach ($paths as $path) {
-            if (is_object($path) && method_exists($path, 'asArray')) {
-                $files = array_merge($files, $path->asArray());
-            }
-            else if (is_a($path, 'bolt\helpers\fs\file')) {
-                $files[] = (string)$file;
-            }
-            else if (is_array($path)) {
-                $files = array_merge($files, $path);
-            }
-            else {
-                $files[] = $this->_http->find($path);
-            }
-        }
-
-        foreach ($files as $file) {
-            require_once $file;
-        }
+    public function loadFromControllers(router\collection $collection = null) {
+        $collection = $collection ?: $this->_collection;
+        $classes = false;
 
         // get all loaded classes
         if (($classes = b::getClassImplements('\bolt\http\router\face')) != false) {
@@ -294,9 +282,12 @@ class router {
             $c->addPrefix($prefix, $requirements, $options, $host, $schemes);
 
             // add this collection
-            $this->_collection->addCollection($c);
+            $collection->addCollection($c);
 
         }
+
+
+        return $classes;
 
     }
 
