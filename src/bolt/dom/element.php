@@ -1,52 +1,78 @@
 <?php
 
 namespace bolt\dom;
+use \b;
 
+use DOMElement,
+    DOMAttr;
 
-use Symfony\Component\CssSelector\CssSelector;
+class element {
 
-class element extends node {
+    public $ownerDocument;
 
-    private $_dom;
+    public $element;
 
-    public $tagName = 'div';
+    public $guid;
 
-    public function __construct($tag = null, $value = "", $attr = []) {
-        $this->_dom = new \bolt\dom();
+    public function __construct($tag = null, $value = "", $attr = [], document $document = null) {
+        $this->ownerDocument = $document ?: new document();
+        $this->element = $this->ownerDocument->createElement($tag, $value);
 
-        $tag = $tag ?: $this->tagName;
+        $this->guid = b::guid("noderef");
 
-        $node = $this->_dom->doc()->createElement($tag);
-        $this->_dom->doc()->appendChild($node);
+        $this->attr('data-domref', $this->guid);
 
-        parent::__construct($this->_dom, $node);
-
-        $this->html($value);
-        $this->attr($attr);
-
-        $this->init();
+        if (is_array($attr)) {
+            $this->attr($attr);
+        }
 
     }
 
-    public function html($html = null){
-        if ($html !== null) {
-            return parent::html($html);
+    public function __get($name) {
+        return $this->attr($name);
+    }
+
+    public function __set($name, $value) {
+        return $this->attr($name, $value);
+    }
+
+    public function __call($name, $args) {
+        return call_user_func_array([$this->element, $name], $args);
+    }
+
+
+    public function html($html = null) {
+        if ($html) {
+
         }
         else {
+            return $this->ownerDocument->getHTML($this);
+        }
+    }
 
-            $ref = clone $this->_dom->doc();
+    public function find($selector) {
+        return $this->ownerDocument->find(sprintf('*[data-domref="%s"] %s', $this->_guid, $selector));
+    }
 
-            $xpath = new \DOMXPath($ref);
-
-            foreach ($xpath->query(CssSelector::toXPath('*[data-domref]')) as $node) {
-                $node->removeAttribute('data-domref');
+    public function attr($name, $value = null) {
+        if (is_array($name)) {
+            foreach ($name as $n => $v) {
+                if (is_numeric($n)) {
+                    $this->appendChild(new DOMAttr($v));
+                }
+                else {
+                    $this->setAttribute($n, html_entity_decode($v, ENT_QUOTES, 'utf-8'));
+                }
             }
-            foreach ($xpath->query(CssSelector::toXPath('*[data-fragmentref]')) as $node) {
-                $node->removeAttribute('data-fragmentref');
-            }
+            return $this;
+        }
 
-            return $ref->saveHTML();
-
+        if ($value !== null) {
+            $this->setAttribute($name, $value);
+            return $this;
+        }
+        else {
+            return $this->getAttribute($name);
         }
     }
 
