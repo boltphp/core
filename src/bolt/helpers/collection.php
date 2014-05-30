@@ -12,7 +12,8 @@ class collection implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonS
         $this->items = $items;
     }
 
-    public function each(Closure $cb, $data = []) {
+    public function each($cb, $data = []) {
+        if (is_string($cb)) { $cb = [$this, $cb]; }
         foreach ($this->items as $key => $item) {
             call_user_func($cb, $item, $key, $data);
         }

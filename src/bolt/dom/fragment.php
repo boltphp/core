@@ -3,54 +3,31 @@
 namespace bolt\dom;
 use \b;
 
-class fragment  { //extends \bolt\dom {
+class fragment extends document {
 
-    // protected $hasRoot = true;
+    public function __construct($charset = 'UTF-8', $html = null) {
+        parent::__construct($charset);      
+        if ($html) {
+            $this->setHTML($html);  
+        }
+    }
 
-    // protected function rootId() {
-    //     return "{$this->guid()}root";
-    // }
+    public function setHTML($html) {
+        @$this->loadHTML("<div id='{$this->guid}'>{$html}</div>", LIBXML_HTML_NOIMPLIED + LIBXML_HTML_NODEFDTD + LIBXML_NOERROR + LIBXML_NOWARNING + LIBXML_NOXMLDECL);
+        return $this;   
+    }
 
-    // public function rootNode() {
-    //     return $this->doc()->getElementById($this->rootId());
-    // }
+    public function getHTML($el = null) {
+        return $this->find("#{$this->guid}")->nodeValue;
+    }
 
-    // public function html($html = null) {
-    //     if ($html !== null) {
-    //         @$this->doc()->loadHTML("<div id='{$this->rootId()}'>{$html}</div>", LIBXML_HTML_NOIMPLIED + LIBXML_HTML_NODEFDTD + LIBXML_NOERROR + LIBXML_NOWARNING + LIBXML_NOXMLDECL);
-    //         return $this;
-    //     }
-    //     else {
+    public function saveHTML($el = null) {
+        $el = $this->find("#{$this->guid}");
+        return parent::saveHTML($el);
+    }    
 
-    //         $ref = $this->cleanDomNodes();
-    //         $root = $ref->getElementById($this->rootId());
-    //         $parts = [];
-    //         if ($root AND $root->hasChildNodes()) {
-    //             foreach ($root->childNodes as $node) {
-    //                 $parts[] = $ref->saveHTML($node);
-    //             }
-    //         }
-    //         return trim(implode("", $parts));
-    //     }
-    // }
-
-    // public function root($tag = null) {
-    //     if ($tag !== null) {
-    //         $this->html("<{$tag} id='{$this->rootId()}'></{$tag}>");
-    //         return $this;
-    //     }
-    //     else {
-    //         return $this->find("#{$this->rootId()}", true, false);
-    //     }
-    // }
-
-    // public function append($what) {
-    //     $this->root()->append($what);
-    //     return $this;
-    // }
-
-    // public function children() {
-    //     return $this->find("> *");
-    // }
+    public function children() {
+        return $this->find("#{$this->guid} *");
+    }
 
 }

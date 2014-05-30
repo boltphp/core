@@ -1,42 +1,35 @@
 <?php
 
+use bolt\dom;
+
 class domTest extends Test {
 
+	public function setUp() {
+		$this->dom = new bolt\dom();
+	}
 
-    public function test() {
-        $this->markTestIncomplete('soon...');
-    }
+	public function testDocument() {
+		$this->assertInstanceOf('bolt\dom\document', $this->dom->document());
+	}
 
-//     public function setUp() {
-//         $this->d = new \bolt\dom();
-//     }
+	public function testFragment() {
+		$this->assertInstanceOf('bolt\dom\fragment', $this->dom->fragment());	
+	}
 
-//     public function test_doc() {
-//         $this->assertInstanceOf('DOMDocument', $this->d->doc());
-//     }
+	public function testElement() {
+		$this->assertInstanceOf('bolt\dom\element', $this->dom->element('div'));	
+	}
 
-//     public function test_getSetHTML() {
-//         $this->eq("\n", $this->d->html());
+	public function testStaticDocument() {
+		$this->assertInstanceOf('bolt\dom\document', dom::createDocument());
+	}
 
-//         $html = '<i>test</i>';
+	public function testStaticFragment() {
+		$this->assertInstanceOf('bolt\dom\fragment', dom::createFragment());	
+	}
 
-//         $this->eq($this->d, $this->d->html($html));
-
-//         $this->eq('<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-// <html><body>'.$html.'</body></html>
-// ', $this->d->html());
-
-//         $html = '<b>test</b>';
-
-//         $this->eq($this->d, $this->d->html($html));
-
-//         $this->eq('<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">
-// <html><body>'.$html.'</body></html>
-// ', $this->d->html());
-
-//     }
-
-
-
+	public function testStaticElement() {
+		$this->assertInstanceOf('bolt\dom\element', dom::createElement('div'));	
+	}
 
 }

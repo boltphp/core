@@ -11,6 +11,7 @@ use DOMImplementation,
     DOMXPath;
 
 class document extends DOMDocument implements \ArrayAccess {
+    use traits\queryable;
 
     public $guid = false;
 
@@ -21,7 +22,7 @@ class document extends DOMDocument implements \ArrayAccess {
      *
      * @param string $charset 'UTF-8'
      */
-    public function __construct($charset = 'UTF-8') {
+    public function __construct($charset = 'UTF-8', $html = null) {
         parent::__construct($charset);
 
         $this->validateOnParse = false;
@@ -33,6 +34,16 @@ class document extends DOMDocument implements \ArrayAccess {
 
         $this->guid = b::guid("domref");
 
+        if ($html) {
+            $this->html($html);
+        }
+
+    }
+
+    public function destroyChild(element $el) {
+        if (isset($this->_refrances[$el->guid])) {
+            unset($this->_refrances[$el->guid]);
+        }
     }
 
     /**
@@ -42,14 +53,40 @@ class document extends DOMDocument implements \ArrayAccess {
      *
      * @return mixed
      */
-    public function html($html = null) {
+    public function html($html = null) { 
         if ($html !== null) {
-            @$this->loadHTML($html, LIBXML_COMPACT + LIBXML_NOERROR + LIBXML_NOWARNING + LIBXML_NOXMLDECL);
-            return $this;
+            return $this->setHTML($html);
         }
         else {
-            return $this->saveHTML();
+            return $this->getHTML();
         }
+    }
+
+
+    /**
+     * create an element child for this document
+     * 
+     * @param  string $name 
+     * @param  string $value
+     * @param  array $attr 
+     * 
+     * @return bolt\dom\element
+     */
+    public function createElement($name, $value = null, $attr = []) {
+        return new element($name, $value, $attr, $this);
+    }
+
+
+    /**
+     * create a native dom node
+     * 
+     * @param  string $name 
+     * @param  string $value
+     * 
+     * @return DOMElement
+     */
+    public function createElementNative($name, $value) {
+        return parent::createElement($name, $value);
     }
 
 
@@ -63,34 +100,86 @@ class document extends DOMDocument implements \ArrayAccess {
             $element = $element->element;
         }
         if (is_a($element, 'DOMElement')) {
-            return parent::saveHTML($this->_cleanElement($element));
+            return parent::saveHTML(self::cleanElement($element, true));
+        }        
+
+        if ($this->documentElement) {
+            self::cleanElement($this->documentElement);
         }
 
-        $this->_cleanElement();
-        return str_replace('<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">', '<!DOCTYPE html>', parent::saveHTML());
+        return str_replace(
+            '<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN" "http://www.w3.org/TR/REC-html40/loose.dtd">', 
+            '<!DOCTYPE html>', 
+            parent::saveHTML()
+        );
     }
 
-    public function getHTML($element = null) {
-        if ($element) {
-            return $this->saveHTML($element);
-        }
-        else {
-            return $this->html();
-        }
+
+    /**
+     * get HTML for the document or given element
+     * 
+     * @param  DOMNode|bolt\dom\element $element
+     * 
+     * @return string
+     */
+    public function getHTML($element = null) {    
+        return $this->saveHTML($element);
     }
+
+
+    /**
+     * set HTML for the document
+     * 
+     * @param string $html
+     *
+     * @return self
+     */
+    public function setHTML($html) {
+        @$this->loadHTML($html, LIBXML_COMPACT + LIBXML_NOERROR + LIBXML_NOWARNING + LIBXML_NOXMLDECL);
+        return $this;
+    }
+
+
+    /**
+     * import an element into this document
+     * 
+     * @param  DOMNode|bolt\dom\node $node
+     * @param  boolean $deep
+     * 
+     * @return mixed
+     */
+    public function import($node, $deep = true) {
+        if (is_a($node, 'bolt\dom\element')) {
+            $this->_refrances[$node->guid] = $node;
+            $node->ownerDocument = $this;
+            $node->element = $this->importNode($node->element, $deep);
+            return $node;
+        }            
+        return $this->importNode($node, $deep);
+    }
+
 
     /**
      * clean the document of any domref attributes
      *
-     * @return [type] [description]
+     * @return mixed
      */
-    private function _cleanElement($el = null) {
-        $xpath = new DOMXPath($this);
+    public static function cleanElement($el = null, $useClone = false) {
+        $el = is_a($el, 'bolt\dom\element') ? $el->element : $el;
+
+        if ($useClone) {
+            $el = clone $el;
+        }
+
+        $xpath = new DOMXPath($el->ownerDocument);
 
         if ($el) {
             $el->removeAttribute('data-domref');
         }
 
+        foreach ($xpath->query('*[@*]', $el) as $node) {
+            $node->removeAttribute('data-domref');
+        }
         foreach ($xpath->query('//*[@*]', $el) as $node) {
             $node->removeAttribute('data-domref');
         }
@@ -106,74 +195,26 @@ class document extends DOMDocument implements \ArrayAccess {
      *
      * @return bolt\dom\collection
      */
-    public function find($selector) {
+    public function find($selector, element $element = null) {
         $xpath = CssSelector::toXPath(trim($selector));
         $prefixes = $this->_findNamespacePrefixes($xpath);
         $x = new DOMXPath($this);
 
+        $el = $element ? $element->element : null;
+
         $collection = new collection($this);
 
-        foreach ($x->query($xpath) as $node) {
+        foreach ($x->query($xpath, $el) as $node) {
+            if ($node->hasAttribute('data-domref') && ($ref = $node->getAttribute('data-domref')) && isset($this->_refrances[$ref])) {
+                $node = $this->_refrances[$ref];
+            }
+            else {
+                $node = new element($node, null, null, $this);
+            }
             $collection->push($node);
         }
 
         return $collection;
-    }
-
-
-    /**
-     * find a selector
-     * @param  string $selector
-     *
-     * @return boolean
-     */
-    public function offsetExists($selector) {
-        return count($this->find($selector)) > 0;
-    }
-
-
-    /**
-     * get a offset
-     *
-     * @see  self::find
-     * @param  string $selector
-     *
-     * @return bolt\dom\collection
-     */
-    public function offsetGet($selector) {
-        return $this->find($selector);
-    }
-
-
-    /**
-     * set the contents of an element
-     *
-     * @see  self::html
-     * @param  string $selector
-     * @param  mixed $value
-     *
-     * @return self
-     */
-    public function offsetSet($selector, $value) {
-        $el = $this->find($selector)->first();
-
-        if (!$el) {return false;}
-
-        $el->html($value);
-
-        return $this;
-    }
-
-
-    /**
-     * remove a node if it exists
-     *
-     * @param  strong $selector
-     *
-     * @return mixed
-     */
-    public function offsetUnset($selector) {
-        return $this->find($selector)->remove();
     }
 
 
