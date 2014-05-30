@@ -4,6 +4,8 @@ namespace bolt\dom;
 use \b;
 
 use DOMElement,
+    DOMCdataSection,
+    DOMText,
     DOMAttr;
 
 class element implements \ArrayAccess {
@@ -57,25 +59,25 @@ class element implements \ArrayAccess {
      * @var array
      */
     private $_globalAttr = [
-        'accesskey',
-        'class',
-        'contenteditable',
-        'contextmenu',
-        'dir',
-        'draggable',
-        'dropzone',
-        'hidden',
-        'id',
-        'itemid',
-        'itemprop',
-        'itemref',
-        'itemscope',
-        'itemtype',
-        'lang',
-        'spellcheck',
-        'style',
-        'tabindex',
-        'title'
+        'accesskey' => null,
+        'class' => null,
+        'contenteditable' => null,
+        'contextmenu' => null,
+        'dir' => null,
+        'draggable' => null,
+        'dropzone' => null,
+        'hidden' => null,
+        'id' => null,
+        'itemid' => null,
+        'itemprop' => null,
+        'itemref' => null,
+        'itemscope' => null,
+        'itemtype' => null,
+        'lang' => null,
+        'spellcheck' => null,
+        'style' => null,
+        'tabindex' => null,
+        'title' => null
     ];
 
 
@@ -189,12 +191,10 @@ class element implements \ArrayAccess {
      * @return mixed       
      */
     public function __call($name, $args) {
-        if (substr($name, 0, 3) == 'get' && ($attr = strtolower(substr($name, 3))) && array_key_exists($attr, $this->attr)) {
-            return $this->attr($attr);
-        }
-        else if (substr($name, 0, 3) == 'set' && ($attr = strtolower(substr($name, 3))) && array_key_exists($attr, $this->attr)) {
-            return $this->attr($attr, $args[0]);
-        }
+        if (($attr = strtolower($name)) && array_key_exists($attr, $this->attr)) {
+            array_unshift($args, $attr);
+            return call_user_func_array([$this, 'attr'], $args);
+        }        
         else if (method_exists($this->element, $name)) {
             return call_user_func_array([$this->element, $name], $args);
         }
@@ -295,27 +295,58 @@ class element implements \ArrayAccess {
      */
     public function html($html = null) {
         if ($html !== null) {
-            $this->clear();
+            return $this->setHTML($html);
+        }
+        else {
+            return $this->getHTML();
+        }
+    }
+
+
+    /**
+     * set element HTML
+     *
+     * @param string html
+     *
+     * @return self
+     */
+    public function setHTML($html) {
+        $this->clear();
+        $html = html_entity_decode($html, ENT_NOQUOTES, 'utf-8');
+        if ($this->tagName == 'script') {
+            $this->element->appendChild(new \DOMCdataSection($html));            
+        }        
+        else if (stripos($html, '<') !== false || stripos($html, '>') !== false) {
             $fragment = new fragment($html);
             foreach ($fragment->children() as $node) {                
                 $this->element->appendChild(
                     $this->ownerDocument->importNode($node->element, true)
                 );
             }
-            return $this;
         }
         else {
-            $html = "";
-            foreach ($this->element->childNodes as $node) {
-                switch ($node->nodeType) {
-                    case XML_TEXT_NODE:
-                        $html .= $node->nodeValue; break;
-                    default:
-                        $html .= $this->ownerDocument->saveHTML($node);
-                };                
-            }
-            return $html;
+            $this->element->appendChild(new DOMText($html));
         }
+        return $this;
+    }
+
+
+    /**
+     * get element HTML
+     *
+     * @return string
+     */
+    public function getHTML() {
+        $html = "";
+        foreach ($this->element->childNodes as $node) {
+            switch ($node->nodeType) {
+                case XML_TEXT_NODE:
+                    $html .= $node->nodeValue; break;
+                default:
+                    $html .= $this->ownerDocument->saveHTML($node);
+            };                
+        }
+        return $html;   
     }
 
 
@@ -341,18 +372,18 @@ class element implements \ArrayAccess {
     public function attr($name, $value = null) {
         if (is_array($name)) {
             foreach ($name as $n => $v) {
-                if (is_numeric($n)) {
-                    $this->appendChild(new DOMAttr($v));
-                }
-                else {
-                    $this->setAttribute($n, html_entity_decode($v, ENT_QUOTES, 'utf-8'));
-                }
+                $this->attr($n, $v);                                    
             }
             return $this;
         }
 
-        if ($value !== null) {
-            $this->setAttribute($name, $value);
+        if ($value !== null) {            
+            if (is_numeric($name) || $value === true) {
+                $this->element->appendChild(new DOMAttr($value === true ? $name : $value));
+            }
+            else {
+                $this->setAttribute($name, html_entity_decode($value, ENT_QUOTES, 'utf-8'));
+            }            
             return $this;
         }
         else {
@@ -394,4 +425,49 @@ class element implements \ArrayAccess {
     }
 
 
+    /**
+     * set a property for the style attribute
+     * 
+     * @param string|array $prop 
+     * @param string $value
+     *
+     * @return self
+     */
+    public function setStyle($prop, $value=null) {
+        if (is_array($prop)) {
+            foreach($prop as $p => $v) {
+                $this->setStyle($p, $v);
+            }
+            return $this;
+        }
+        $cur = explode(';', $this->attr('style'));
+
+        $props = [];
+
+        foreach($cur as $part) {
+            if (empty($part)) {continue;}
+            list($p, $v) = explode(':', $part);
+            $props[trim($p)] = trim($v);
+        }
+
+        switch($prop) {
+            case 'background-image':
+                if (substr($value, 0, 3) != 'url') {
+                    $value = "url({$value})";
+                }
+                break;
+
+        };
+
+        $props[trim($prop)] = trim($value);
+        $_ = [];
+
+        foreach ($props as $prop => $value) {
+            $_[] = implode(':', [$prop, $value]);
+        }
+
+        $this->attr('style', implode(';', $_));
+
+        return $this;
+    }
 }

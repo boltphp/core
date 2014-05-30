@@ -14,8 +14,12 @@ class dom_element_aTest extends Test {
 	}
 
 	public function testSetHref() {
-		$this->a->setHref('#poop');
-		$this->eq('#poop', $this->a->getHref());
+		$this->a->href('#poop');
+		$this->a->download(true);
+
+		$this->eq('#poop', $this->a->href());
+
+		$this->eq('<a href="#poop" download></a>', $this->a->outerHTML); 
 	}
 
 }
