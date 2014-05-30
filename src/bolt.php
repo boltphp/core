@@ -4,7 +4,7 @@
  *
  * A PHP Framework
  *
- * @copyright  2010 - 2013
+ * @copyright  2010 - 2014
  * @author     Travis Kuhl (travis@kuhl.co)
  * @link       http://bolthq.com
  * @license    http://opensource.org/licenses/Apache-2.0 Apache 2.0

@@ -66,6 +66,8 @@ $classLoader->addPrefixes(array(
     'Doctrine\\Common\\Annotations\\' => $vendorPrefix . '/doctrine/annotations/lib',
     'Doctrine\\Common\\' => $vendorPrefix . '/doctrine/common/lib',
     'Assetic' => $vendorPrefix . '/kriswallsmith/assetic/src',
+    'Psr\\Log\\' => $vendorPrefix . '/psr/log',
+    'Monolog\\' => $vendorPrefix . '/monolog/monolog/src/Monolog',
 ));
 $classLoader->register();
 

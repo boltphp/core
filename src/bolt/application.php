@@ -39,7 +39,6 @@ class application extends plugin {
      */
     private $_bootstrapDir = false;
 
-
     /**
      * construct a new application instance
      *
@@ -67,6 +66,11 @@ class application extends plugin {
             $this->loadCompiled($config['compiled']);
         }
 
+        // plugin our default logging system
+        // this can not be unplugged
+        $this->plug('log', 'bolt\log', [
+                'name' => 'bolt'
+            ]);
     }
 
 

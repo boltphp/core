@@ -3,6 +3,8 @@
 require_once __DIR__."/../vendor/autoload.php";
 require_once __DIR__."/../src/bolt.php";
 
+// require __DIR__."/../bolt.phar";
+
 date_default_timezone_set('UTC');
 
 define("VENDOR_DIR", realpath(__DIR__."/../vendor/"));
