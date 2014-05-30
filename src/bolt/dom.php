@@ -4,14 +4,14 @@ namespace bolt;
 use \b;
 
 
-class dom implements plugin\singleton { 
+class dom implements plugin\singleton {
 
     /**
      * create a document
      *
      * @param string charset
      * @param string html
-     * 
+     *
      * @return bolt\dom\document
      */
     public function document($charset = null, $html = null) {
@@ -23,8 +23,8 @@ class dom implements plugin\singleton {
      * create a fragment
      *
      * @param  string charset
-     * @param  string html 
-     * 
+     * @param  string html
+     *
      * @return bolt\dom\fragment
      */
     public function fragment($charset = null, $html = null) {
@@ -34,12 +34,12 @@ class dom implements plugin\singleton {
 
     /**
      * create an element
-     *     
+     *
      * @param  string|DOMNode $tag
-     * @param  string $value   
-     * @param  array $attr    
+     * @param  string $value
+     * @param  array $attr
      * @param  bolt\dom\document $document
-     * 
+     *
      * @return bolt\dom\element
      */
     public function element($tag, $value = null, $attr = null, dom\document $document = null) {
@@ -57,7 +57,7 @@ class dom implements plugin\singleton {
 
 
     /**
-     * @see self::fragment     
+     * @see self::fragment
      * @return bolt\dom\fragment
      */
     public static function createFragment($charset = null, $html = null) {
@@ -66,11 +66,11 @@ class dom implements plugin\singleton {
 
 
     /**
-     * @see self::element    
+     * @see self::element
      * @return bolt\dom\element
      */
     public static function createElement($tag, $value = null, $attr = [], dom\document $document = null) {
-        if (is_string($tag) && ($class = "bolt\\dom\\element\\$tag") && class_exists($class, true)) {        
+        if (is_string($tag) && ($class = "bolt\\dom\\element\\$tag") && class_exists($class, true)) {
             return new $class(null, $value, $attr, $document);
         }
         return new dom\element($tag, $value, $attr, $document);

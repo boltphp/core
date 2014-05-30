@@ -66,6 +66,7 @@ $classLoader->addPrefixes(array(
     'Assetic' => $vendorPrefix . '/kriswallsmith/assetic/src',
     'Psr\\Log\\' => $vendorPrefix . '/psr/log',
     'Monolog\\' => $vendorPrefix . '/monolog/monolog/src/Monolog',
+    'HTML5' => $vendorPrefix . '/masterminds/html5/src',
 ));
 $classLoader->register();
 

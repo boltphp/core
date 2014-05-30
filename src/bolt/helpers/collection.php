@@ -94,5 +94,8 @@ class collection implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonS
         return isset($this->items[$offset]) ? $this->items[$offset] : null;
     }
 
+    public function toArray() {
+        return $this->items;
+    }
 
 }

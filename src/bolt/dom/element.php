@@ -8,47 +8,49 @@ use DOMElement,
     DOMText,
     DOMAttr;
 
+use HTML5;
+
 class element implements \ArrayAccess {
     use traits\queryable;
 
     /**
      * document that ownes this element
-     * 
+     *
      * @var bolt\dom\document
      */
     public $ownerDocument;
 
     /**
      * refrance to DOMElement
-     * 
+     *
      * @var DOMElement
      */
     public $element;
 
     /**
      * unique id for this element
-     * 
+     *
      * @var string
      */
-    private $_guid;
+    private $_refid;
 
     /**
      * name of the root tag
-     * 
+     *
      * @var string
      */
     public $tagName = 'div';
 
     /**
      * default value of the root tag
-     * 
+     *
      * @var string
      */
     public $value;
 
     /**
      * default attributes
-     * 
+     *
      * @var array
      */
     public $attr = [];
@@ -83,35 +85,41 @@ class element implements \ArrayAccess {
 
     /**
      * Constructr
-     * 
-     * @param string|DOMElement $tag     
-     * @param mixed $value   
-     * @param array $attr    
+     *
+     * @param string|DOMElement $tag
+     * @param mixed $value
+     * @param array $attr
      * @param bolt\dom\document $document
-     * 
+     *
      */
-    final public function __construct($tag = null, $value = null, $attr = null, document $document = null) {
+    public function __construct($tag = null, $value = null, $attr = null, document $document = null) {
         $this->ownerDocument = $document ?: new document();
 
-        $this->attr = $attr ? array_merge($this->_globalAttr, $this->attr, $attr) : $this->attr;
+        // default values
+        $this->attr = array_merge($this->_globalAttr, (array)$this->attr, (array)$attr);
         $value = $value ?: $this->value;
 
         if (is_a($tag, 'DOMElement')) {
             $this->element = $tag;
             $this->tagName = $tag->tagName;
         }
+        else if (is_a($tag, 'DOMText')) {
+            $this->element = $tag;
+            $this->tagName = ':text';
+        }
         else {
             $this->tagName = $tag ?: $this->tagName;
             $this->element = $this->ownerDocument->createElementNative($this->tagName, "");
         }
 
-        $this->_guid = b::guid("noderef");
-        $this->attr('data-domref', $this->guid);
+        $this->_refid = b::guid("noderef");
+        $this->attr('data-domref', $this->_refid);
 
         $this->ownerDocument->import($this);
 
-        if (is_array($attr)) {
-            $this->attr($attr);
+
+        if (is_array($this->attr)) {
+            $this->attr($this->attr);
         }
         if ($value) {
             $this->html($value);
@@ -132,7 +140,7 @@ class element implements \ArrayAccess {
 
     /**
      * called after the element has been created
-     * 
+     *
      * @return void
      */
     public function init() {}
@@ -140,15 +148,15 @@ class element implements \ArrayAccess {
 
     /**
      * magic get method
-     * 
+     *
      * @param  string $name
-     * 
+     *
      * @return mixed
      */
     public function __get($name) {
         switch ($name) {
-            case 'guid':
-                return $this->_guid;
+            case 'refid':
+                return $this->_refid;
 
             case 'outerHTML':
                 return $this->ownerDocument->getHTML($this);
@@ -171,7 +179,7 @@ class element implements \ArrayAccess {
      * set a value to an attribute
      *
      * @see  self::attr
-     * @param string $name 
+     * @param string $name
      * @param mixed $value
      *
      * @return self
@@ -182,19 +190,19 @@ class element implements \ArrayAccess {
 
 
     /**
-     * set/get default attribute or passthrough to 
+     * set/get default attribute or passthrough to
      * self::$element if method exists
-     * 
-     * @param  string $name 
-     * @param  array $args 
-     * 
-     * @return mixed       
+     *
+     * @param  string $name
+     * @param  array $args
+     *
+     * @return mixed
      */
     public function __call($name, $args) {
         if (($attr = strtolower($name)) && array_key_exists($attr, $this->attr)) {
             array_unshift($args, $attr);
             return call_user_func_array([$this, 'attr'], $args);
-        }        
+        }
         else if (method_exists($this->element, $name)) {
             return call_user_func_array([$this->element, $name], $args);
         }
@@ -204,15 +212,15 @@ class element implements \ArrayAccess {
 
     /**
      * create a new element in this document
-     * 
-     * @param  string|DOMElement $tag  
+     *
+     * @param  string|DOMElement $tag
      * @param  mixed $value
-     * @param  array $attr 
-     * 
+     * @param  array $attr
+     *
      * @return bolt\dom\element
      */
     public function create($tag, $value = null, $attr = []) {
-        return new static($tag, $value, $attr, $this->ownerDocument);
+        return new element($tag, $value, $attr, $this->ownerDocument);
     }
 
 
@@ -221,29 +229,42 @@ class element implements \ArrayAccess {
      *
      * @see  self::appendChild
      * @param  mixed $child
-     * 
+     *
      * @return self
      */
     public function append($child) {
-        $r = $this->appendChild($child);
+        if (is_a($child, 'bolt\dom\collection')) {
+            $child = $child->toArray();
+        }
+        if (is_array($child)) {
+            foreach ($child as $item) {
+                $this->append($item);
+            }
+            return $this;
+        }
+        $this->appendChild($child);
         return $this;
     }
 
 
     /**
      * append a child node
-     * 
-     * @param  mixed $child 
-     * 
+     *
+     * @param  mixed $child
+     *
      * @return bolt\dom\element
      */
     public function appendChild($child) {
         if (is_a($child, 'DOMElement')) {
-            $child = new static($child, null, null, $this->ownerDocument);
-        }        
-        if (is_a($child, 'bolt\dom\element') && $child->ownerDocument->guid != $this->guid) {
+            $child = new element($child, null, null, $this->ownerDocument);
+        }
+        if (is_a($child, 'bolt\dom\element')) {
             $this->ownerDocument->import($child);
-        }        
+        }
+        if (is_a($child, 'bolt\dom\fragment')) {
+            $this->append($child->children());
+            return $this;
+        }
         $this->element->appendChild($child->element);
         return $child;
     }
@@ -251,20 +272,20 @@ class element implements \ArrayAccess {
 
     /**
      * remove this node
-     * 
+     *
      * @return self
      */
-    public function remove() {        
-        if ($this->parentNode) {            
+    public function remove() {
+        if ($this->parentNode) {
             $this->parentNode->removeChild($this->element);
-        }    
+        }
         return $this;
     }
 
 
     /**
      * return all children
-     * 
+     *
      * @return bolt\dom\collection
      */
     public function children() {
@@ -274,20 +295,22 @@ class element implements \ArrayAccess {
 
     /**
      * remove all child nodes
-     * 
+     *
      * @return self
      */
     public function clear() {
-        $this->children()->each('remove');
+        foreach ($this->childNodes as $node) {
+            $node->parentNode->removeChild($node);
+        }
         return $this;
     }
 
 
     /**
      * get or set the innerHTML of the element
-     * 
+     *
      * @param  string|null $html
-     * 
+     *
      * @return mixed
      */
     public function html($html = null) {
@@ -311,11 +334,12 @@ class element implements \ArrayAccess {
         $this->clear();
         $html = html_entity_decode($html, ENT_NOQUOTES, 'utf-8');
         if ($this->tagName == 'script') {
-            $this->element->appendChild(new \DOMCdataSection($html));            
-        }        
+            $this->element->appendChild(new \DOMCdataSection($html));
+        }
         else if (stripos($html, '<') !== false || stripos($html, '>') !== false) {
-            $fragment = new fragment($html);
-            foreach ($fragment->children() as $node) {                
+            $fragment = new fragment(null, $html);
+
+            foreach ($fragment->children() as $node) {
                 $this->element->appendChild(
                     $this->ownerDocument->importNode($node->element, true)
                 );
@@ -341,50 +365,51 @@ class element implements \ArrayAccess {
                     $html .= $node->nodeValue; break;
                 default:
                     $html .= $this->ownerDocument->saveHTML($node);
-            };                
+            };
         }
-        return $html;   
+        return $html;
     }
 
 
     /**
      * query for a child element
-     * 
+     *
      * @param  string $selector
      * @return bolt\dom\collection
      */
-    public function find($selector) {        
+    public function find($selector) {
         return $this->ownerDocument->find($selector, $this);
     }
 
 
     /**
      * get or set an attribute on the element
-     * 
+     *
      * @param  string|array $name
-     * @param  string|null $value 
-     * 
+     * @param  string|null $value
+     *
      * @return mixed
      */
     public function attr($name, $value = null) {
+        if (is_a($this->element, 'DOMText')) {return $this;}
+
         if (is_array($name)) {
             foreach ($name as $n => $v) {
-                $this->attr($n, $v);                                    
+                $this->attr($n, $v);
             }
             return $this;
         }
-
-        if ($value !== null) {            
+        if ($value !== null) {
             if (is_numeric($name) || $value === true) {
                 $this->element->appendChild(new DOMAttr($value === true ? $name : $value));
             }
             else {
-                $this->setAttribute($name, html_entity_decode($value, ENT_QUOTES, 'utf-8'));
-            }            
+                $this->element->setAttribute($name, html_entity_decode($value, ENT_QUOTES, 'utf-8'));
+            }
             return $this;
         }
         else {
-            return $this->getAttribute($name);
+            return $this->element->getAttribute($name);
         }
     }
 
@@ -392,24 +417,40 @@ class element implements \ArrayAccess {
     /**
      * insert a node before this node in
      * the self::$owernDocument
-     * 
+     *
      * @param  mixed $node
-     * 
+     *
      * @return self
      */
     public function insertBefore($node) {
-        if (is_a($node, 'bolt\dom\element') && $node->ownerDocument->guid != $this->ownerDocument->guid) {
+        if (is_a($node, 'bolt\dom\element')) {
             $this->ownerDocument->import($node);
             $node = $node->element;
         }
-        $this->parentNode->insertBefore($node, $this->element);
+        $r = $this->element->parentNode->insertBefore($node, $this->element);
         return $this;
     }
 
 
     /**
+     * replace this node with a given node
+     *
+     * @param mixed $element
+     *
+     * @return self
+     */
+    public function replace($element) {
+        $this->ownerDocument->import($element);
+        if (is_a($element, 'bolt\dom\element')) {
+            $element = $element->element;
+        }
+        $this->parentNode->replaceChild($element, $this->element);
+        return $this;
+    }
+
+    /**
      * add a class to the class attribute
-     * 
+     *
      * @param string|array $class
      *
      * @return self
@@ -424,13 +465,15 @@ class element implements \ArrayAccess {
 
     /**
      * set a property for the style attribute
-     * 
-     * @param string|array $prop 
+     *
+     * @param string|array $prop
      * @param string $value
      *
      * @return self
      */
     public function setStyle($prop, $value=null) {
+        if (is_a($this->element, 'DOMText')) {return $this;}
+
         if (is_array($prop)) {
             foreach($prop as $p => $v) {
                 $this->setStyle($p, $v);

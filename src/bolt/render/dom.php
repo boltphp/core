@@ -3,7 +3,6 @@
 namespace bolt\render;
 use \b;
 
-
 /**
  * render a dom string
  */
@@ -27,13 +26,13 @@ class dom extends base {
      * @return bolt\dom
      */
     public function render($str, array $vars = []) {
-        return stripos($str, '<html') !== false ? new \bolt\dom($str) : new \bolt\dom\fragment($str);
+        return stripos($str, '<html') !== false ? \bolt\dom::createDocument(null, $str) : \bolt\dom::createFragment(null, $str);
     }
 
 
     /**
      * render a compiled string
-     * 
+     *
      * @see  bolt\render\base::renderCompiled
      */
     public function renderCompiled($compiled, array $vars = []) {
