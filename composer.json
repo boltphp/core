@@ -11,9 +11,6 @@
     ],
     "require": {
         "php": ">=5.4.0",
-
-        "boltphp/handlebars.php": "v0.8.1",
-
         "symfony/class-loader": "2.4.*",
         "symfony/http-foundation": "2.4.*",
         "symfony/process": "2.4.*",
@@ -30,8 +27,7 @@
         "doctrine/cache": "dev-master",
         "doctrine/lexer": "1.0.*@dev",
 
-        "masterminds/html5": "1.*",
-
+        "masterminds/html5": "1.0.4",
         "monolog/monolog": "1.9.1",
         "patchwork/utf8": "1.1.*",
         "guzzle/guzzle": ">=3.7.0,<3.9.0",
