@@ -2,8 +2,6 @@
 /**
  * bolt.php
  *
- * A PHP Framework
- *
  * @copyright  2010 - 2014
  * @author     Travis Kuhl (travis@kuhl.co)
  * @link       http://bolthq.com

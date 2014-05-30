@@ -257,9 +257,6 @@ class element implements \ArrayAccess {
     public function remove() {        
         if ($this->parentNode) {            
             $this->parentNode->removeChild($this->element);
-        }
-        else {
-            $this->element->nodeValue = "";
         }    
         return $this;
     }
