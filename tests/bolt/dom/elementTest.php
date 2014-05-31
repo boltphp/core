@@ -14,11 +14,11 @@ class dom_elementTest extends Test {
         $this->eq('<strong class="t">poop</strong>', $this->el->html());
     }
 
-    public function testSetHtml() {
-    	$html = '<a href="#">poop</a>';
-    	$this->el->html($html);
-    	$this->eq($html, $this->el->html());
-    }
+    // public function testSetHtml() {
+    // 	$html = '<a href="#">poop</a>';
+    // 	$this->el->html($html);
+    // 	$this->eq($html, $this->el->html());
+    // }
 
     public function testFindElement() {
     	$a = new dom_elementTest_aref();

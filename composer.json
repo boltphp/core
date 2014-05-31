@@ -27,7 +27,7 @@
         "doctrine/cache": "dev-master",
         "doctrine/lexer": "1.0.*@dev",
 
-        "masterminds/html5": "dev-master",
+        "masterminds/html5": "1.0.4",
         "monolog/monolog": "1.9.1",
         "patchwork/utf8": "1.1.*",
         "guzzle/guzzle": ">=3.7.0,<3.9.0",
