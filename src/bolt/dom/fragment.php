@@ -9,6 +9,8 @@ class fragment extends document {
 
     public function __construct($charset = 'UTF-8', $html = null) {
         parent::__construct($charset);
+        @parent::loadHTML(" ");
+
         if ($html) {
             $this->setHTML($html);
         }
@@ -16,10 +18,10 @@ class fragment extends document {
 
     public function setHTML($html) {
         $dom = HTML5::loadHTMLFragment($html);
-        $wrap = parent::createElementNative('div');
-        $wrap->setAttribute('id', $this->refid);
-        $wrap->appendChild($this->importNode($dom, true));
-        $this->appendChild($wrap);
+         $wrap = parent::createElementNative('div');
+         $wrap->setAttribute('id', $this->refid);
+         $wrap->appendChild($this->importNode($dom, true));
+         parent::appendChild($wrap);
         return $this;
     }
 
@@ -34,6 +36,10 @@ class fragment extends document {
             };
         }
         return $html;
+    }
+
+    public function appendChild(\DOMNode $node) {
+        return $this->getElementById($this->refid)->appendChild($node);
     }
 
     public function saveHTML($el = null) {

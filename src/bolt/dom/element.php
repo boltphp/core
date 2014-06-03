@@ -225,6 +225,15 @@ class element implements \ArrayAccess {
 
 
     /**
+     * create and append
+     */
+    public function createAndAppend() {
+        $el = call_user_func_array([$this, 'create'], func_get_args());
+        $this->append($el);
+        return $el;
+    }
+
+    /**
      * append a child node
      *
      * @see  self::appendChild
@@ -400,6 +409,8 @@ class element implements \ArrayAccess {
             return $this;
         }
         if ($value !== null) {
+            if ($value === "") {return $this;}
+
             if (is_numeric($name) || $value === true) {
                 $this->element->appendChild(new DOMAttr($value === true ? $name : $value));
             }

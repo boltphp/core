@@ -138,6 +138,10 @@ class repository {
                 $value = Type::getType($_['type'])->convertToPHPValue(b::param($name, null, $item), $p);
             }
 
+            if (!$ref->hasProperty($name)) {
+                continue;
+            }
+
             $prop = $ref->getProperty($name);
 
             $prop->setAccessible(true);

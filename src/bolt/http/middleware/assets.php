@@ -15,6 +15,7 @@ class assets extends \bolt\http\middleware {
 
     private $_assets;
 
+
     private function _mapContentTypeFromExt($ext) {
         if (array_key_exists($ext, direct::$mime)) {
             return direct::$mime[$ext];
@@ -27,6 +28,7 @@ class assets extends \bolt\http\middleware {
     }
 
     public function before() {
+
 
         // don't handle this
         if (!isset($this->http['assets']->getConfig()['path'])) {
