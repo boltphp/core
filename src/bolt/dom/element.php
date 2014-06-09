@@ -176,20 +176,6 @@ class element implements \ArrayAccess {
 
 
     /**
-     * set a value to an attribute
-     *
-     * @see  self::attr
-     * @param string $name
-     * @param mixed $value
-     *
-     * @return self
-     */
-    public function __set($name, $value) {
-        return $this->attr($name, $value);
-    }
-
-
-    /**
      * set/get default attribute or passthrough to
      * self::$element if method exists
      *
@@ -415,7 +401,7 @@ class element implements \ArrayAccess {
                 $this->element->appendChild(new DOMAttr($value === true ? $name : $value));
             }
             else {
-                $this->element->setAttribute($name, html_entity_decode($value, ENT_QUOTES, 'utf-8'));
+                $this->element->setAttribute($name, html_entity_decode((string)$value, ENT_QUOTES, 'utf-8'));
             }
             return $this;
         }

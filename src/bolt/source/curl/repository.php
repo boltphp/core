@@ -11,11 +11,11 @@ use \Doctrine\ORM\Mapping\ClassMetadata,
  */
 class repository {
 
-    private $_curl;
-    private $_entity;
-    private $_driver;
-    private $_manager;
-    private $_map = false;
+    protected $_curl;
+    protected $_entity;
+    protected $_driver;
+    protected $_manager;
+    protected $_map = false;
 
     /**
      * Constructor
@@ -37,7 +37,7 @@ class repository {
      *
      * @return \Doctrine\ORM\Mapping\ClassMetadata
      */
-    private function _map() {
+    protected function _map() {
         if (!$this->_map) {
             $map = new ClassMetadata($this->_entity);
             $this->_driver->loadMetadataForClass($this->_entity, $map);
