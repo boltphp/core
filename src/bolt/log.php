@@ -8,13 +8,11 @@ use Monolog\Logger,
 	ReflectionClass
 ;
 
-class log implements plugin\factory {
+class log implements plugin\singleton {
 
-	public static function factory($parent, $config = []) {		
-		if (!isset($config['name'])) {
-			throw new \Exception("You must provide a name for the log.");
-		}
-		return new static($parent, $config['name'], $config);
+
+	public static function factory($parent, $config = []) {				
+		return new log($parent, $config);
 	}
 
 	private $_name;
@@ -23,35 +21,50 @@ class log implements plugin\factory {
 
 	private $_instance;
 
-	public function __construct(application $app, $name, $config = []) {
+	public function __construct(application $app, $config = []) { 
+		if (!isset($config['name'])) {
+			throw new \Exception("You must provide a name for the log.");
+		}
 		$this->_app = $app;
-		$this->_name = $name;
-		$this->_instance = new Logger($name);
+		$this->_name = $config['name'];
+		$this->_instance = new Logger($this->_name);
+	}
+
+	public function getInstance() {
+		return $this->_instance;
+	}
+
+	public function level($name) {
+		$name = strtoupper($name);
+		return constant("\Monolog\Logger::{$name}");	
 	}
 
 	public function __call($name, $args) {
 		$map = [
-			'debug' => 'pushDebug',
-			'info' => 'pushInfo',
-			'notice' => 'pushNotice',
-			'warning' => 'pushWarning',
-			'error' => 'pushError',
-			'critical' => 'pushCritical',
-			'alert' => 'pushAlert',
-			'emergency' => 'pushEmergency'
+			'debug' => 'addDebug',
+			'info' => 'addInfo',
+			'notice' => 'addNotice',
+			'warning' => 'addWarning',
+			'error' => 'addError',
+			'critical' => 'addCritical',
+			'alert' => 'addAlert',
+			'emergency' => 'addEmergency'
 		];
 
 		if (isset($map[$name])) {
 			$name = $map[$name];
 		}
 
-		if (method_exists($this->_instance, $name)) {
-			return call_user_func_array([$this->_instance, $name], $args);
+		if (method_exists($this->_instance, $name)) { 
+			try {
+				return call_user_func_array([$this->_instance, $name], $args);
+			}
+			catch (\Exception $e) { }
 		}
 		return null;
 	}
 
-	public function handler($class, $args = []) {
+	public function handler($class, $level = null, $args = []) {
 		if (is_string($class)) {
 			$map = [
 				'stream' => 'StreamHandler',
@@ -68,10 +81,12 @@ class log implements plugin\factory {
 			$ref = new ReflectionClass($class);
 			$class = $ref->newInstanceArgs($args);
 		}
-		if (!$class instanceof HandlerInterface) {
+
+		if (!in_array('Monolog\Handler\HandlerInterface', class_implements($class))) {
 			throw new \Exception("Handler class does not implement HandlerInterface");
 		}
-		$this->pushHandler($class);
+
+		$this->_instance->pushHandler($class, $level);
 		return $this;
 	}
 
@@ -96,7 +111,7 @@ class log implements plugin\factory {
 			$ref = new ReflectionClass($class);
 			$class = $ref->newInstanceArgs($args);
 		}
-		$this->pushProcessor($class);
+		$this->_instance->pushProcessor($class);
 		return $this;
 	} 
 

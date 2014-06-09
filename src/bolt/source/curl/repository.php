@@ -172,11 +172,14 @@ class repository {
         // get our return url
         list($url, $query, $headers) = $this->getRequestUri('find', func_get_args());
 
+        $this->_curl->log('info', "[Curl.Respository.Find] $url?".http_build_query($query), ['headers' => $headers]);
+
         // make our request
         $resp = $this->_curl->get($url, $headers, ['query' => $query])->send();
 
         // if we don't ahve a
         if ($resp->getStatusCode() !== 200) {
+            $this->_curl->log("WARNING", "[Curl.Respository.Find] {$resp->getStatusCode()}");
             return null;
         }
 
@@ -204,11 +207,14 @@ class repository {
         // get our return url
         list($url, $query, $headers) = $this->getRequestUri('findBy', func_get_args());
 
+        $this->_curl->log('info', "[Curl.Respository.FindBy] $url?".http_build_query($query), ['headers' => $headers]);
+
         // make our request
         $resp = $this->_curl->get($url, $headers, ['query' => $query])->send();
 
         // if we don't ahve a
         if ($resp->getStatusCode() !== 200) {
+            $this->_curl->log("WARNING", "[Curl.Respository.FindBy] {$resp->getStatusCode()}");
             return [];
         }
 
@@ -243,11 +249,14 @@ class repository {
         // get our return url
         list($url, $query, $headers) = $this->getRequestUri('findOneBy', func_get_args());
 
+        $this->_curl->log('info', "[Curl.Respository.FindOneBy] $url?".http_build_query($query), ['headers' => $headers]);
+
         // make our request
         $resp = $this->_curl->get($url, $headers, ['query' => $query])->send();
 
         // if we don't ahve a
         if ($resp->getStatusCode() !== 200) {
+            $this->_curl->log("WARNING", "[Curl.Respository.FindOneBy] {$resp->getStatusCode()}");
             return [];
         }
 

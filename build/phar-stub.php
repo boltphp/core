@@ -65,7 +65,7 @@ $classLoader->addPrefixes(array(
     'Doctrine\\Common\\' => $vendorPrefix . '/doctrine/common/lib',
     'Assetic' => $vendorPrefix . '/kriswallsmith/assetic/src',
     'Psr\\Log\\' => $vendorPrefix . '/psr/log',
-    'Monolog\\' => $vendorPrefix . '/monolog/monolog/src/Monolog',
+    'Monolog\\' => $vendorPrefix . '/monolog/monolog/src',
     'HTML5' => $vendorPrefix . '/masterminds/html5/src',
 ));
 $classLoader->register();

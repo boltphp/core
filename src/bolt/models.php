@@ -11,6 +11,7 @@ use \Doctrine\DBAL\Types\Type;
  * model manager
  */
 class models implements plugin\singleton, \ArrayAccess {
+    use helpers\loggable;
 
     /**
      * application

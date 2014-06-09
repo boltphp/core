@@ -10,6 +10,7 @@ use \Guzzle\Http\Client;
  * curl manager
  */
 class curl implements sourceInterface {
+    use \bolt\helpers\loggable;
 
     /**
      * application
@@ -70,6 +71,10 @@ class curl implements sourceInterface {
             $this->_client->setBaseUrl($config['baseUrl']);
         }
 
+    }
+
+    public function getApp() {
+        return $this->_app;
     }
 
 
