@@ -93,6 +93,10 @@ class render {
     }
 
 
+    public function getEngineInstance($class, $config = []) {
+        return new $class($this, $config);
+    }
+
     /**
      * render a string using the provided renderer
      * 

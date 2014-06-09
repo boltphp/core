@@ -24,14 +24,17 @@ class handlebars extends base {
         return true;
     }
 
+    public function getDelimiters() {
+        return b::param('delimiters', '<% %>', $this->config);
+    }
 
     /**
      * Constructor
      */
     protected function getInstance() {
-        if (!$this->_instance) {
+        if (!$this->_instance) {            
             $this->_instance = new HBR([
-                    'delimiters' => "<% %>",
+                    'delimiters' => $this->getDelimiters(),
                 ]);
             $this->_instance->addHelper('=', function($template, $context, $args, $source) {
                 $ctx = $context->get('context');
@@ -50,7 +53,7 @@ class handlebars extends base {
      */
     public function compile($str) {
         $i = $this->getInstance();
-        $tokens = $i->getTokenizer()->scan($str, '<% %>');
+        $tokens = $i->getTokenizer()->scan($str, $this->getDelimiters());
         $tree = $i->getParser()->parse($tokens);
 
         return [

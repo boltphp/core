@@ -15,6 +15,8 @@ abstract class base implements renderInterface {
      */
     protected $manager;
 
+    protected $config = [];
+
     /**
      * can this renderer compile a view
      * 
@@ -30,8 +32,9 @@ abstract class base implements renderInterface {
      * @param bolt\render $manager
      * 
      */
-    final public function __construct(\bolt\render $manager) {
+    final public function __construct(\bolt\render $manager, $config = []) {
         $this->manager = $manager;
+        $this->config = $config;
         $this->init();
     }
 
