@@ -11,7 +11,7 @@ use Monolog\Logger,
 class log implements plugin\singleton {
 
 
-	public static function factory($parent, $config = []) {				
+	public static function factory($parent, $config = []) {
 		return new log($parent, $config);
 	}
 
@@ -21,7 +21,7 @@ class log implements plugin\singleton {
 
 	private $_instance;
 
-	public function __construct(application $app, $config = []) { 
+	public function __construct(application $app, $config = []) {
 		if (!isset($config['name'])) {
 			throw new \Exception("You must provide a name for the log.");
 		}
@@ -36,7 +36,7 @@ class log implements plugin\singleton {
 
 	public function level($name) {
 		$name = strtoupper($name);
-		return constant("\Monolog\Logger::{$name}");	
+		return constant("\Monolog\Logger::{$name}");
 	}
 
 	public function __call($name, $args) {
@@ -55,7 +55,7 @@ class log implements plugin\singleton {
 			$name = $map[$name];
 		}
 
-		if (method_exists($this->_instance, $name)) { 
+		if (method_exists($this->_instance, $name)) {
 			try {
 				return call_user_func_array([$this->_instance, $name], $args);
 			}
@@ -104,7 +104,7 @@ class log implements plugin\singleton {
 			];
 			if (isset($map[$class])) {
 				$class = $map[$class];
-			}	
+			}
 			if (!class_exists($class, true)) {
 				$class = "Monolog\\Processor\\{$class}";
 			}
@@ -113,6 +113,6 @@ class log implements plugin\singleton {
 		}
 		$this->_instance->pushProcessor($class);
 		return $this;
-	} 
+	}
 
 }
