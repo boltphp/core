@@ -38,6 +38,11 @@ class collection implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonS
         return $this;
     }
 
+    public function slice($offset, $length = null, $preserve_keys = true) {
+        $this->items = array_slice($this->items, $offset, $length, $preserve_keys);
+        return $this;
+    }
+
     public function map(Closure $cb) {
         $this->items = array_map($cb, $this->items);
         return $this;
@@ -58,6 +63,11 @@ class collection implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonS
 
     public function unshift($item) {
         array_unshift($this->items, $item);
+        return $this;
+    }
+
+    public function shuffle() {
+        shuffle($this->items);
         return $this;
     }
 

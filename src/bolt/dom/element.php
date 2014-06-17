@@ -196,6 +196,7 @@ class element implements \ArrayAccess {
     }
 
 
+
     /**
      * create a new element in this document
      *
