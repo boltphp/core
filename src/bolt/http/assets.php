@@ -122,9 +122,13 @@ class assets implements \bolt\plugin\singleton {
     }
 
     public function getCompiledFile($path) {
+
         $compiled = isset($this->_http->app['compiled']) ? $this->_http->app['compiled']->get('assets') : [];
         if (isset($compiled['data']['map'][$path])) {
             return $this->_http->app['compiled']->getFile("assets/{$compiled['data']['map'][$path]['file']}");
+        }
+        else if (($file = $this->_http->app['compiled']->getFile("assets/{$path}")) !== null) {
+            return $file;
         }
         return null;
     }

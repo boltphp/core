@@ -107,6 +107,10 @@ class assets extends \bolt\http\middleware {
             else if (($a = $this->_assets->path($path)) != false && file_exists($a)) {
                 $content[] = file_get_contents($a);
             }
+            else if (($file = $this->_assets->getCompiledFile($path)) != null) {
+                $content[] = $file;
+            }
+
 
         }
 
