@@ -460,6 +460,16 @@ class element implements \ArrayAccess {
         return $this;
     }
 
+    public function removeClass($class) {
+        $cur = explode(" ", $this->attr('class'));
+        foreach ($cur as $i => $cl) {
+            if ($class == $cl) {
+                unset($cur[$i]);
+            }
+        }
+        $this->attr('class', implode(" ", $cur));
+        return $this;
+    }
 
     /**
      * set a property for the style attribute
