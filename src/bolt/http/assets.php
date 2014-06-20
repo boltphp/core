@@ -114,7 +114,8 @@ class assets implements \bolt\plugin\singleton {
     }
 
     public function getCompiledFileInfo($path) {
-        $compiled = isset($this->_http->app['compiled']) ? $this->_http->app['compiled']->get('assets') : [];
+        if (!isset($this->_http->app['compiled'])) {return null;}
+        $compiled = $this->_http->app['compiled']->get('assets') ?: [];
         if (isset($compiled['data']['map'][$path])) {
             return $compiled['data']['map'][$path];
         }
@@ -122,8 +123,8 @@ class assets implements \bolt\plugin\singleton {
     }
 
     public function getCompiledFile($path) {
-
-        $compiled = isset($this->_http->app['compiled']) ? $this->_http->app['compiled']->get('assets') : [];
+        if (!isset($this->_http->app['compiled'])) {return null;}
+        $compiled = $this->_http->app['compiled']->get('assets') ?: [];
         if (isset($compiled['data']['map'][$path])) {
             return $this->_http->app['compiled']->getFile("assets/{$compiled['data']['map'][$path]['file']}");
         }
