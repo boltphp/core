@@ -18,6 +18,8 @@
  *  limitations under the License.
  */
 
+define("boltPackage", 'phar');
+
 Phar::mapPhar('bolt.phar');
 
 // define our prefixes
