@@ -59,7 +59,7 @@ class log implements plugin\singleton {
 			try {
 				return call_user_func_array([$this->_instance, $name], $args);
 			}
-			catch (\Exception $e) { }
+			catch (\Exception $e) { error_log("LOG ERROR: {$e->getMessage()}"); }
 		}
 		return null;
 	}

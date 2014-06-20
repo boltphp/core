@@ -213,15 +213,18 @@ class router {
     public function loadFromControllers(router\collection $collection = null) {
         $collection = $collection ?: $this->_collection;
         $classes = false;
+        $controllers = [];
 
         // get all loaded classes
-        if (($classes = b::getClassImplements('\bolt\http\router\face')) != false) {
+        if (($classes = get_declared_classes()) != false) {
+
             foreach ($classes as $class) {
-                if (
-                    $class->name === 'bolt\http\controller' ||
-                    $class->name === 'bolt\http\router\route' ||
-                    (!$class->hasProperty('routes') && !$class->hasMethod('getRoutes'))
-                ) {continue;} // skip our controller class and make sure we have at least $routes || getRoutes()
+
+                if ( $class === 'bolt\http\controller' || $class === 'bolt\http\router\route' || $class === 'bolt\http\controller\route') {continue;} // skip our controller class and make sure we have at least $routes || getRoutes()
+                if ( !is_subclass_of($class, '\bolt\http\router\face')) {continue;}
+                $class = new \ReflectionClass($class);
+
+                if (!$class->hasProperty('routes') && !$class->hasMethod('getRoutes')) {continue;}
 
                 $_ = [
                     'ref' => $class,
@@ -237,6 +240,8 @@ class router {
                     $name = $class->name;
                     $_['routes'] = array_merge($_['routes'], $name::getRoutes());
                 }
+
+                $controllers[] = $class;
 
                 $routes[] = $_;
 
@@ -287,7 +292,7 @@ class router {
         }
 
 
-        return $classes;
+        return $controllers;
 
     }
 
