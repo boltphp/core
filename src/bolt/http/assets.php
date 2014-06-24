@@ -202,9 +202,16 @@ class assets implements \bolt\plugin\singleton {
         return $this->_root;
     }
 
+    public function getManager() {
+        return $this->_manager;
+    }
+
     public function __get($name) {
         if ($name == 'filters') {
             return $this->_filter;
+        }
+        else if ($name == 'manager') {
+            return $this->_manager;
         }
 
         return null;
@@ -267,32 +274,15 @@ class assets implements \bolt\plugin\singleton {
             }
         }
 
-        foreach ($names as $name) {
-            $asset = $this->_manager->get($name);
-
-            $a = $factory->createAsset(
-                    "@{$name}"
-                );
+        foreach ($names as $name) {           
+            $asset = $this->_manager->get($name); 
+            $a = $this->compileCollection($name);
 
             $ext = $asset->getVars()['ext'];
             $d = $a->dump();
             $id = md5($a->dump());
             $file = "{$name}-{$id}.{$ext}";
             $filters = isset($this->_filters[$ext]) ? $this->_filters[$ext] : [];
-
-            if (isset($this->_filters['compile'][$ext])) {
-                $filters = array_merge($filters, $this->_filters['compile'][$ext]);
-            }
-
-            // filters
-            if (count($filters) > 0) {
-                try {
-                    $d = (new StringAsset($d, $filters, $this->getRoot()))->dump();
-                }
-                catch (\Exception $e) {
-                    throw new \Exception("Unable to process filters {$e->getMessage()}");
-                }
-            }
 
             $map["@{$name}.{$ext}"] = [
                 'id' => $id,
@@ -331,6 +321,38 @@ class assets implements \bolt\plugin\singleton {
 
         $e->data['client']->saveCompileLoader('assets', ['map' => $map, 'files' => $files]);
 
+
+    }
+
+    public function compileCollection($name) {        
+        $asset = $this->_manager->get($name);
+        
+        $factory = $this->factory();
+
+        $a = $factory->createAsset(
+                "@{$name}"
+            );
+
+        $ext = $asset->getVars()['ext'];        
+
+        $filters = isset($this->_filters[$ext]) ? $this->_filters[$ext] : [];
+
+        if (isset($this->_filters['compile'][$ext])) {
+            $filters = array_merge($filters, $this->_filters['compile'][$ext]);
+        }
+
+        // filters
+        if (count($filters) > 0) {
+            try {
+                $a = new StringAsset($a->dump(), $filters, $this->getRoot());
+            }
+            catch (\Exception $e) {
+                throw new \Exception("Unable to process filters {$e->getMessage()}");
+            }
+        }
+
+
+        return $a;
 
     }
 
