@@ -51,7 +51,7 @@ class models implements plugin\singleton, \ArrayAccess {
 
     /**
      * source holder
-     * 
+     *
      * @var \bolt\source\face
      */
     private $_source;
@@ -134,7 +134,7 @@ class models implements plugin\singleton, \ArrayAccess {
 
     /**
      * return the source driver
-     * 
+     *
      * @return bolt\source\face
      */
     public function getSource() {
@@ -189,7 +189,7 @@ class models implements plugin\singleton, \ArrayAccess {
 
     /**
      * load all models in the config directories
-     * 
+     *
      * @return self
      */
     public function loadFromDirectories() {
@@ -324,9 +324,9 @@ class models implements plugin\singleton, \ArrayAccess {
 
     /**
      * save an entity using the entity manager
-     * 
+     *
      * @param  bolt\models\entity $entity
-     * 
+     *
      * @return self
      */
     public function save(models\entity $entity) {
@@ -352,9 +352,9 @@ class models implements plugin\singleton, \ArrayAccess {
 
     /**
      * delete an entity using the entity manager
-     * 
+     *
      * @param  \bolt\models\entity $entity
-     * 
+     *
      * @return self
      */
     public function delete(models\entity $entity) {
@@ -392,11 +392,11 @@ class models implements plugin\singleton, \ArrayAccess {
 
     /**
      * created an entity object
-     * 
+     *
      * @param  string  $entity
      * @param  array  $data
      * @param  boolean $partial
-     * 
+     *
      * @return \bolt\models\entity
      */
     public function create($entity, $data = [], $partial = false) {

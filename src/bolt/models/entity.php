@@ -149,7 +149,7 @@ abstract class entity implements \JsonSerializable {
      */
     public function getValue($var, $default = null) {
         try {
-            return $this->_getAccessor()->getValue($this, $var, $default);
+            return $this->_getAccessor()->getValue($this, $var) ?: $default;
         }
         catch (\Symfony\Component\PropertyAccess\Exception\UnexpectedTypeException $e) {
             return $default;

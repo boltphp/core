@@ -14,42 +14,42 @@ class curl implements sourceInterface {
 
     /**
      * application
-     * 
+     *
      * @var bolt\application
      */
     private $_app;
 
     /**
      * base configuration
-     * 
+     *
      * @var array
      */
     private $_config;
 
     /**
      * guzzle http client
-     * 
+     *
      * @var Guzzle\Http\Client
      */
     private $_client;
 
     /**
      * model manager
-     * 
+     *
      * @var bolt\models
      */
     private $_modelManager;
 
     /**
      * models storage driver
-     * 
+     *
      * @var bolt\models\driver
      */
     private $_modelDriver;
 
     /**
      * entity repositories
-     * 
+     *
      * @var array
      */
     private $_repositories = [];
@@ -57,7 +57,7 @@ class curl implements sourceInterface {
 
     /**
      * Constructor
-     * 
+     *
      * @param bolt\application $app
      * @param array $config
      */
@@ -80,7 +80,7 @@ class curl implements sourceInterface {
 
     /**
      * return guzzle client
-     * 
+     *
      * @return Guzzle\Http\Client
      */
     public function getClient() {
@@ -90,10 +90,10 @@ class curl implements sourceInterface {
 
     /**
      * return the entity manager
-     * 
+     *
      * @param  bolt\models $manager
      * @param  bolt\models\driver $driver
-     * 
+     *
      * @return self
      */
     public function getModelEntityManager(\bolt\models $manager, \bolt\models\driver $driver) {
@@ -105,9 +105,9 @@ class curl implements sourceInterface {
 
     /**
      * get a repository for a given entity class
-     * 
+     *
      * @param  string $entity
-     * 
+     *
      * @return bolt\curl\repository
      */
     public function getRepository($entity) {
@@ -117,14 +117,22 @@ class curl implements sourceInterface {
         return $this->_repositories[$entity] = new curl\repository($this, $entity, $this->_modelManager, $this->_modelDriver);
     }
 
+    /**
+     * persist
+     */
+    public function persist(\bolt\models\entity $entity) {
+        $class = get_class($entity);
+        return $this->getRepository($class)->persist($entity);
+    }
+
 
     /**
      * magic call to send any undefined
      * methods to $_client
-     * 
+     *
      * @param  string $name
      * @param  array $args
-     * 
+     *
      * @return mixed
      */
     public function __call($name, $args) {

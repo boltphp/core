@@ -65,15 +65,23 @@ class repository {
             case 'find':
                 return [$map->getTableName()."/{$args[0]}.json", [], []];
 
+            case 'findOneBy':
             case 'findBy':
                 return [$map->getTableName().".json", [
                         'query' => $args[0],
                         'order' => $args[1],
-                        'limit' => $args[2],
-                        'offset' => $args[3]
+                        'limit' => isset($args[2]) ? $args[2] : null,
+                        'offset' => isset($args[3]) ? $args[3] : null
                     ],
                     []
                 ];
+
+            case 'create':
+                return [$map->getTableName().".json", $args['data'], []];
+
+            case 'update':
+                return [$map->getTableName()."/{$args['id']}.json", $args['data'], []];
+
         };
     }
 
@@ -249,7 +257,7 @@ class repository {
         // get our return url
         list($url, $query, $headers) = $this->getRequestUri('findOneBy', func_get_args());
 
-        $this->_curl->log('info', "[Curl.Respository.FindOneBy] $url?".http_build_query($query), ['headers' => $headers]);
+        $this->_curl->log('info', "[Curl.Respository.FindOneBy] $url?".http_build_query($query ?: []), ['headers' => $headers]);
 
         // make our request
         $resp = $this->_curl->get($url, $headers, ['query' => $query])->send();
@@ -263,9 +271,64 @@ class repository {
         // see if the enity wants to transform
         $data = $this->getTransform('findOneBy', $resp->json());
 
+        if (!$data) {
+            return [];
+        }
 
         return $this->generateEntity($data);
 
+    }
+
+
+    /**
+     * persist
+     *
+     * @param bolt\models\entity $entity
+     *
+     * @return bolt\models\entity
+     */
+    public function persist($entity) {
+        $map = $this->_map();
+
+        $id = $entity->getValue($map->getIdentifierFieldNames()[0], null);
+
+        $type = $id === null ? 'create' : 'update';
+
+        $data = $entity->normalize();
+
+        // get our return url
+        list($url, $query, $headers) = $this->getRequestUri($type, ['id' => $id, 'data' => $data]);
+
+        // make our request
+        if ($type == 'create') {
+            $resp = $this->_curl->post($url, $headers, $query)->send();
+        }
+        else {
+            $resp = $this->_curl->put($url, $headers, $query)->send();
+        }
+
+        // if we don't ahve a
+        if ($resp->getStatusCode() !== 200) {
+            $this->_curl->log("WARNING", "[Curl.Respository.Persist] {$resp->getStatusCode()}");
+            return [];
+        }
+
+        // see if the enity wants to transform
+        try {
+            $data = $this->getTransform($type, $resp->json());
+            $entity->set($data);
+        }
+        catch (\Exception $e) {
+            $this->_curl->log("WARNING", "[Curl.Respository.Persist] Unable to format json response. {$resp->getStatusCode()}");
+            return [];
+        }
+
+        return $entity;
+    }
+
+
+    public function flush() {
+        // do nothing
     }
 
 }

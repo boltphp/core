@@ -164,6 +164,8 @@ class element implements \ArrayAccess {
             case 'innerHTML':
             case 'html':
                 return $this->html();
+            case 'firstChild':
+                return new static($this->element->firstChild, null, null, $this->ownerDocument);
 
         };
 
