@@ -24,6 +24,11 @@ abstract class format implements format\face {
      */
     private $_content;
 
+    /**     
+     * @var bolt\http\controller
+     */
+    private $_controller;
+
     /**
      * @var string
      */
@@ -36,10 +41,11 @@ abstract class format implements format\face {
      * @param bolt\http\response $parent
      *
      */
-    public function __construct(\bolt\http\response $parent) {
+    public function __construct(\bolt\http\response $parent, \bolt\http\controller $controller = null) {
         $this->_parent = $parent;
         $this->headers = new ResponseHeaderBag();
         $this->headers->set('Content-Type', $this->contentType);
+        $this->_controller = $controller;
 
     }
 
@@ -48,6 +54,9 @@ abstract class format implements format\face {
     }
 
     public function __get($name) {
+        if ($name == 'controller') { 
+            return $this->_controller;
+        }
         return $this->_parent->{$name};
     }
 

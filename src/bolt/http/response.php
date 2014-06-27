@@ -66,13 +66,15 @@ class response extends SymfonyResponse {
      *
      * @param string|array $format format name or array of formats
      * @param mixed $content
+     * @param bolt\http\controller $controller optional controller to tie to format
      *
      * @return bolt\http\response\format
      */
-    public function format($format, $content=null) {
+    public function format($format, $content=null, \bolt\http\controller $controller = null) {
+
         if (is_array($format)) {
-            array_walk($format, function($content, $format){
-                $this->format($format, $content);
+            array_walk($format, function($content, $format) use ($controller){
+                $this->format($format, $content, $controller);
             });
             return $this;
         }
@@ -91,7 +93,7 @@ class response extends SymfonyResponse {
                 throw new \Exception("Unknown format class $class");
             }
 
-            $this->_formats[$format] = new $class($this);
+            $this->_formats[$format] = new $class($this, $controller);
         }
 
 
@@ -107,6 +109,9 @@ class response extends SymfonyResponse {
         return $this->_formats[$format];
     }
 
+    public function getFormat($format) {
+        return isset($this->_formats[$format]) ? $this->_formats[$format] : null;
+    }
 
     /**
      * does this response have a foramt
@@ -116,7 +121,7 @@ class response extends SymfonyResponse {
      * @return boolean
      */
     public function hasFormat($format) {
-        return array_key_exists($format, $this->_formats);
+        return isset($this->_formats[$format]);
     }
 
 
