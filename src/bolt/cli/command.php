@@ -3,11 +3,16 @@
 namespace bolt\cli;
 use \b;
 
-use \Symfony\Component\Console\Command\Command as SymfonyCommand,
-    \Symfony\Component\Console\Input\InputArgument,
-    \Symfony\Component\Console\Input\InputOption,
-    \Symfony\Component\Console\Input\InputInterface,
-    \Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Command\Command as SymfonyCommand,
+    Symfony\Component\Console\Input\InputArgument,
+    Symfony\Component\Console\Input\InputOption,
+    Symfony\Component\Console\Input\InputInterface,
+    Symfony\Component\Console\Output\OutputInterface,
+    Symfony\Component\Console\Question\ConfirmationQuestion,
+    Symfony\Component\Console\Question\Question,
+    Symfony\Component\Console\Question\ChoiceQuestion,
+    Symfony\Component\Console\Helper\ProgressBar;
+
 
 class command extends SymfonyCommand {
 
@@ -91,14 +96,46 @@ class command extends SymfonyCommand {
 
     public function get($name) {
         switch($name) {
+            case 'progressbar':
+                return $this->ProgressBar();
+
             case 'progress':
             case 'dialog':
             case 'formatter':
             case 'table':
+            case 'question':
                 return $this->_cli->getConsole()->getHelperSet()->get($name);
 
         };
         return null;
+    }
+
+    public function progressbar($units) {
+        return new ProgressBar($this->output, $units);
+    }
+
+    public function ask($q) {
+        return $this->get('question')->ask($this->input, $this->output, $q);
+    }
+
+    public function askQuestion($text) {
+        return $this->ask($this->question($text));
+    }
+
+    public function askConfirmation($text, $default = true) {
+        return $this->ask($this->confirmation($text, $default));
+    }
+
+    public function question($text) {
+        return new Question(trim($text)." ");
+    }
+
+    public function confirmation($text, $default = true) {
+        return new ConfirmationQuestion(trim($text)." ", $default);
+    }
+
+    public function choice($text, $choices, $default) {
+        return new ChoiceQuestion(trim($text)." ", $choices, $default);
     }
 
     public function setName($name) {

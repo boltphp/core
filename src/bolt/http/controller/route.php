@@ -169,14 +169,14 @@ class route extends http\controller implements http\router\face {
             // run before
             $this->before();
 
-            // check if the current response 
+            // check if the current response
             // is already ready to send, if yes
             // skip build and after
             if ($this->response->isReadyToSend() === false) {
 
                 // build
                 $resp = $this->build($params);
-        
+
                 // after
                 $this->after();
 
