@@ -48,6 +48,9 @@ abstract class format implements format\face {
     }
 
     public function __get($name) {
+        if ($name == 'parent') {
+            return $this->_parent;
+        }
         return $this->_parent->{$name};
     }
 
@@ -108,7 +111,7 @@ abstract class format implements format\face {
         // if content is a closure
         while (is_callable($this->_content)) {
             if (is_a($this->_content, '\Closure')) {
-                $this->_content = call_user_func(\Closure::bind($this->_content, $this));
+                $this->_content = call_user_func(\Closure::bind($this->_content, $this->_parent), $this);
             }
             else {
                 $this->_content = call_user_func($this->_content);

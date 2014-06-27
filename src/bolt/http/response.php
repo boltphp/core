@@ -178,6 +178,20 @@ class response extends SymfonyResponse {
 
 
     /**
+     * set a header
+     *
+     * @param string $name header name
+     * @param string|array $value value of header
+     * @param bool $replace
+     *
+     * @return self
+     */
+    public function setHeader($name, $value, $replace = true) {
+        $this->headers->set($name, $value, $replace);
+        return $this;
+    }
+
+    /**
      * set response as ready to send
      *
      * @return self
@@ -225,7 +239,7 @@ class response extends SymfonyResponse {
         // if our content is callable
         // we want to do that now
         while(is_callable($content)) {
-            $content = call_user_func($content);
+            $content = call_user_func($content, $this);
         }
 
         // if we have a layout and it's callable
