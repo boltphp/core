@@ -1,6 +1,6 @@
 <?php
 
-namespace bolt\http\middleware;
+namespace bolt\http\assets;
 use \b;
 
 use Assetic\Asset\AssetCollection;
@@ -11,7 +11,7 @@ use Assetic\Asset\AssetCache;
 use Assetic\Cache\FilesystemCache;
 
 
-class assets extends \bolt\http\middleware {
+class middleware extends \bolt\http\middleware {
 
     private $_assets;
 

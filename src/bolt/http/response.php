@@ -109,9 +109,18 @@ class response extends SymfonyResponse {
         return $this->_formats[$format];
     }
 
+
+    /**
+     * return all registered formats
+     * 
+     * @param  string $format
+     * 
+     * @return null|bolt\http\response\format
+     */
     public function getFormat($format) {
         return isset($this->_formats[$format]) ? $this->_formats[$format] : null;
     }
+
 
     /**
      * does this response have a foramt
@@ -128,14 +137,28 @@ class response extends SymfonyResponse {
         return $this->_formats[$format];
     }
 
+    /**
+     * set a layout handler for this response
+     * 
+     * @param mixed $layout string or callback
+     *
+     * @return self
+     */
     public function setLayout($layout) {
         $this->_layout = $layout;
         return $this;
     }
 
+
+    /**
+     * get the current layout
+     * 
+     * @return mixed
+     */
     public function getLayout() {
         return $this->_layout;
     }
+
 
     /**
      * set a response exception
@@ -210,6 +233,13 @@ class response extends SymfonyResponse {
     }
 
 
+    /**
+     * prepare the response to be output
+     * 
+     * @param  SymfonyRequest $request
+     * 
+     * @return SymfonyResponse
+     */
     public function prepare(SymfonyRequest $request) {
         $content = $this->getContent();
 
