@@ -7,7 +7,8 @@ class responseTest extends Test {
     }
 
     public function testGuid()  {
-        $this->eq(true, !empty($this->resp->guid()));
+        $guid  = $this->resp->guid();
+        $this->eq(true, !empty($guid));
         $r = new \bolt\http\response();
         $this->assertFalse($this->resp->guid() == $r->guid());
     }
