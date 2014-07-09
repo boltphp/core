@@ -89,7 +89,7 @@ class route extends http\controller implements http\router\face {
      * @return bolt\http\response\format
      */
     public function format($format, $content=false) {
-        return $this->_response->format($format, $content);
+        return $this->_response->format($format, $content, $this);
     }
 
 
