@@ -48,6 +48,20 @@ class collection implements \ArrayAccess, \Countable, \IteratorAggregate, \JsonS
         return $this;
     }
 
+    public function diff() {
+        $args = func_get_args();
+        array_unshift($args, $this->items);
+        $this->items = call_user_func_array('array_diff', $args);
+        return $this;
+    }
+
+    public function intersect() {
+        $args = func_get_args();
+        array_unshift($args, $this->items);
+        $this->items = call_user_func_array('array_intersect', $args);
+        return $this;
+    }
+
     public function push($item) {
         $this->items[] = $item;
         return $this;

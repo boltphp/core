@@ -119,6 +119,9 @@ class response extends SymfonyResponse {
         return array_key_exists($format, $this->_formats);
     }
 
+    public function getFormat($format) {
+        return $this->_formats[$format];
+    }
 
     public function setLayout($layout) {
         $this->_layout = $layout;

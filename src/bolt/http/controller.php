@@ -129,6 +129,17 @@ class controller {
         return $this;
     }
 
+    /**
+     * does a param exist
+     *
+     * @param $name $name
+     *
+     * @return bool
+     */
+    public function __isset($name) {
+        return array_key_exists($name, $this->_parameters);
+    }
+
 
     /**
      * get paramaters
