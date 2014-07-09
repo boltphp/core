@@ -133,10 +133,6 @@ class response extends SymfonyResponse {
         return isset($this->_formats[$format]);
     }
 
-    public function getFormat($format) {
-        return $this->_formats[$format];
-    }
-
     /**
      * set a layout handler for this response
      * 
