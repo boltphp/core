@@ -10,6 +10,7 @@ use Assetic\Asset\StringAsset;
 use Assetic\Asset\AssetCache;
 use Assetic\Cache\FilesystemCache;
 
+use bolt\http\middleware\direct;
 
 class middleware extends \bolt\http\middleware {
 
