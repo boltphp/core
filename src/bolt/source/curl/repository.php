@@ -309,7 +309,7 @@ class repository {
 
         // if we don't ahve a
         if ($resp->getStatusCode() !== 200) {
-            $this->_curl->log("WARNING", "[Curl.Respository.Persist] {$resp->getStatusCode()}");
+            $this->_curl->log("WARNING", "[Curl.Respository.Persist] {$type} {$resp->getStatusCode()}");
             return [];
         }
 

@@ -3,7 +3,9 @@
 namespace bolt\models;
 use \b;
 
-use Symfony\Component\PropertyAccess\PropertyAccess;
+use Symfony\Component\PropertyAccess\PropertyAccess,
+    \Doctrine\ORM\Mapping\ClassMetadata,
+    \Doctrine\DBAL\Types\Type;
 
 /**
  *
@@ -35,6 +37,9 @@ abstract class entity implements \JsonSerializable {
      */
     private $_access;
 
+    private $_map;
+
+    public static function struct($metadata) {}
 
     /**
      * get the base app
@@ -279,6 +284,16 @@ abstract class entity implements \JsonSerializable {
     public function normalize() {
         $ref = b::getReflectionClass(get_class($this));
 
+        if (!$this->_map) {
+            $class = get_class($this);
+            $map = new ClassMetadata($class);
+            $this::struct($map);
+            $this->_map = $map;
+        }
+
+        // we use a dummy platform
+        $p = new \Doctrine\DBAL\Platforms\MySqlPlatform();
+
         // run our before normalize even
         // must return an array
         $array = $this->beforeNormalize();
@@ -287,10 +302,17 @@ abstract class entity implements \JsonSerializable {
         // loop through each property
         foreach ($ref->getProperties() as $prop) {
             if ($prop->isProtected()) {
+                $_ = $this->_map->hasField($prop->name) ? $this->_map->getFieldMapping($prop->name) : false;
+
+
+
                 $val = $this->{$prop->name};
 
                 if (is_object($val) && method_exists($val, 'asArray')) {
                     $val = $val->asArray();
+                }
+                else if ($_ && Type::hasType($_['type'])) {
+                    $val = Type::getType($_['type'])->convertToDatabaseValue($val, $p);
                 }
 
                 $array[$prop->name] = $val;

@@ -3,12 +3,14 @@
 namespace bolt\http\assets;
 use \b;
 
-use Assetic\Asset\AssetCollection;
-use Assetic\Asset\FileAsset;
-use Assetic\Asset\GlobAsset;
-use Assetic\Asset\StringAsset;
-use Assetic\Asset\AssetCache;
-use Assetic\Cache\FilesystemCache;
+use Assetic\Asset\AssetCollection,
+    Assetic\Asset\FileAsset,
+    Assetic\Asset\GlobAsset,
+    Assetic\Asset\StringAsset,
+    Assetic\Asset\AssetCache,
+    Assetic\Cache\FilesystemCache,
+    bolt\http\middleware\direct
+;
 
 
 class middleware extends \bolt\http\middleware {
