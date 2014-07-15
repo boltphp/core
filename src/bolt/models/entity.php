@@ -304,8 +304,6 @@ abstract class entity implements \JsonSerializable {
             if ($prop->isProtected()) {
                 $_ = $this->_map->hasField($prop->name) ? $this->_map->getFieldMapping($prop->name) : false;
 
-
-
                 $val = $this->{$prop->name};
 
                 if (is_object($val) && method_exists($val, 'asArray')) {
