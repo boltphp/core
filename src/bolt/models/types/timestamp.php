@@ -29,6 +29,9 @@ class timestamp extends Type {
     }
 
     public function convertToDatabaseValue($value, AbstractPlatform $platform) {
+        if (!is_a($value, 'DateTime')) {
+            return "";
+        }
         return $value !== null ? $value->getTimestamp() : null;
     }
 

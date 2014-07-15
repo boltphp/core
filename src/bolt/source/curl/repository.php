@@ -319,7 +319,7 @@ class repository {
             $entity->set($data);
         }
         catch (\Exception $e) {
-            $this->_curl->log("WARNING", "[Curl.Respository.Persist] Unable to format json response. {$resp->getStatusCode()}");
+            $this->_curl->log("WARNING", "[Curl.Respository.Persist] Unable to format json response. {$resp->getStatusCode()} {$resp->getBody()}");
             return [];
         }
 
