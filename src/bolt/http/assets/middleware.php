@@ -12,8 +12,6 @@ use Assetic\Asset\AssetCollection,
     bolt\http\middleware\direct
 ;
 
-use bolt\http\middleware\direct;
-
 class middleware extends \bolt\http\middleware {
 
     private $_assets;
