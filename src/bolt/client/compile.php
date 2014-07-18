@@ -28,6 +28,10 @@ class compile extends command {
 
     public function init() {
 
+        // disable opcaches
+        ini_set('opcache.enable', 0);
+        ini_set('apc.enabled', 0);
+
         // if we have a compiled plugin
         // disable it
         $this->app->pluginExists('compiled', function(){
@@ -103,6 +107,9 @@ class compile extends command {
             'loaders' => $this->_loaders,
             'dir' => "../compiled/"
         ];
+
+
+        $this->app->fire("compile:complete", ['config' => $config]);
 
         $sub = '<'.'?php
             class '.$uid.' implements \bolt\plugin\singleton {

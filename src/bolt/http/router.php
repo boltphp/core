@@ -56,6 +56,7 @@ class router {
         }
 
 
+
         // compile
         $http->app->on('compile', [$this, 'onCompile']);
 
