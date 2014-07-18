@@ -4,8 +4,10 @@ namespace bolt\http;
 use \b;
 
 /// require symfony response
-use Symfony\Component\HttpFoundation\Response as SymfonyResponse;
-use Symfony\Component\HttpFoundation\Request as SymfonyRequest;
+use Symfony\Component\HttpFoundation\Response as SymfonyResponse,
+    Symfony\Component\HttpFoundation\Request as SymfonyRequest,
+    Symfony\Component\HttpFoundation\Cookie
+;
 
 /**
  * response object
@@ -109,12 +111,28 @@ class response extends SymfonyResponse {
         return $this->_formats[$format];
     }
 
+    public function setCookie($cookie) {
+        if (!is_a($cookie, 'Symfony\Component\HttpFoundation\Cookie')) {
+            $cookie = new Cookie(
+                b::param('name', null, $cookie),
+                b::param('value', null, $cookie),
+                b::param('expire', null, $cookie),
+                b::param('path', '/', $cookie),
+                b::param('domain', null, $cookie),
+                b::param('secure', false, $cookie),
+                b::param('http', true, $cookie)
+            );
+        }
+        $this->headers->setCookie($cookie);
+        return $this;
+    }
+
 
     /**
      * return all registered formats
-     * 
+     *
      * @param  string $format
-     * 
+     *
      * @return null|bolt\http\response\format
      */
     public function getFormat($format) {
@@ -135,7 +153,7 @@ class response extends SymfonyResponse {
 
     /**
      * set a layout handler for this response
-     * 
+     *
      * @param mixed $layout string or callback
      *
      * @return self
@@ -148,7 +166,7 @@ class response extends SymfonyResponse {
 
     /**
      * get the current layout
-     * 
+     *
      * @return mixed
      */
     public function getLayout() {
@@ -231,9 +249,9 @@ class response extends SymfonyResponse {
 
     /**
      * prepare the response to be output
-     * 
+     *
      * @param  SymfonyRequest $request
-     * 
+     *
      * @return SymfonyResponse
      */
     public function prepare(SymfonyRequest $request) {

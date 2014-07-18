@@ -21,9 +21,7 @@ class session implements \bolt\plugin\singleton, \ArrayAccess {
 
     private $_name;
 
-    private $_driver;
-
-    private $_lifetime = null;
+    private $_handler;
 
     private $_store;
 
@@ -32,46 +30,42 @@ class session implements \bolt\plugin\singleton, \ArrayAccess {
 
         $this->_http = $http;
 
-        // storage
-        $s = b::param('storage', null, $config);
-
-        if ($s) {
-            $this->_driver = new MemcachedSessionHandler($s['memcached']);
+        if (!isset($config['handler'])) {
+            throw new \Exception("No storage handler provided");
         }
+        if (!is_a($config['handler'], 'SessionHandlerInterface')){
+            throw new \Exception("Storage handler must implement 'SessionHandlerInterface'.");
+        }
+
+        $this->_handler = $config['handler'];
+        $this->_handler->setManager($this);
 
         $this->_name = b::param('name', 'b', $config);
 
-        $this->_lifetime = b::param('lifetime', null, $config);
 
-        $this->_store = new session\store($this, $this->_name, $this->_driver);
+        $this->_store = new session\store($this, $this->_name, $this->_handler);
         $this->_session = new SymfonySession($this->_store);
 
 
+    }
+
+    public function getHttp() {
+        return $this->_http;
     }
 
     public function getName() {
         return $this->_name;
     }
 
-    public function setSessionCookie($lifetime = null, $path = '/', $domain = null, $secure = false, $httpOnly = true) {
-        $_id = $this->_http->request->cookies->get($this->_name);
-        if ($this->getId() === $_id) {return $this;}
-        $lifetime = $lifetime ?: $this->_lifetime;
-        $c = new Cookie($this->_name, $this->_session->getId(), $lifetime, $path, $domain, $secure, $httpOnly);
-        $this->_http->response->headers->setCookie($c);
-        return $this;
-    }
-
     public function start() {
         $this->_session->start();
-        $this->setSessionCookie();
         return $this;
     }
 
     public function destroy() {
         $this->_session->clear();
         $this->_store->destroy();
-        $this->_http->response->headers->clearCookie($this->_name);   
+        $this->_http->response->headers->clearCookie($this->_name);
         return $this;
     }
 

@@ -102,12 +102,16 @@ class store implements SessionStorageInterface {
 
     public function destroy() {
         $this->_driver->destroy($this->_id);
-        $this->closed = true;
+        $this->_closed = true;
         return $this;
     }
 
     public function save() {
         $data = [];
+
+        if ($this->_closed) {
+            return;
+        }
 
         foreach ($this->_bags as $bag) {
             $data[$bag->getStorageKey()] = $bag->all();
