@@ -86,7 +86,7 @@ class collection extends \bolt\helpers\collection {
     }
 
     public function setLimit($limit) {
-        return $this->_limit;
+        return $this->_limit = $limit;
     }
 
     public function getLimit() {
