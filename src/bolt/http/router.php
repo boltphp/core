@@ -43,7 +43,14 @@ class router {
         $compiled = $http->app->getCompiled('router');
 
         if ($compiled) {
-            $this->_collection = $compiled['data']['collection'];
+            $data = $compiled['data']['collection'];
+            $this->_collection = new router\collection();
+
+            foreach ($data as $name => $routeData) {
+                $route = new router\route("");
+                $route->unserialize($routeData);
+                $this->_collection->add($name, $route);
+            }
         }
         else if (isset($config['autoload']) && $config['autoload'] === true) {
             if (!isset($config['dirs'])) {
@@ -77,9 +84,15 @@ class router {
 
         $classes = $this->loadFromControllers($collection);
 
+        $data = [];
+
+        foreach ($collection as $name => $route) {
+            $data[$name] = $route->serialize();
+        }
+
         //
         $e->data['client']->saveCompileLoader('router', [
-            'collection' => $collection,
+            'collection' => $data,
             'controllers' => array_map(function($class){
                 return $class->name;
             }, $classes)

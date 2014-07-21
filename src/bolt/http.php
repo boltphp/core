@@ -311,6 +311,16 @@ class http extends plugin {
                 // bind our params to request::attributes
                 $this->_request->attributes->replace($params);
 
+                if (!class_exists($params['_controller'], true)) {
+                    new $params['_controller']($this);
+
+                    die;
+
+                    $this->_response->setException(new \Exception("Unable to find controller {$params['_controller']}"));
+                    $this->_response->readyToSend();
+                    return $this->send();   
+                }
+
                 // create our controller
                 $controller = new $params['_controller']($this);
 
