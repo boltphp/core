@@ -272,7 +272,7 @@ class router {
 
 
                 if (!$name && !is_string($key)) {
-                    $name = "route".rand(9, 999);
+                    $name = b::guid('route');
                 }
                 else if (!$name) {
                     $name = $key;
