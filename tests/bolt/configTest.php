@@ -143,6 +143,21 @@ class configTest extends Test {
 
     }
 
+    public function test_all() {
+        $resp = $this->c->all('test1');
+        $this->eq($resp, $this->d);
+    }
+
+    public function test_badAll() {
+        $this->setExpectedException('Exception');
+        $this->c->all('not_good');
+    }
+
+    public function test_has() {
+        $this->eq(true, $this->c->has('test1'));
+        $this->eq(false, $this->c->has('nope'));
+    }
+
 }
 
 

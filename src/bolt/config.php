@@ -217,6 +217,7 @@ class config implements \IteratorAggregate, \ArrayAccess {
     }
 
 
+
     /**
      * get a value from a stored namespace
      *

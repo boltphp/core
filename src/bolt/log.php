@@ -10,18 +10,45 @@ use Monolog\Logger,
 
 class log implements plugin\singleton {
 
-
+	/**
+	 * create a log instance
+	 * 
+	 * @param  bolt\application $parent
+	 * @param  array $config
+	 * @return \bolt\log
+	 */
 	public static function factory($parent, $config = []) {
 		return new log($parent, $config);
 	}
 
+	/**
+	 * name of log instance
+	 * 
+	 * @var string
+	 */
 	private $_name;
 
+	/**
+	 * application
+	 * 
+	 * @var bolt\application
+	 */
 	private $_app;
 
+	/**
+	 * monolog instance
+	 * 
+	 * @var Monolog\Logger
+	 */
 	private $_instance;
 
-	public function __construct(application $app, $config = []) {
+	/**
+	 * Constructor
+	 * 
+	 * @param bolt\application $app
+	 * @param array $config 
+	 */
+	public function __construct(application $app, array $config = []) {
 		if (!isset($config['name'])) {
 			throw new \Exception("You must provide a name for the log.");
 		}
@@ -30,15 +57,49 @@ class log implements plugin\singleton {
 		$this->_instance = new Logger($this->_name);
 	}
 
+
+	/**
+	 * get the Monolog instance
+	 * 
+	 * @return Monoglog\Logger
+	 */
 	public function getInstance() {
 		return $this->_instance;
 	}
 
-	public function level($name) {
-		$name = strtoupper($name);
-		return constant("\Monolog\Logger::{$name}");
+
+	/**
+	 * return the instance name
+	 * 
+	 * @return string
+	 */
+	public function getName() {
+		return $this->_name;
 	}
 
+
+	/**
+	 * return a logger instance constant
+	 * 
+	 * @param  string $name 
+	 * 
+	 * @return Mongolog\Logger::$name
+	 */
+	public function level($name) {
+		$name = strtoupper($name);
+		$ref = "\Monolog\Logger::{$name}";
+		return defined($ref) ? constant($ref) : null;
+	}
+
+
+	/**
+	 * passthrough to monolog\logger
+	 * 
+	 * @param  string $name
+	 * @param  array $args
+	 * 
+	 * @return mixed
+	 */
 	public function __call($name, $args) {
 		$map = [
 			'debug' => 'addDebug',
@@ -64,7 +125,17 @@ class log implements plugin\singleton {
 		return null;
 	}
 
-	public function handler($class, $level = null, $args = []) {
+
+	/**
+	 * add a handler to the Mongolog\Logger instnace
+	 * 
+	 * @param  string $class
+	 * @param  mixed $level
+	 * @param  array $args 
+	 * 
+	 * @return self
+	 */
+	public function handler($class, $level = null, array $args = []) {
 		if (is_string($class)) {
 			$map = [
 				'stream' => 'StreamHandler',
@@ -90,6 +161,15 @@ class log implements plugin\singleton {
 		return $this;
 	}
 
+
+	/**
+	 * add a processor to Mongolog\Logger instance
+	 * 
+	 * @param  string $class
+	 * @param  array $args 
+	 * 
+	 * @return self
+	 */
 	public function processor($class, $args = []) {
 		if (is_string($class)) {
 			$map = [
