@@ -201,6 +201,7 @@ class modelTest_EntityManager {
         return new modelTest_Repo();
     }
 
+
 }
 
 class modelTest_Repo {
@@ -221,6 +222,19 @@ class modelTest_Repo {
         return $what[0];
     }
 
+    public function getClassMetadata() {
+        return new modelTest_RepoClassMetadata();
+    }
+
+}
+
+class modelTest_RepoClassMetadata {
+    public function getFieldNames() {
+        return ['test'];
+    }
+    public function getFieldMapping() {
+
+    }
 }
 
 class modelTest_entityNoAlias extends \bolt\models\entity {

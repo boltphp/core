@@ -406,10 +406,7 @@ class models implements plugin\singleton, \ArrayAccess {
         if (array_key_exists($entity, $this->_alias)) {
             $entity = $this->_alias[$entity];
         }
-        $e = new $entity();
-        $e->setManager($this);
-        $e->set($data);
-        return $e;
+        return self::generateEntity($entity, $data, $this);
     }
 
 
@@ -499,7 +496,7 @@ class models implements plugin\singleton, \ArrayAccess {
      *
      * @return object
      */
-    public static function generate($class, array $data, \bolt\models $manager = null) {
+    public static function generate($class, array $data, \bolt\models $manager) {
         if (!class_exists($class, true)) {
             throw new \Exception("Unable to load class '$class'");
         }
@@ -510,17 +507,41 @@ class models implements plugin\singleton, \ArrayAccess {
         // get a relection of this method
         $ref = b::getReflectionClass($class);
 
-        foreach ($data as $name => $value) {
-            if (!$ref->hasProperty($name)) {continue;}
+        // TODO: make this better
+        $p = new \Doctrine\DBAL\Platforms\MySqlPlatform();
+
+        $map = $manager->getRepoForEntity($class)->getClassMetadata();
+
+        // loop through each field name
+        foreach ($map->getFieldNames() as $name) {
+            $_ = $map->getFieldMapping($name);
+            $value = b::param($name, null, $data);
+
+            // target entity
+            if (isset($_['targetEntity']) && isset($data[$name])) {
+                // reach back to curl to get a repo for this entity
+                $value = self::generate($_['targetEntity'], $data[$name], $manager);
+            }
+
+            // is a type value
+            else if (Type::hasType($_['type'])) {
+                $value = Type::getType($_['type'])->convertToPHPValue(b::param($name, null, $data), $p);
+            }
+
+            // nothing
+            if (!$ref->hasProperty($name)) {
+                continue;
+            }
+
+
             $prop = $ref->getProperty($name);
+
             $prop->setAccessible(true);
             $prop->setValue($entity, $value);
+
         }
 
-        if ($manager) {
-            $entity->setManager($manager);
-        }
-
+        $entity->setManager($manager);
         $entity->setLoaded(true);
 
         return $entity;

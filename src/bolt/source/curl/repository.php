@@ -37,7 +37,7 @@ class repository {
      *
      * @return \Doctrine\ORM\Mapping\ClassMetadata
      */
-    protected function _map() {
+    public function getClassMetadata() {
         if (!$this->_map) {
             $map = new ClassMetadata($this->_entity);
             $this->_driver->loadMetadataForClass($this->_entity, $map);
@@ -60,7 +60,7 @@ class repository {
         if (method_exists($this->_entity, 'curlRequest')) {
             return call_user_func([$this->_entity, 'curlRequest'], $type, $args);
         }
-        $map = $this->_map();
+        $map = $this->getClassMetadata();
         switch($type) {
             case 'find':
                 return [$map->getTableName()."/{$args[0]}.json", [], []];
@@ -113,7 +113,7 @@ class repository {
      * @return object
      */
     public function generateEntity($item) {
-        $map = $this->_map();
+        $map = $this->getClassMetadata();
 
         $entity = new $this->_entity;
 
@@ -288,7 +288,7 @@ class repository {
      * @return bolt\models\entity
      */
     public function persist($entity) {
-        $map = $this->_map();
+        $map = $this->getClassMetadata();
 
         $id = $entity->getValue($map->getIdentifierFieldNames()[0], null);
 
