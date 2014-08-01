@@ -117,6 +117,10 @@ class curl implements sourceInterface {
         return $this->_repositories[$entity] = new curl\repository($this, $entity, $this->_modelManager, $this->_modelDriver);
     }
 
+    public function getClassMetadata($entity) {
+        return $this->getRepository($entity)->getClassMetadata();
+    }
+
     /**
      * persist
      */

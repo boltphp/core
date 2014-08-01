@@ -4,7 +4,9 @@ namespace bolt;
 use \b;
 
 // doctrine stuff
-use \Doctrine\DBAL\Types\Type;
+use \Doctrine\DBAL\Types\Type,
+    \Doctrine\ORM\Mapping\ClassMetadata
+;
 
 
 /**
@@ -510,7 +512,7 @@ class models implements plugin\singleton, \ArrayAccess {
         // TODO: make this better
         $p = new \Doctrine\DBAL\Platforms\MySqlPlatform();
 
-        $map = $manager->getRepoForEntity($class)->getClassMetadata();
+        $map = $manager->getEntityManager()->getClassMetadata($class);
 
         // loop through each field name
         foreach ($map->getFieldNames() as $name) {
