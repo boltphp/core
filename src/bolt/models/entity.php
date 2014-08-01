@@ -278,6 +278,7 @@ abstract class entity implements \JsonSerializable {
 
     /**
      * return a normalized array of this object
+     * that can be used to stored in a database
      *
      * @return array
      */
@@ -329,6 +330,7 @@ abstract class entity implements \JsonSerializable {
 
     /**
      * return object as an array
+     * mapping
      *
      * @return array
      */
