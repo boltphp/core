@@ -12,7 +12,7 @@ class log implements plugin\singleton {
 
 	/**
 	 * create a log instance
-	 * 
+	 *
 	 * @param  bolt\application $parent
 	 * @param  array $config
 	 * @return \bolt\log
@@ -23,30 +23,30 @@ class log implements plugin\singleton {
 
 	/**
 	 * name of log instance
-	 * 
+	 *
 	 * @var string
 	 */
 	private $_name;
 
 	/**
 	 * application
-	 * 
+	 *
 	 * @var bolt\application
 	 */
 	private $_app;
 
 	/**
 	 * monolog instance
-	 * 
+	 *
 	 * @var Monolog\Logger
 	 */
 	private $_instance;
 
 	/**
 	 * Constructor
-	 * 
+	 *
 	 * @param bolt\application $app
-	 * @param array $config 
+	 * @param array $config
 	 */
 	public function __construct(application $app, array $config = []) {
 		if (!isset($config['name'])) {
@@ -60,7 +60,7 @@ class log implements plugin\singleton {
 
 	/**
 	 * get the Monolog instance
-	 * 
+	 *
 	 * @return Monoglog\Logger
 	 */
 	public function getInstance() {
@@ -70,7 +70,7 @@ class log implements plugin\singleton {
 
 	/**
 	 * return the instance name
-	 * 
+	 *
 	 * @return string
 	 */
 	public function getName() {
@@ -80,9 +80,9 @@ class log implements plugin\singleton {
 
 	/**
 	 * return a logger instance constant
-	 * 
-	 * @param  string $name 
-	 * 
+	 *
+	 * @param  string $name
+	 *
 	 * @return Mongolog\Logger::$name
 	 */
 	public function level($name) {
@@ -94,10 +94,10 @@ class log implements plugin\singleton {
 
 	/**
 	 * passthrough to monolog\logger
-	 * 
+	 *
 	 * @param  string $name
 	 * @param  array $args
-	 * 
+	 *
 	 * @return mixed
 	 */
 	public function __call($name, $args) {
@@ -128,11 +128,11 @@ class log implements plugin\singleton {
 
 	/**
 	 * add a handler to the Mongolog\Logger instnace
-	 * 
+	 *
 	 * @param  string $class
 	 * @param  mixed $level
-	 * @param  array $args 
-	 * 
+	 * @param  array $args
+	 *
 	 * @return self
 	 */
 	public function handler($class, $level = null, array $args = []) {
@@ -151,23 +151,24 @@ class log implements plugin\singleton {
 			}
 			$ref = new ReflectionClass($class);
 			$class = $ref->newInstanceArgs($args);
+			$class->setLevel($level);
 		}
 
 		if (!in_array('Monolog\Handler\HandlerInterface', class_implements($class))) {
 			throw new \Exception("Handler class does not implement HandlerInterface");
 		}
 
-		$this->_instance->pushHandler($class, $level);
+		$this->_instance->pushHandler($class);
 		return $this;
 	}
 
 
 	/**
 	 * add a processor to Mongolog\Logger instance
-	 * 
+	 *
 	 * @param  string $class
-	 * @param  array $args 
-	 * 
+	 * @param  array $args
+	 *
 	 * @return self
 	 */
 	public function processor($class, $args = []) {
