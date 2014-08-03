@@ -201,6 +201,9 @@ class modelTest_EntityManager {
         return new modelTest_Repo();
     }
 
+    public function getClassMetadata() {
+        return new modelTest_RepoClassMetadata();
+    }
 
 }
 

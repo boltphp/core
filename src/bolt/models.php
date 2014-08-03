@@ -522,7 +522,8 @@ class models implements plugin\singleton, \ArrayAccess {
             // target entity
             if (isset($_['targetEntity']) && isset($data[$name])) {
                 // reach back to curl to get a repo for this entity
-                $value = self::generate($_['targetEntity'], $data[$name], $manager);
+                $subData = is_array($data[$name]) ? $data[$name] : [];
+                $value = self::generate($_['targetEntity'], $subData, $manager);
             }
 
             // is a type value

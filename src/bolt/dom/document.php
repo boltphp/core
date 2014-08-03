@@ -167,6 +167,9 @@ class document extends DOMDocument implements \ArrayAccess {
      */
     public function setHTML($html) {
         $dom = HTML5::loadHTML($html);
+
+
+
         parent::appendChild(parent::importNode($dom->documentElement, true));
 
         // var_dump($dom); die;
@@ -259,6 +262,9 @@ class document extends DOMDocument implements \ArrayAccess {
 
             if (is_a($node, 'DOMElement') && $node->hasAttribute('data-domref') && ($ref = $node->getAttribute('data-domref')) && isset($this->_refrances[$ref])) {
                 $node = $this->_refrances[$ref];
+            }
+            else if (is_a($node, 'DOMComment')) {
+                continue;
             }
             else {
                 $node = new element($node, null, null, $this);
