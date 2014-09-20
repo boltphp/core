@@ -300,11 +300,17 @@ class repository {
         list($url, $query, $headers) = $this->getRequestUri($type, ['id' => $id, 'data' => $data]);
 
         // make our request
-        if ($type == 'create') {
-            $resp = $this->_curl->post($url, $headers, $query)->send();
+        try {
+            if ($type == 'create') {
+                $resp = $this->_curl->post($url, $headers, $query)->send();
+            }
+            else {
+                $resp = $this->_curl->put($url, $headers, $query)->send();
+            }
         }
-        else {
-            $resp = $this->_curl->put($url, $headers, $query)->send();
+        catch (\Exception $e) {
+            $this->_curl->log("WARNING", "[Curl.Respository.Persist] {$type} {$e->getResponse()->getStatusCode()}");
+            return [];
         }
 
         // if we don't ahve a
