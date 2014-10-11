@@ -17,3 +17,7 @@ matrix:
     - php: hhvm
     - php: 5.6
   fast_finish: true
+
+branches:
+  except:
+    - 1.0
