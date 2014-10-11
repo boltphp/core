@@ -43,7 +43,7 @@ class compile extends command {
 
         // we need a composer file
         if (!$composer) {
-            return $this->writeError("Unable to file composer.json file.");
+            return $this->writeError("Unable to find composer.json file.");
         }
 
         $dir = b::path($composer['dir'], 'compiled');
@@ -162,7 +162,7 @@ class compile extends command {
         if (is_dir($this->_dir)) {
             b::fs('remove', $this->_dir);
         }
-        b::fs('remove', "{$this->app->getBootstrapDir()}/compiled.php");        
+        b::fs('remove', "{$this->app->getBootstrapDir()}/compiled.php");
         b::fs('mkdir', $this->_dir);
     }
 

@@ -318,7 +318,7 @@ class http extends plugin {
 
                     $this->_response->setException(new \Exception("Unable to find controller {$params['_controller']}"));
                     $this->_response->readyToSend();
-                    return $this->send();   
+                    return $this->send();
                 }
 
                 // create our controller
