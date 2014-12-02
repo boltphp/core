@@ -3,6 +3,9 @@
 namespace bolt\models\functions;
 
 
+use Doctrine\ORM\Query\AST\Functions\FunctionNode;
+use Doctrine\ORM\Query\Lexer;
+
 class fromUnixTime extends FunctionNode
 {
     public $needle = null;

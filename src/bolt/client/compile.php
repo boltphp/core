@@ -1,8 +1,10 @@
 <?php
 
 namespace bolt\client;
-use \b;
 
+use b,
+    Symfony\Component\Filesystem\Filesystem
+;
 
 class compile extends command {
 
@@ -18,11 +20,15 @@ class compile extends command {
             'options' => [
                 'plugins' => [
                     'mode' => self::VALUE_IS_ARRAY | self::VALUE_REQUIRED
+                ],
+                'dir' => [
+                    'mode' => self::VALUE_REQUIRED
                 ]
             ]
         ];
     }
 
+    private $_composerDir = false;
     private $_dir = false;
     private $_loaders = [];
 
@@ -50,6 +56,7 @@ class compile extends command {
 
         // compile dir
         $this->_dir = $dir;
+        $this->_composerDir = b::path($composer['dir']);
 
         // make sure they've defied a bootstrap dir
         // in their app config
@@ -63,9 +70,9 @@ class compile extends command {
     public function generate() {
         $plugins = $this->opt('plugins');
 
-        $this->clean();
+        $this->_dir = $dir = $this->opt('dir') ? b::path(getcwd(), $this->opt('dir')) : $this->_dir;
 
-        $dir = $this->_dir;
+        $this->clean();
 
         // get all events
         $listeners = $this->app->getListeners('compile');
@@ -103,9 +110,13 @@ class compile extends command {
 
         $uid = uniqid("BoltCompiled");
 
+
+        $fs = new Filesystem();
+        $rel = $fs->makePathRelative(realpath($this->_dir), $this->_composerDir);
+
         $config = [
             'loaders' => $this->_loaders,
-            'dir' => "../compiled/"
+            'dir' => "../{$rel}"
         ];
 
 
@@ -119,6 +130,10 @@ class compile extends command {
                 public function __construct(\bolt\application $app, $config = []) {
                     $this->_app = $app;
                     $this->_config = $config;
+                }
+                public function setDir($dir) {
+                    $this->_config["dir"] = $dir;
+                    return $this;
                 }
                 public function enable() {
                     $this->_enabled = true;
