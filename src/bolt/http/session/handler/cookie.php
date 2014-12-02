@@ -14,12 +14,13 @@ class cookie implements \SessionHandlerInterface {
     protected $domain;
     protected $secret;
 
-    public function __construct($config = []) {
+    public function __construct($http, $config = []) {
         $this->_config = $config;
+        $this->http = $http;
 
         $this->lifetime = b::param('lifetime', '+1 day', $config);
         $this->domain = b::param('domain', false, $config);
-        $this->secret = b::param('secret', false, $config);
+        $this->secret = substr(b::param('secret', false, $config), 0, 24);
 
     }
 
@@ -76,7 +77,7 @@ class cookie implements \SessionHandlerInterface {
         mcrypt_generic_deinit($td);
         mcrypt_module_close($td);
 
-        return json_decode($encrypted_data);
+        return json_decode($decrypted_data, true);
 
     }
 

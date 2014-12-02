@@ -58,6 +58,7 @@ $classLoader->addPrefixes(array(
     'Guzzle\\Tests' => $vendorPrefix . '/guzzle/guzzle/tests',
     'Guzzle' => $vendorPrefix . '/guzzle/guzzle/src',
     'Doctrine\\ORM\\' => $vendorPrefix . '/doctrine/orm/lib',
+    'Doctrine\\Instantiator\\' => $vendorPrefix . '/doctrine/instantiator/src',
     'Doctrine\\DBAL\\' => $vendorPrefix . '/doctrine/dbal/lib',
     'Doctrine\\Common\\Lexer\\' => $vendorPrefix . '/doctrine/lexer/lib',
     'Doctrine\\Common\\Inflector\\' => $vendorPrefix . '/doctrine/inflector/lib',
