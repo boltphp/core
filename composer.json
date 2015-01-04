@@ -22,9 +22,9 @@
         "symfony/console": "2.5.*",
         "symfony/filesystem": "2.5.*",
 
-        "doctrine/orm": "dev-master",
-        "doctrine/dbal": "dev-master",
-        "doctrine/cache": "dev-master",
+        "doctrine/orm": "2.5.*@dev",
+        "doctrine/dbal": "*",
+        "doctrine/cache": "1.4.*@dev",
         "doctrine/lexer": "1.0.*@dev",
         "doctrine/instantiator": "~1.0.3",
 
