@@ -2,7 +2,7 @@
 /**
  * bolt.php
  *
- * @copyright  2010 - 2014
+ * @copyright  2010 - 2015
  * @author     Travis Kuhl (travis@kuhl.co)
  * @link       http://bolthq.com
  * @license    http://opensource.org/licenses/Apache-2.0 Apache 2.0
@@ -34,7 +34,7 @@ class bolt {
     /**
      * @var string
      */
-    const VERSION = '0.7.3';
+    const VERSION = '0.7.4';
 
     /**
      * @var b
